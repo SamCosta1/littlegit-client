@@ -1,6 +1,6 @@
-package com.example.demo.view
+package org.littlegit.client.view
 
-import com.example.demo.app.Styles
+import org.littlegit.client.app.Styles
 import tornadofx.*
 
 class MainView : View("Hello TornadoFX") {
