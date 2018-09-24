@@ -1,6 +1,6 @@
 package org.littlegit.client.engine.controller
 
-import com.squareup.moshi.Moshi
+import org.littlegit.client.engine.serialization.MoshiProvider
 import org.littlegit.client.engine.api.AuthApi
 import org.littlegit.client.env.EnvSwitcher
 import retrofit2.Retrofit
@@ -10,6 +10,7 @@ import tornadofx.*
 class ApiController: Controller() {
 
     val authApi: AuthApi
+    val moshiProvider: MoshiProvider by inject()
 
     init {
         val retrofit = buildLittlGitRetrofit()
@@ -20,10 +21,8 @@ class ApiController: Controller() {
     private fun buildLittlGitRetrofit(): Retrofit
             = Retrofit.Builder()
                 .baseUrl(EnvSwitcher.currentEnvironment.baseUrl)
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .addConverterFactory(MoshiConverterFactory.create(moshiProvider.moshi))
                 .build()
 
-    private val moshi: Moshi = buildMoshi()
 
-    private fun buildMoshi(): Moshi = Moshi.Builder().build()
 }
