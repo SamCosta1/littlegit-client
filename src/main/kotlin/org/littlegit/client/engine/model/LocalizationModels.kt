@@ -1,7 +1,7 @@
 package org.littlegit.client.engine.model
 
 typealias LocalizationKey = String
-data class LocalizedString(val key: LocalizationKey, val translation: String)
+data class LocalizedString(val term: LocalizationKey, val definition: String)
 
 enum class Language(val code: String) {
     English("en-GB"),

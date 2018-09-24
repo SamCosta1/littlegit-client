@@ -10,7 +10,7 @@ import tornadofx.*
 
 class Localizer: Controller() {
 
-    val moshiProvider: MoshiProvider by inject()
+    private val moshiProvider: MoshiProvider by inject()
 
     private var translations: Map<LocalizationKey, LocalizedString>
 
@@ -21,11 +21,11 @@ class Localizer: Controller() {
     private fun getTranslations(lang: Language): Map<LocalizationKey, LocalizedString> {
         val moshi = moshiProvider.moshi
         val adapter = moshi.listAdapter(LocalizedString::class.java)
-        val jsonString = javaClass.getResource("${lang.code}.json").readText()
+        val jsonString = javaClass.getResource("/${lang.code}.json").readText()
 
         val stringsList = adapter.fromJson(jsonString) ?: emptyList()
-        return stringsList.map { it.key to it }.toMap()
+        return stringsList.map { it.term to it }.toMap()
     }
 
-    operator fun get(key: I18nKey): LocalizedString = translations[key.key] ?: LocalizedString(key.key, "-")
+    operator fun get(key: I18nKey): String = translations[key.key]?.definition ?: "-"
 }

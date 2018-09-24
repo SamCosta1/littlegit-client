@@ -9,6 +9,14 @@
     <version>0.0.0</version>
     <packaging>jar</packaging>
 
+    <repositories>
+        <repository>
+            <id>myMavenRepo.read</id>
+            <url>https://mymavenrepo.com/repo/fgpmG1RhV5dDf0vvHkBf/</url>
+        </repository>
+    </repositories>
+
+
     <properties>
         <!-- Installer Filename without suffix -->
         <app.filename>LittleGit</app.filename>
@@ -50,6 +58,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.littlegit.core</groupId>
+            <artifactId>littlegit-core</artifactId>
+            <version>0.1.0</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>no.tornado</groupId>
             <artifactId>fxlauncher</artifactId>
