@@ -1,22 +1,18 @@
 package org.littlegit.client.engine.i18n
 
-import com.squareup.moshi.JsonReader
-import okio.BufferedSource
-import org.littlegit.client.engine.controller.ApiController
+import org.littlegit.client.engine.controller.InitableController
 import org.littlegit.client.engine.model.*
 import org.littlegit.client.engine.serialization.MoshiProvider
 import org.littlegit.client.engine.serialization.listAdapter
 import tornadofx.*
 
-class Localizer: Controller() {
+class Localizer: Controller(), InitableController {
 
+    private val defaultLanguage = Language.English
     private val moshiProvider: MoshiProvider by inject()
 
-    private var translations: Map<LocalizationKey, LocalizedString>
-
-    init {
-        translations = getTranslations(Language.English)
-    }
+    private var translations: Map<LocalizationKey, LocalizedString> = emptyMap()
+    private lateinit var defaultLanguageTranslations: Map<LocalizationKey, LocalizedString>
 
     private fun getTranslations(lang: Language): Map<LocalizationKey, LocalizedString> {
         val moshi = moshiProvider.moshi
@@ -27,5 +23,12 @@ class Localizer: Controller() {
         return stringsList.map { it.term to it }.toMap()
     }
 
-    operator fun get(key: I18nKey): String = translations[key.key]?.definition ?: "-"
+    override fun onStart(onReady: () -> Unit) {
+        defaultLanguageTranslations = getTranslations(defaultLanguage)
+    }
+
+    operator fun get(key: I18nKey): String = translations[key.key]?.definition
+            ?: defaultLanguageTranslations[key.key]?.definition
+            ?: key.key
+
 }

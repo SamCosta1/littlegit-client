@@ -11,12 +11,13 @@ enum class Language(val code: String) {
 }
 
 enum class I18nKey(val key: String) {
+    AppName("app_name"),
     InvalidEmail("invalid_email"),
     InvalidPassword("invalid_password"),
     FirstNameBlank("first_name_blank"),
     SurnameBlank("surname_blank"),
     LanguageCodeBlank("language_code_blank"),
-    SurnameTooLong("surname_to_long"),
+    SurnameTooLong("surname_too_long"),
     FirstNameTooLong("first_name_too_long"),
     InvalidLanguageCode("invalid_language_code"),
     Response500Body("5xx_error"),
