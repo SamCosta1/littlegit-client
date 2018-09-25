@@ -10,6 +10,7 @@ import org.littlegit.client.engine.model.RefreshRequest
 import tornadofx.*
 import java.nio.file.Paths
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class LocalDbTests {
 
@@ -36,12 +37,23 @@ class LocalDbTests {
     }
 
     @Test
-    fun testReadObject_WhenExists() {
+    fun testWriteList() {
+        val key = "testWriteObject"
+        val objToWrite = listOf(
+                RefreshRequest("a refresh token", 202),
+                RefreshRequest("a second refresh token", 303)
+        )
 
+        localDb.writeList(key, objToWrite, RefreshRequest::class.java)
+
+        val retrieved = localDb.readList(key, RefreshRequest::class.java)
+        assertEquals(objToWrite, retrieved)
     }
 
     @Test
     fun testReadObject_WhenDoesNotExist() {
-
+        val key = "non-existent"
+        val retrieved = localDb.read(key, RefreshRequest::class.java)
+        assertNull(retrieved)
     }
 }

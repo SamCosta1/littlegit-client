@@ -37,18 +37,20 @@ open class LocalDb: Controller() {
 
     private val dbAccessor: LocalDbAccessor by inject()
 
-    private fun readRawJSON(key: String): String = dbAccessor.getDb().use { db ->
+    private fun readRawJSON(key: String): String? = dbAccessor.getDb().use { db ->
         db.map.use {
-            return  it[key] as String
+            return it[key]
         }
     }
 
     fun <T>read(key: String, clazz: Class<T>): T? {
-        return moshi.adapter(clazz).fromJson(readRawJSON(key))
+        val rawJSON = readRawJSON(key) ?: return null
+        return moshi.adapter(clazz).fromJson(rawJSON)
     }
 
     fun <T>readList(key: String, clazz: Class<T>): List<T>? {
-        return moshi.listAdapter(clazz).fromJson(readRawJSON(key))
+        val rawJSON = readRawJSON(key) ?: return null
+        return moshi.listAdapter(clazz).fromJson(rawJSON)
     }
 
     private fun writeRawJSON(key: String, json: String) {
