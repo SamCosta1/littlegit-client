@@ -16,6 +16,8 @@ class SplashView : BaseView() {
     override val root = vbox {
         style {
             padding = box(10.px)
+            minWidth = 20.px
+            minHeight = 20.px
         }
     }
 
@@ -28,7 +30,6 @@ class SplashView : BaseView() {
             } else {
                 replaceWith(LoginView::class)
             }
-
         }
     }
 }
