@@ -59,6 +59,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+        <dependency>
             <groupId>org.littlegit.core</groupId>
             <artifactId>littlegit-core</artifactId>
             <version>0.1.0</version>

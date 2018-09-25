@@ -17,7 +17,6 @@ class SplashView : BaseView() {
         style {
             padding = box(10.px)
         }
-        label(localizer[I18nKey.AppName])
     }
 
     override fun onCreate() {

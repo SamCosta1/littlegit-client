@@ -23,8 +23,13 @@ class Localizer: Controller(), InitableController {
         return stringsList.map { it.term to it }.toMap()
     }
 
-    override fun onStart(onReady: () -> Unit) {
-        defaultLanguageTranslations = getTranslations(defaultLanguage)
+    override fun onStart(onReady: (InitableController) -> Unit) {
+        runAsync {
+            getTranslations(defaultLanguage)
+        } ui {
+            defaultLanguageTranslations = it
+            onReady(this)
+        }
     }
 
     operator fun get(key: I18nKey): String = translations[key.key]?.definition
