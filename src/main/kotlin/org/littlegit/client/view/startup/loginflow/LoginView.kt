@@ -1,5 +1,6 @@
 package org.littlegit.client.view.startup.loginflow
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
@@ -15,23 +16,29 @@ class LoginView : BaseView() {
     private val password = model.bind { SimpleStringProperty() }
     private val message = model.bind { SimpleStringProperty() }
 
+
     override val root = vbox {
         form {
             fieldset {
+                label(localizer[I18nKey.Login])
                 field(localizer[I18nKey.Email]) {
-                    textfield(email)
+                    textfield(email).required()
                 }
                 field(localizer[I18nKey.Password]) {
-                    textfield(password)
+                    textfield(password).required()
                 }
-                button(localizer[I18nKey.Login]).action {
-                   authController.login(email.value, password.value) {
-                       message.value = it.isSuccess.toString()
-                   }
+                button(localizer[I18nKey.Login]) {
+                    enableWhen(model.valid)
+                    action {
+                        authController.login(email.value, password.value) {
+                            message.value = it.isSuccess.toString()
+                        }
+                    }
                 }
                 label(message)
             }
-
         }
+
     }
 }
+

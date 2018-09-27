@@ -6,7 +6,8 @@ import tornadofx.*
 
 class UserController: Controller(), InitableController {
 
-    var currentUser: User? = null
+    var currentUser: User? = null; private set
+
     private val userDb: UserDb by inject()
 
     override fun onStart(onReady: (InitableController) -> Unit) {

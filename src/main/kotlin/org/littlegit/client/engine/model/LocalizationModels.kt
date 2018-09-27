@@ -36,7 +36,12 @@ enum class I18nKey(val key: String) {
     Email("email"),
     Password("password"),
     Login("login"),
+    Signup("signup"),
+    Name("name"),
+    Surname("surname"),
     Unknown("-");
+
+
 
     companion object {
         private val keys: Map<String, I18nKey> = I18nKey.values().map { it.key to it }.toMap()
