@@ -7,7 +7,7 @@ import retrofit2.http.POST
 
 interface AuthApi {
 
-    @POST
+    @POST("auth/login")
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
 
     @POST

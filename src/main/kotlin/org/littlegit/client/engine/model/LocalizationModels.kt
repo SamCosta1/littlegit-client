@@ -32,6 +32,15 @@ enum class I18nKey(val key: String) {
     InvalidUsername("invalid_username"),
     ValueAlreadyExists("value_already_exists"),
     InvalidUserId("invalid_user_id"),
-    InvalidPublicKey("invalid_public_key")
+    InvalidPublicKey("invalid_public_key"),
+    Email("email"),
+    Password("password"),
+    Login("login"),
+    Unknown("-");
+
+    companion object {
+        private val keys: Map<String, I18nKey> = I18nKey.values().map { it.key to it }.toMap()
+        fun fromRaw(raw: String?): I18nKey = keys[raw] ?: Unknown
+    }
 
 }

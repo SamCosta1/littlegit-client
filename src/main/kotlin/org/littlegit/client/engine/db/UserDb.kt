@@ -9,10 +9,8 @@ class UserDb: LocalDb() {
     }
 
     fun saveUser(user: User) {
-
+        writeAsync(DB_KEY, user, User::class.java)
     }
 
-    fun getUser(): User? {
-        return null
-    }
+    fun getUser(completion: (User?) -> Unit) = readAsync(DB_KEY, User::class.java, completion)
 }

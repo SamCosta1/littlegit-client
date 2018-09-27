@@ -10,7 +10,7 @@ import tornadofx.*
 class ApiController: Controller() {
 
     val authApi: AuthApi
-    val moshiProvider: MoshiProvider by inject()
+    private val moshiProvider: MoshiProvider by inject()
 
     init {
         val retrofit = buildLittlGitRetrofit()

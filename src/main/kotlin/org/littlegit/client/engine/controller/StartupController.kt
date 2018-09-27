@@ -6,7 +6,11 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class StartupController: Controller() {
 
-    private val controllers: List<InitableController> = listOf(find(Localizer::class), find(AuthController::class))
+    private val controllers: List<InitableController> = listOf(
+            find(Localizer::class),
+            find(AuthController::class),
+            find(UserController::class)
+    )
 
     private var numFinished = AtomicInteger(0)
 

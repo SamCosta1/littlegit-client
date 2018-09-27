@@ -15,7 +15,11 @@ class LocalDbAccessor(): Controller() {
     private var dbLocation: Path
 
     init{
-        dbLocation = Paths.get(System.getProperty("user.dir"), ".db", dbFileName)
+        dbLocation = Paths.get(System.getProperty("user.dir"), ".db")
+        if (!dbLocation.toFile().exists()) {
+            dbLocation.toFile().mkdirs()
+        }
+        dbLocation = dbLocation.resolve(dbFileName)
     }
 
     // Only used for testing
@@ -37,9 +41,13 @@ open class LocalDb: Controller() {
 
     private val dbAccessor: LocalDbAccessor by inject()
 
-    private fun readRawJSON(key: String): String? = dbAccessor.getDb().use { db ->
-        db.map.use {
-            return it[key]
+    private fun readRawJSON(key: String): String?  {
+        synchronized(dbAccessor) {
+            dbAccessor.getDb().use { db ->
+                db.map.use {
+                    return it[key]
+                }
+            }
         }
     }
 
@@ -54,10 +62,12 @@ open class LocalDb: Controller() {
     }
 
     private fun writeRawJSON(key: String, json: String) {
-        dbAccessor.getDb().use { db ->
-            db.map.use {
-                it[key] = json
-                db.commit()
+        synchronized(dbAccessor) {
+            dbAccessor.getDb().use { db ->
+                db.map.use {
+                    it[key] = json
+                    db.commit()
+                }
             }
         }
     }
@@ -68,6 +78,30 @@ open class LocalDb: Controller() {
 
     fun <T>writeList(key: String, obj: List<T>, clazz: Class<T>) {
         writeRawJSON(key, moshi.listAdapter(clazz).toJson(obj))
+    }
+
+    fun <T>readAsync(key: String, clazz: Class<T>, completion: (T?) -> Unit) = runAsync {
+        read(key, clazz)
+    } ui {
+        completion(it)
+    }
+
+    fun <T>writeAsync(key: String, obj: T, clazz: Class<T>, completion: (() -> Unit)? = null) = runAsync {
+        write(key, obj, clazz)
+    } ui {
+        completion?.invoke()
+    }
+
+    fun <T>readListAsync(key: String, clazz: Class<T>, completion: (List<T>?) -> Unit) = runAsync {
+        readList(key, clazz)
+    } ui {
+        completion(it)
+    }
+
+    fun <T>writeListAsync(key: String, obj: List<T>, clazz: Class<T>, completion: (() -> Unit)? = null) = runAsync {
+        writeList(key, obj, clazz)
+    } ui {
+        completion?.invoke()
     }
 }
 

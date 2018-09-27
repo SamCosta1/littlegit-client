@@ -19,10 +19,11 @@ class SplashView : BaseView() {
             minWidth = 20.px
             minHeight = 20.px
         }
+        label("Hello world")
     }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onBeforeShow() {
+        super.onBeforeShow()
 
         startupController.onStartup {
             if (authController.isLoggedIn) {
