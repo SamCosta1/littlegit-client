@@ -4,17 +4,76 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
-    <artifactId>tornadofx-maven-project</artifactId>
-    <version>1.0</version>
+    <groupId>org.littlegit.client</groupId>
+    <artifactId>littlegit-client</artifactId>
+    <version>0.0.0</version>
     <packaging>jar</packaging>
 
+    <repositories>
+        <repository>
+            <id>myMavenRepo.read</id>
+            <url>https://mymavenrepo.com/repo/fgpmG1RhV5dDf0vvHkBf/</url>
+        </repository>
+    </repositories>
+
+
     <properties>
+        <!-- Installer Filename without suffix -->
+        <app.filename>LittleGit</app.filename>
+
+        <!-- The JavaFX Application class name -->
+        <app.mainClass>org.littlegit.client.app.Main</app.mainClass>
+
+        <!-- Optional override to specify where the cached files are stored. Default is current working directory -->
+        <app.cacheDir>USERLIB/FxlDemo</app.cacheDir>
+
+        <!-- Optional parameters to the application, will be embedded in the launcher and can be overriden on the command line -->
+        <app.parameters>--myOption=myValue --myOtherOption=myOtherValue</app.parameters>
+
+        <!-- The Application vendor used by javapackager -->
+        <app.vendor>Acme Inc</app.vendor>
+
+        <!-- The Application version used by javapackager -->
+        <app.version>2.0</app.version>
+
+        <!-- Base URL where you will host the application artifacts -->
+        <app.url>http://littlegit.org/</app.url>
+
+        <!-- Optional scp target for application artifacts hosted at the above url -->
+        <app.deploy.target>ubuntu@ec2-34-253-241-12.eu-west-1.compute.amazonaws.com:~/apps</app.deploy.target>
+
+        <!-- The app and launcher will be assembled in this folder -->
+        <app.dir>${project.build.directory}/app</app.dir>
+
+        <!-- Native installers will be built in this folder -->
+        <app.installerdir>${project.build.directory}/installer</app.installerdir>
+
+        <!-- Should the client downgrade if the server version is older than the local version? -->
+        <app.acceptDowngrade>false</app.acceptDowngrade>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <kotlin.version>1.2.60</kotlin.version>
         <tornadofx.version>1.7.17</tornadofx.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.littlegit.core</groupId>
+            <artifactId>littlegit-core</artifactId>
+            <version>0.1.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>no.tornado</groupId>
+            <artifactId>fxlauncher</artifactId>
+            <version>1.0.20</version>
+        </dependency>
         <dependency>
             <groupId>no.tornado</groupId>
             <artifactId>tornadofx</artifactId>
@@ -31,11 +90,191 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.moshi</groupId>
+            <artifactId>moshi-kotlin</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-moshi</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.moshi</groupId>
+            <artifactId>moshi-kotlin</artifactId>
+            <version>1.6.0</version>
+        </dependency>
     </dependencies>
+
+
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
+            <!-- Compile project jar to appdir -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <outputDirectory>${app.dir}</outputDirectory>
+                </configuration>
+            </plugin>
+            <!-- Copy dependencies to appdir -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <excludeScope>provided</excludeScope>
+                    <outputDirectory>${app.dir}</outputDirectory>
+                    <stripVersion>true</stripVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <!-- Generate app.xml manifest -->
+                <executions>
+                    <execution>
+                        <id>create-manifest</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>fxlauncher.CreateManifest</mainClass>
+                            <arguments>
+                                <argument>${app.url}</argument>
+                                <argument>${app.mainClass}</argument>
+                                <argument>${app.dir}</argument>
+                                <argument>--cache-dir=${app.cacheDir}</argument>
+                                <argument>--accept-downgrade=${app.acceptDowngrade}</argument>
+                                <argument>--include-extensions=jpg</argument>
+                                <argument>${app.parameters}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Embed app.xml inside fxlauncher.xml so we don't need to reference app.xml to start the app -->
+                    <execution>
+                        <id>embed-manifest-in-launcher</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>jar</executable>
+                            <workingDirectory>${app.dir}</workingDirectory>
+                            <arguments>
+                                <argument>uf</argument>
+                                <argument>fxlauncher.jar</argument>
+                                <argument>app.xml</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Optional step to include custom UI, see https://github.com/edvin/fxlauncher-custom-ui -->
+                    <!--<execution>-->
+                    <!--<id>embed-custom-ui-in-launcher</id>-->
+                    <!--<phase>package</phase>-->
+                    <!--<goals>-->
+                    <!--<goal>exec</goal>-->
+                    <!--</goals>-->
+                    <!--<configuration>-->
+                    <!--<executable>jar</executable>-->
+                    <!--<workingDirectory>${app.dir}</workingDirectory>-->
+                    <!--<arguments>-->
+                    <!--<argument>uf</argument>-->
+                    <!--<argument>fxlauncher.jar</argument>-->
+                    <!--<argument>-C</argument>-->
+                    <!--<argument>${project.basedir}/../fxlauncher-custom-ui/target/classes</argument>-->
+                    <!--<argument>.</argument>-->
+                    <!--</arguments>-->
+                    <!--</configuration>-->
+                    <!--</execution>-->
+                    <!-- Create native installer. Feel free to add more arguments as needed.
+                     https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javapackager.html
+                     -->
+                    <execution>
+                        <id>installer</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>javapackager</executable>
+
+                            <arguments>
+                                <argument>-deploy</argument>
+                                <argument>-native</argument>
+                                <argument>-outdir</argument>
+                                <argument>${app.installerdir}</argument>
+                                <argument>-outfile</argument>
+                                <argument>${app.filename}</argument>
+                                <argument>-srcdir</argument>
+                                <argument>${app.dir}</argument>
+                                <argument>-srcfiles</argument>
+                                <argument>fxlauncher.jar</argument>
+                                <argument>-appclass</argument>
+                                <argument>fxlauncher.Launcher</argument>
+                                <argument>-name</argument>
+                                <argument>${project.name}</argument>
+                                <argument>-title</argument>
+                                <argument>${project.name}</argument>
+                                <argument>-vendor</argument>
+                                <argument>${app.vendor}</argument>
+                                <argument>-BappVersion=${app.version}</argument>
+                                <argument>-Bidentifier=${project.groupId}.${project.artifactId}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Copy application artifacts to remote site using scp (optional) -->
+                    <execution>
+                        <id>deploy-app</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>scp</executable>
+                            <arguments>
+                                <argument>-r</argument>
+                                <argument>target/app/.</argument>
+                                <argument>${app.deploy.target}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
