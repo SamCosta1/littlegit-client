@@ -11,6 +11,7 @@ import tornadofx.*
 import java.nio.file.Paths
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class LocalDbTests {
 

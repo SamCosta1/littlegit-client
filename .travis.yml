@@ -10,3 +10,4 @@ matrix:
 install: true
 script:
 - "mvn clean package"
+- "mvn test"
