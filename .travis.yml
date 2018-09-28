@@ -10,4 +10,3 @@ matrix:
 install: true
 script:
 - "mvn clean package"
-- "mvn exec:exec@installer"
