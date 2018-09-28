@@ -17,7 +17,9 @@ data class User (
         val role: Long,
         val languageCode: String,
         val username: String
-)
+) {
+    val language: Language = Language.fromLanguageCode(languageCode)
+}
 
 data class RefreshRequest (
         val refreshToken: String,

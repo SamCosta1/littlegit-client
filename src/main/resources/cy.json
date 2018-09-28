@@ -1,7 +1,7 @@
 [
     {
         "term": "invalid_email",
-        "definition": "Your email doesn't look quite right",
+        "definition": "Mae'r ebost yn edrych yn anghywir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -9,7 +9,7 @@
     },
     {
         "term": "invalid_password",
-        "definition": "Your password doesn't seem quite right",
+        "definition": "Mae'r gyfringair yn edrych yn anghywir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -17,7 +17,7 @@
     },
     {
         "term": "first_name_blank",
-        "definition": "You need to tell us your name!",
+        "definition": "Mae angen gwybod eich enw!",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -25,7 +25,7 @@
     },
     {
         "term": "surname_blank",
-        "definition": "You need to tell us your last name!",
+        "definition": "Mae angen gwybyd eich enw olaf!",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -41,7 +41,7 @@
     },
     {
         "term": "surname_too_long",
-        "definition": "Your last name doesn't look quite right",
+        "definition": "Dydi eich enw olaf ddim yn edrych yn gywir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -49,7 +49,7 @@
     },
     {
         "term": "first_name_too_long",
-        "definition": "Your first name doesn't look quite right",
+        "definition": "Mae eich enw yn rhy hir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -65,7 +65,7 @@
     },
     {
         "term": "5xx_error",
-        "definition": "Something's gone wrong in the mothership",
+        "definition": "Mae rhywbeth wedi torri",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -73,7 +73,7 @@
     },
     {
         "term": "email_in_use",
-        "definition": "Someone's already using that email address, did you already sign up?",
+        "definition": "Mae rhywun yn defnyddio'r ebost yna'n barod, ydych chi wedi cofrestru'n barod?",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -81,7 +81,7 @@
     },
     {
         "term": "username_in_use",
-        "definition": "Sorry, someone's already using that username",
+        "definition": "Sori! Mae rhywun defnyddio'r llysenw yna'n barod",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -89,7 +89,7 @@
     },
     {
         "term": "repo_name_blank",
-        "definition": "What do you want to call your project?",
+        "definition": "Rhaid rhoi enw i'ch project",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -97,7 +97,7 @@
     },
     {
         "term": "repo_name_too_long",
-        "definition": "That name's too long!",
+        "definition": "Mae'r enw yna'n rhy hir!",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -105,7 +105,7 @@
     },
     {
         "term": "repo-name-invalid",
-        "definition": "Your project name doesn't look quite right",
+        "definition": "Nid yw'r enw yna'n edrych yn gywir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -113,7 +113,7 @@
     },
     {
         "term": "description_too_long",
-        "definition": "Your description is a bit too long",
+        "definition": "Mae'r disgrifiad yn rhy hir!",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -129,7 +129,7 @@
     },
     {
         "term": "blank_username",
-        "definition": "You need to choose a username",
+        "definition": "Rhaid dewis llysenw",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -137,7 +137,7 @@
     },
     {
         "term": "invalid_username",
-        "definition": "That username doesn't look quite right",
+        "definition": "Nid ydi'r llysenw yna'n edrych yn gywir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -145,7 +145,7 @@
     },
     {
         "term": "value_already_exists",
-        "definition": "That value already exists",
+        "definition": "Mae'r gwerth yna'n bodoli'n barod",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -161,7 +161,7 @@
     },
     {
         "term": "invalid_public_key",
-        "definition": "Invalid public key",
+        "definition": "Allwedd cyhoeddus anghywir",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -169,7 +169,7 @@
     },
     {
         "term": "email",
-        "definition": "Email",
+        "definition": "E-bost",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -177,7 +177,7 @@
     },
     {
         "term": "password",
-        "definition": "Password",
+        "definition": "Cyfringair",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -185,7 +185,7 @@
     },
     {
         "term": "login",
-        "definition": "Login",
+        "definition": "Mewngofnodi",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -193,7 +193,7 @@
     },
     {
         "term": "signup",
-        "definition": "Signup",
+        "definition": "Cofrestru",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -201,7 +201,7 @@
     },
     {
         "term": "name",
-        "definition": "Name",
+        "definition": "Enw",
         "context": "",
         "term_plural": "",
         "reference": "",
@@ -209,7 +209,7 @@
     },
     {
         "term": "surname",
-        "definition": "Surname",
+        "definition": "Cyfenw",
         "context": "",
         "term_plural": "",
         "reference": "",

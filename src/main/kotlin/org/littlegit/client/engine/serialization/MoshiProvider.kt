@@ -7,14 +7,10 @@ import org.littlegit.client.engine.model.I18nKey
 
 
 class MoshiProvider: Controller() {
-    val moshi: Moshi
-
-    init {
-        moshi = Moshi.Builder()
-                .add(KotlinJsonAdapterFactory())
-                .add(I18nKeyAdapter())
-                .build()
-    }
+    val moshi: Moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .add(I18nKeyAdapter())
+            .build()
 }
 
 class I18nKeyAdapter {
