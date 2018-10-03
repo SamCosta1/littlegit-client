@@ -24,7 +24,7 @@ class Localizer: Controller(), InitableController {
     private fun getTranslations(lang: Language): Map<LocalizationKey, LocalizedString> {
         val moshi = moshiProvider.moshi
         val adapter = moshi.listAdapter(LocalizedString::class.java)
-        val jsonString = javaClass.getResource("/${lang.code}.json").readText()
+        val jsonString = javaClass.getResource("/${lang.code.toLowerCase()}.json").readText()
 
         val stringsList = adapter.fromJson(jsonString) ?: emptyList()
         return stringsList.map { it.term to it }.toMap()
