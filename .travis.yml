@@ -10,6 +10,7 @@ matrix:
     deploy:
       provider: firebase
       skip_cleanup: true
+      project: "littlegit-client"
       on:
         branch: deployments
       token:
