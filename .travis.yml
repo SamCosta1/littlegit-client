@@ -10,6 +10,8 @@ matrix:
     deploy:
       provider: firebase
       skip_cleanup: true
+      on:
+        branch: deployments
       token:
         secure: SnkuG7yKREym2VoYbLTdsWDaGqyETLT2QRIZkg+KRIKj+VateR1a60yNslsFrgyOvAR4wO81tAFcm4+S0x7KWbtUWUA3SJLA6/RqzvoQM9k0NSHvggzSKPns58sl8gZaeYn4G1P+Slma13VvMM3X65unoWv4hSDkQvShJO6Mai1tpe60oeWaIIqgCbW02DwS5hXeVXV+Czk5woyGUvg6sqVebbXmkePs0VbLe//JU3dg+s9SiTrnPii/4gEDdO5/M7qS5vmSiBcIhjehnQefeiBpkC9bNPLQwehrBnJ57zOxKpKjgR1FuQ+DGbhn1de/zAdtFlUpt91z1fDfE/vbEhlVnG9aTTGUYx379zlW3RxdCl+dUEVk/ple8oxPeBrKynU9dyc6wJ6U4kk0TUnKlBtH24KGpEpW6+reNdnx+Pwka6JB7+FqusgEyz6atUesp6zgr5NYhueZL5uhgVUwQMEODnr9iWvkibno5FuXuVi+lly+SSgXJ7I5AZAgqvd8FSBlN//O+mweoChhKYRmp2M6LmMP747l3MzqcPLcSaAv9QJWPk5HMj3zJ56lORRRBbpGt93d2zHW8WXgMEzZ0LhPky7G4danPDUQFv8GnYSrR5CmwOHgaliafoLgY+JNmSdPBpuS/p6k/utAu3VWEoDGSGW+AvLQU+0YLk54Ias=
   - os: osx
