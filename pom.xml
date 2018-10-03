@@ -37,10 +37,7 @@
         <app.version>2.0</app.version>
 
         <!-- Base URL where you will host the application artifacts -->
-        <app.url>http://littlegit.org/</app.url>
-
-        <!-- Optional scp target for application artifacts hosted at the above url -->
-        <app.deploy.target>ubuntu@ec2-34-253-241-12.eu-west-1.compute.amazonaws.com:~/apps</app.deploy.target>
+        <app.url>http://localhost:8000</app.url>
 
         <!-- The app and launcher will be assembled in this folder -->
         <app.dir>${project.build.directory}/app</app.dir>
@@ -53,7 +50,9 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+
         <kotlin.version>1.2.60</kotlin.version>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <tornadofx.version>1.7.17</tornadofx.version>
     </properties>
 
@@ -118,12 +117,30 @@
         </dependency>
     </dependencies>
 
-
-
     <build>
+        <resources>
+            <!-- regular resource processsing for everything except logback.xml -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>logback.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+                <configuration>
+                    <includes>
+                        <include>*Tests*</include>
+                    </includes>
+                </configuration>
+            </plugin>
             <!-- Compile project jar to appdir -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -155,7 +172,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>1.6.0</version>
                 <!-- Generate app.xml manifest -->
                 <executions>
                     <execution>
@@ -172,7 +189,7 @@
                                 <argument>${app.dir}</argument>
                                 <argument>--cache-dir=${app.cacheDir}</argument>
                                 <argument>--accept-downgrade=${app.acceptDowngrade}</argument>
-                                <argument>--include-extensions=jpg</argument>
+                                <argument>--include-extensions=jpg,json</argument>
                                 <argument>${app.parameters}</argument>
                             </arguments>
                         </configuration>
