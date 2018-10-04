@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Application ts="1538572906960" uri="https://littlegit-client.firebaseapp.com/" launch="org.littlegit.client.app.Main">
+    <lib file="kotlin-stdlib-jdk8.jar" checksum="3711118362" size="12389"/>
+    <lib file="kotlin-stdlib-common.jar" checksum="3845455518" size="107703"/>
+    <lib file="converter-moshi.jar" checksum="1575795267" size="6504"/>
+    <lib file="kotlin-stdlib.jar" checksum="3394642322" size="962020"/>
+    <lib file="mapdb.jar" checksum="382582079" size="733966"/>
+    <lib file="kotlin-test.jar" checksum="1454326331" size="28193"/>
+    <lib file="tornadofx.jar" checksum="3555970929" size="2812326"/>
+    <lib file="annotations.jar" checksum="4201984052" size="17536"/>
+    <lib file="littlegit-client-0.0.0.jar" checksum="692016293" size="178447"/>
+    <lib file="jcip-annotations.jar" checksum="1937708790" size="2254"/>
+    <lib file="eclipse-collections-api.jar" checksum="2036146319" size="796810"/>
+    <lib file="kotlin-reflect.jar" checksum="3443672951" size="2579770"/>
+    <lib file="kotlinx-coroutines-core.jar" checksum="2481036176" size="537207"/>
+    <lib file="javax.json-api.jar" checksum="4026910835" size="31140"/>
+    <lib file="hamcrest-core.jar" checksum="1597245928" size="45024"/>
+    <lib file="retrofit.jar" checksum="3974179591" size="91002"/>
+    <lib file="moshi-kotlin.jar" checksum="3380728081" size="18634"/>
+    <lib file="eclipse-collections-forkjoin.jar" checksum="2663910232" size="42638"/>
+    <lib file="littlegit-core.jar" checksum="1039437350" size="223188"/>
+    <lib file="eclipse-collections.jar" checksum="979509956" size="9648448"/>
+    <lib file="javax.json.jar" checksum="1161332358" size="101089"/>
+    <lib file="kotlin-test-common.jar" checksum="1454282424" size="3936"/>
+    <lib file="okhttp.jar" checksum="980189916" size="412117"/>
+    <lib file="moshi.jar" checksum="830963701" size="133420"/>
+    <lib file="junit.jar" checksum="2756529828" size="314932"/>
+    <lib file="lz4.jar" checksum="3878688908" size="236880"/>
+    <lib file="elsa.jar" checksum="414858231" size="119259"/>
+    <lib file="kotlin-stdlib-jdk7.jar" checksum="298309527" size="3135"/>
+    <lib file="okio.jar" checksum="3015488021" size="85756"/>
+    <lib file="guava.jar" checksum="1919264529" size="2308517"/>
+    <updateText>Updating...</updateText>
+    <updateLabelStyle>-fx-font-weight: bold;</updateLabelStyle>
+    <progressBarStyle>-fx-pref-width: 200;</progressBarStyle>
+    <wrapperStyle>-fx-spacing: 10; -fx-padding: 25;</wrapperStyle>
+    <parameters>--myOption=myValue --myOtherOption=myOtherValue</parameters>
+    <cacheDir>USERLIB/FxlDemo</cacheDir>
+    <acceptDowngrade>false</acceptDowngrade>
+    <stopOnUpdateErrors>false</stopOnUpdateErrors>
+    <lingeringUpdateScreen>false</lingeringUpdateScreen>
+</Application>
