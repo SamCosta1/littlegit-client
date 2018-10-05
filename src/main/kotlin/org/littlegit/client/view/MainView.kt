@@ -1,9 +1,7 @@
 package org.littlegit.client.view
 
-import com.sun.xml.internal.rngom.parse.host.Base
 import org.littlegit.client.app.Styles
 import org.littlegit.client.engine.controller.AuthController
-import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.view.startup.loginflow.LoginView
 import tornadofx.*
