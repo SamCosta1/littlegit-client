@@ -5,6 +5,7 @@ import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Language
 import org.littlegit.client.view.BaseView
+import org.littlegit.client.view.MainView
 import tornadofx.*
 
 class LoginView : BaseView() {
@@ -33,7 +34,7 @@ class LoginView : BaseView() {
                     enableWhen(model.valid)
                     action {
                         authController.login(email.value, password.value) {
-                            message.value = it.isSuccess.toString()
+                            replaceWith(MainView::class)
                         }
                     }
                 }

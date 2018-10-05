@@ -11,7 +11,6 @@ enum class Language(val code: String) {
         fun fromLanguageCode(code: String?) = Language.values().find { it.code.toLowerCase() == code?.toLowerCase() } ?: English
     }
 }
-
 enum class I18nKey(val key: String) {
     AppName("app_name"),
     InvalidEmail("invalid_email"),
@@ -41,7 +40,9 @@ enum class I18nKey(val key: String) {
     Signup("signup"),
     Name("name"),
     Surname("surname"),
+    Logout("logout"),
     Unknown("-");
+
 
     companion object {
         private val keys: Map<String, I18nKey> = I18nKey.values().map { it.key to it }.toMap()
@@ -49,3 +50,4 @@ enum class I18nKey(val key: String) {
     }
 
 }
+

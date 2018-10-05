@@ -1,5 +1,13 @@
 [
     {
+        "term": "app_name",
+        "definition": "LittleGit",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
         "term": "invalid_email",
         "definition": "Mae'r ebost yn edrych yn anghywir",
         "context": "",

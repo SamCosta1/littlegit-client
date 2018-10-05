@@ -72,6 +72,17 @@ open class LocalDb: Controller() {
         }
     }
 
+    fun clear(key: String) {
+        runAsync {
+            synchronized(dbAccessor) {
+                dbAccessor.getDb().use { db ->
+                    db.map.use {
+                        it.remove(key)
+                    }
+                }
+            }
+        }
+    }
     fun <T>write(key: String, obj: T, clazz: Class<T>) {
         writeRawJSON(key, moshi.adapter(clazz).toJson(obj))
     }
