@@ -1,13 +1,21 @@
 language: java
-
+node_js:
+- 9.3.0
 matrix:
   include:
   - os: linux
     jdk: oraclejdk8
+    deploy:
+      provider: firebase
+      skip_cleanup: true
+      project: littlegit-client
+      token:
+        secure: $FIREBASE_TOKEN
+      on:
+        branch: develop
   - os: osx
     osx_image: xcode8.3
-
 install: true
 script:
-- "mvn clean package"
-- "mvn test"
+- mvn clean package
+- mvn test

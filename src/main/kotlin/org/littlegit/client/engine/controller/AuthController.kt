@@ -46,4 +46,9 @@ class AuthController : Controller(), InitableController {
         authDb.updateTokens(authTokens)
         this.authTokens = authTokens
     }
+
+    fun logout() {
+        authDb.clearTokens()
+        authTokens = null
+    }
 }

@@ -133,3 +133,18 @@ buildNumber.properties
 # Local database
 .db
 # End of https://www.gitignore.io/api/java,maven,kotlin,intellij
+
+# Created by https://www.gitignore.io/api/firebase
+
+### Firebase ###
+.idea
+**/node_modules/*
+**/.firebaserc
+
+### Firebase Patch ###
+.runtimeconfig.json
+
+
+# End of https://www.gitignore.io/api/firebase
+
+public/app.xml

@@ -10,4 +10,5 @@ class AuthDb: LocalDb() {
 
     fun getTokens(completion: (AuthTokens?) -> Unit) = readAsync(DB_KEY, AuthTokens::class.java, completion)
     fun updateTokens(tokens: AuthTokens, completion: (() -> Unit)? = null) = writeAsync(DB_KEY, tokens, AuthTokens::class.java, completion)
+    fun clearTokens() = clear(DB_KEY)
 }

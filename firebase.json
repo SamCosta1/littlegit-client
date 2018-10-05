@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "public": "public",
+    "predeploy": "./copy-resources.sh",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

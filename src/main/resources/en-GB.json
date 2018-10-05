@@ -1,5 +1,13 @@
 [
     {
+        "term": "app_name",
+        "definition": "LittleGit",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
         "term": "invalid_email",
         "definition": "Your email doesn't look quite right",
         "context": "",
