@@ -12,7 +12,7 @@ matrix:
       token:
         secure: $FIREBASE_TOKEN
       on:
-        branch: deployments
+        branch: develop
   - os: osx
     osx_image: xcode8.3
 install: true
