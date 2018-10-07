@@ -78,11 +78,13 @@ open class LocalDb: Controller() {
                 dbAccessor.getDb().use { db ->
                     db.map.use {
                         it.remove(key)
+                        db.commit()
                     }
                 }
             }
         }
     }
+
     fun <T>write(key: String, obj: T, clazz: Class<T>) {
         writeRawJSON(key, moshi.adapter(clazz).toJson(obj))
     }
