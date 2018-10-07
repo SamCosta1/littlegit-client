@@ -7,8 +7,13 @@ import tornadofx.*
 class Main: App(SplashView::class, Styles::class) {
     override fun start(stage: Stage) {
         super.start(stage)
-        stage.width = 600.0
-        stage.height = 400.0
+        stage.width = 300.0
+        stage.height = 600.0
 
+    }
+
+    init {
+        reloadStylesheetsOnFocus()
+        reloadViewsOnFocus()
     }
 }

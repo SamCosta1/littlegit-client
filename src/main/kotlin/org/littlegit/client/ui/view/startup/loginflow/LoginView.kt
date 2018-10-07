@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleStringProperty
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Language
+import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.MainView
 import tornadofx.*
@@ -19,6 +20,7 @@ class LoginView : BaseView() {
 
 
     override val root = vbox {
+        addClass(Styles.loginFlow)
         form {
             fieldset {
                 label(localizer.observable(I18nKey.Login))

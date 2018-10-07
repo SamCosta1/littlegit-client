@@ -4,7 +4,7 @@ import javafx.event.EventHandler
 import javafx.scene.paint.Color.rgb
 import org.littlegit.client.engine.model.Language
 import org.littlegit.client.ui.util.imageView
-import org.littlegit.client.ui.view.LoginFlowView
+import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 
 class ChooseLanguageView: BaseView() {
