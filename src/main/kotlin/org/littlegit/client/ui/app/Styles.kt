@@ -10,6 +10,7 @@ class Styles : Stylesheet() {
     companion object {
         val heading by cssclass()
         val loginFlow by cssclass()
+        val secondaryLabel by cssclass()
     }
 
     init {
@@ -21,13 +22,22 @@ class Styles : Stylesheet() {
             fontWeight = FontWeight.BOLD
         }
         textField {
-            borderStyle += BorderStrokeStyle.NONE
-            borderWidth += box(10.px,10.px,0.px,0.px)
-            backgroundColor += Color.ALICEBLUE
+            borderStyle += BorderStrokeStyle.SOLID
+            borderWidth += box(0.px,0.px,1.px,0.px)
             textFill = ThemeColors.PrimaryText
+            backgroundColor += Color.TRANSPARENT
+            padding = box(5.px, 5.px, 5.px, 0.px)
+
         }
+
         button {
             backgroundColor += ThemeColors.Accent
+            backgroundRadius += box(100.px)
+            padding = box(10.px)
+        }
+
+        secondaryLabel {
+            textFill = ThemeColors.SecondaryText
         }
     }
 }

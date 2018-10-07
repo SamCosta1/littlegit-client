@@ -22,14 +22,13 @@ class SignupView: BaseView() {
         addClass(Styles.loginFlow)
         top {
             borderpane().center {
-                
+
                 imageView(Image.WelshFlag)
             }
         }
         bottom {
             form {
                 fieldset {
-                    secondarylabel(localizer.observable(I18nKey.Signup))
                     secondarylabel(localizer.observable(I18nKey.Email))
                     field {
                         textfield(email) {

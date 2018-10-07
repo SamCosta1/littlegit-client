@@ -25,11 +25,14 @@ class SplashView : BaseView() {
     override fun onBeforeShow() {
         super.onBeforeShow()
 
-        startupController.onStartup {
-            if (authController.isLoggedIn) {
-                replaceWith(MainView::class)
-            } else {
-                replaceWith(ChooseLanguageView::class)
+        runLater {
+            startupController.onStartup {
+                println("Splashview")
+                if (authController.isLoggedIn) {
+                    replaceWith(MainView::class)
+                } else {
+                    replaceWith(ChooseLanguageView::class)
+                }
             }
         }
     }
