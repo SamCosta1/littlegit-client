@@ -4,8 +4,7 @@ import javafx.beans.property.SimpleStringProperty
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
-import org.littlegit.client.ui.util.ValidationUtils
-import org.littlegit.client.ui.util.blurValidator
+import org.littlegit.client.ui.util.*
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.MainView
 import tornadofx.*
@@ -19,57 +18,65 @@ class SignupView: BaseView() {
     private val password = model.bind { SimpleStringProperty() }
     private val name = model.bind { SimpleStringProperty() }
 
-    override val root = vbox {
+    override val root = borderpane {
         addClass(Styles.loginFlow)
-        form {
-            fieldset {
-                label(localizer.observable(I18nKey.Signup))
-                label(localizer.observable(I18nKey.Email))
-                field {
-                    textfield(email) {
-                        promptText = "frodo.baggins@gmail.com"
-                        blurValidator {
-                            if (it.isNullOrBlank() || !ValidationUtils.validateEmail(it!!)) {
-                                error(localizer[I18nKey.InvalidEmail])
-                            } else null
-                        }
-                    }
-                }
-                label(localizer.observable(I18nKey.Password))
-                field {
-
-                    passwordfield (password) {
-                        promptText = "*****"
-                        blurValidator {
-                            if (it.isNullOrBlank() || !ValidationUtils.validatePassword(it!!)) {
-                                error(localizer[I18nKey.InvalidPassword])
-                            } else null
-                        }
-                    }
-                }
-                label(localizer.observable(I18nKey.Name))
-                field {
-                    textfield(name) {
-                        promptText = "Frodo"
-                        blurValidator {
-                            when {
-                                it.isNullOrBlank() -> error(localizer[I18nKey.FirstNameBlank])
-                                it!!.length > 15 -> error(localizer[I18nKey.FirstNameTooLong])
-                                else -> null
+        top {
+            borderpane().center {
+                
+                imageView(Image.WelshFlag)
+            }
+        }
+        bottom {
+            form {
+                fieldset {
+                    secondarylabel(localizer.observable(I18nKey.Signup))
+                    secondarylabel(localizer.observable(I18nKey.Email))
+                    field {
+                        textfield(email) {
+                            promptText = "frodo.baggins@gmail.com"
+                            blurValidator {
+                                if (it.isNullOrBlank() || !ValidationUtils.validateEmail(it!!)) {
+                                    error(localizer[I18nKey.InvalidEmail])
+                                } else null
                             }
                         }
                     }
-                }
+                    secondarylabel(localizer.observable(I18nKey.Password))
+                    field {
 
-                button(localizer.observable(I18nKey.Signup)) {
-                    enableWhen(model.valid)
-                    useMaxWidth = true
-                    action {
-                        authController.signup(email.value, password.value, name.value) {
-                            if (it.isSuccess) {
-                                replaceWith(MainView::class)
-                            } else {
+                        passwordfield(password) {
+                            promptText = "*****"
+                            blurValidator {
+                                if (it.isNullOrBlank() || !ValidationUtils.validatePassword(it!!)) {
+                                    error(localizer[I18nKey.InvalidPassword])
+                                } else null
+                            }
+                        }
+                    }
+                    secondarylabel(localizer.observable(I18nKey.Name))
+                    field {
+                        textfield(name) {
+                            promptText = "Frodo"
+                            blurValidator {
+                                when {
+                                    it.isNullOrBlank() -> error(localizer[I18nKey.FirstNameBlank])
+                                    it!!.length > 15 -> error(localizer[I18nKey.FirstNameTooLong])
+                                    else -> null
+                                }
+                            }
+                        }
+                    }
 
+                    button(localizer.observable(I18nKey.Signup)) {
+                        enableWhen(model.valid)
+                        useMaxWidth = true
+                        action {
+                            authController.signup(email.value, password.value, name.value) {
+                                if (it.isSuccess) {
+                                    replaceWith(MainView::class)
+                                } else {
+
+                                }
                             }
                         }
                     }
