@@ -1,9 +1,9 @@
-package org.littlegit.client.view
+package org.littlegit.client.ui.view
 
-import org.littlegit.client.app.Styles
+import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
-import org.littlegit.client.view.startup.loginflow.LoginView
+import org.littlegit.client.ui.view.startup.loginflow.LoginView
 import tornadofx.*
 
 class MainView : BaseView() {

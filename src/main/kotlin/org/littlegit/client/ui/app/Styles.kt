@@ -1,8 +1,7 @@
-package org.littlegit.client.app
+package org.littlegit.client.ui.app
 
 import javafx.scene.text.FontWeight
 import tornadofx.Stylesheet
-import tornadofx.box
 import tornadofx.cssclass
 import tornadofx.px
 

@@ -1,4 +1,4 @@
-package org.littlegit.client.view
+package org.littlegit.client.ui.view
 
 import org.littlegit.client.engine.i18n.Localizer
 import tornadofx.*

@@ -1,11 +1,10 @@
-package org.littlegit.client.view.startup
+package org.littlegit.client.ui.view.startup
 
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.StartupController
-import org.littlegit.client.engine.model.I18nKey
-import org.littlegit.client.view.BaseView
-import org.littlegit.client.view.MainView
-import org.littlegit.client.view.startup.loginflow.LoginView
+import org.littlegit.client.ui.view.BaseView
+import org.littlegit.client.ui.view.MainView
+import org.littlegit.client.ui.view.startup.loginflow.LoginView
 import tornadofx.*
 
 class SplashView : BaseView() {
