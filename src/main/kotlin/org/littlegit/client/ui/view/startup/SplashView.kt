@@ -4,6 +4,7 @@ import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.StartupController
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.MainView
+import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
 import org.littlegit.client.ui.view.startup.loginflow.LoginView
 import tornadofx.*
 
@@ -28,7 +29,7 @@ class SplashView : BaseView() {
             if (authController.isLoggedIn) {
                 replaceWith(MainView::class)
             } else {
-                replaceWith(LoginView::class)
+                replaceWith(ChooseLanguageView::class)
             }
         }
     }

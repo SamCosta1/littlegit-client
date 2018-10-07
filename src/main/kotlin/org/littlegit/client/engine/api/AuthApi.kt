@@ -13,6 +13,6 @@ interface AuthApi {
     @POST
     fun refreshToken(@Body refreshRequest: RefreshRequest): Call<RefreshResponse>
 
-    @POST
+    @POST("/user/signup")
     fun signup(@Body signupDetails: SignupRequest): Call<Void>
 }
