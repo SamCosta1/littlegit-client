@@ -27,7 +27,7 @@ class AuthController : Controller(), InitableController {
         }
     }
 
-    fun signup(email: String, password: String, name: String, completion: ApiCallCompletion<Void>) {
+    fun signup(email: String, password: String, name: String, completion: ApiCallCompletion<LoginResponse>) {
         val random = Math.random() * 10000
         val userName = "$name${random.toInt()}"
         authApi.signup(SignupRequest(email, password, name, "", localizer.currentLanguage.code, userName)).enqueue {
@@ -35,8 +35,8 @@ class AuthController : Controller(), InitableController {
             // In the unlikely event we get a clashing username, try again
             if (it.errorBody is CallFailure.ApiError && it.errorBody.localisedMessage.contains(I18nKey.UsernameInUse)) {
                 signup(email, password, name, completion)
-            } else {
-                completion.invoke(it)
+            } else if (it.isSuccess) {
+                login(email, password, completion)
             }
         }
     }
