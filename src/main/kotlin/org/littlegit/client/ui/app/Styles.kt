@@ -3,6 +3,7 @@ package org.littlegit.client.ui.app
 import javafx.scene.layout.BorderStroke
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import javafx.scene.text.FontWeight
 import tornadofx.*
 
@@ -16,6 +17,8 @@ class Styles : Stylesheet() {
     init {
         loginFlow {
             backgroundColor += ThemeColors.LightPrimary
+            padding = box(10.px)
+
         }
         label and heading {
             fontSize = 20.px
@@ -24,6 +27,7 @@ class Styles : Stylesheet() {
         textField {
             borderStyle += BorderStrokeStyle.SOLID
             borderWidth += box(0.px,0.px,1.px,0.px)
+            borderColor += box(ThemeColors.Accent)
             textFill = ThemeColors.PrimaryText
             backgroundColor += Color.TRANSPARENT
             padding = box(5.px, 5.px, 5.px, 0.px)
@@ -34,6 +38,7 @@ class Styles : Stylesheet() {
             backgroundColor += ThemeColors.Accent
             backgroundRadius += box(100.px)
             padding = box(10.px)
+
         }
 
         secondaryLabel {

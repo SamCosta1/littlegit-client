@@ -11,3 +11,7 @@ abstract class BaseView(title: String? = null, private val fullScreen: Boolean =
         currentStage?.isMaximized = fullScreen
     }
 }
+
+abstract class BaseFragment(): Fragment() {
+    protected val localizer: Localizer by inject()
+}

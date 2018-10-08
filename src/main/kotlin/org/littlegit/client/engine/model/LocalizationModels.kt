@@ -45,6 +45,7 @@ enum class I18nKey(val key: String) {
     Name("name"),
     Surname("surname"),
     Logout("logout"),
+    NoNetworkConnection("no_network_connection"),
     Unknown("-");
 
 
