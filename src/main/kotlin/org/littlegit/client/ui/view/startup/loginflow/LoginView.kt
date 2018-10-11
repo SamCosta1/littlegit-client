@@ -5,6 +5,8 @@ import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Language
 import org.littlegit.client.ui.app.Styles
+import org.littlegit.client.ui.util.Image
+import org.littlegit.client.ui.util.imageView
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.MainView
 import tornadofx.*
@@ -19,34 +21,47 @@ class LoginView : BaseView() {
     private val message = model.bind { SimpleStringProperty() }
 
 
-    override val root = vbox {
+    override val root = borderpane {
         addClass(Styles.loginFlow)
-        form {
-            fieldset {
-                label(localizer.observable(I18nKey.Login))
-                label(localizer.observable(I18nKey.Email))
-                field {
-                    textfield(email).required()
-                }
-                label(localizer.observable(I18nKey.Password))
-                field {
-                    textfield(password).required()
-                }
-                button(localizer.observable(I18nKey.Login)) {
-                    enableWhen(model.valid)
-                    action {
-                        authController.login(email.value, password.value) {
-                            replaceWith(MainView::class)
-                        }
+        top {
+            borderpane {
+                left {
+                    label(localizer.observable(I18nKey.Login)) {
+                        addClass(Styles.heading)
                     }
                 }
-                button("english").action {
-                    localizer.updateLanguage(Language.English)
+                right {
+                    button(localizer.observable(I18nKey.Signup)).action {
+                        replaceWith(SignupView::class)
+                    }
                 }
-                button("welsh").action {
-                    localizer.updateLanguage(Language.Welsh)
+            }
+        }
+        center {
+            imageView(Image.WelshFlag)
+        }
+        bottom {
+            form {
+                fieldset {
+                    label(localizer.observable(I18nKey.Email))
+                    field {
+                        textfield(email).required()
+                    }
+                    label(localizer.observable(I18nKey.Password))
+                    field {
+                        textfield(password).required()
+                    }
+                    button(localizer.observable(I18nKey.Login)) {
+                        enableWhen(model.valid)
+                        useMaxWidth = true
+                        action {
+                            authController.login(email.value, password.value) {
+                                replaceWith(MainView::class)
+                            }
+                        }
+                    }
+                    label(message)
                 }
-                label(message)
             }
         }
     }

@@ -28,10 +28,21 @@ class SignupView: BaseView() {
     override val root = borderpane {
         addClass(Styles.loginFlow)
         top {
-            borderpane().center {
-
-                imageView(Image.WelshFlag)
+            borderpane {
+                left {
+                    label(localizer.observable(I18nKey.Signup)) {
+                        addClass(Styles.heading)
+                    }
+                }
+                right {
+                    button(localizer.observable(I18nKey.Login)).action {
+                        replaceWith(LoginView::class)
+                    }
+                }
             }
+        }
+        center {
+            imageView(Image.WelshFlag)
         }
         bottom {
             form {

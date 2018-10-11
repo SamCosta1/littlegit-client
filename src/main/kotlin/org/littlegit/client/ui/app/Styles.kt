@@ -23,6 +23,7 @@ class Styles : Stylesheet() {
         label and heading {
             fontSize = 20.px
             fontWeight = FontWeight.BOLD
+            textFill = ThemeColors.Accent;
         }
         textField {
             borderStyle += BorderStrokeStyle.SOLID
