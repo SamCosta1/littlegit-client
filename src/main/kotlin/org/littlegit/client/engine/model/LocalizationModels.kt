@@ -1,14 +1,18 @@
 package org.littlegit.client.engine.model
 
+import org.littlegit.client.ui.util.Image
+
 typealias LocalizationKey = String
 data class LocalizedString(val term: LocalizationKey, val definition: String)
 
-enum class Language(val code: String) {
-    English("en-GB"),
-    Welsh("cy");
+enum class Language(val code: kotlin.String, val displayName: String, val image: Image) {
+    English("en-GB", "English", Image.EnglishFlag),
+    Welsh("cy", "Cymraeg", Image.WelshFlag);
+
 
     companion object {
-        fun fromLanguageCode(code: String?) = Language.values().find { it.code.toLowerCase() == code?.toLowerCase() } ?: English
+        val all = Language.values().asList()
+        fun fromLanguageCode(code: String?) = all.find { it.code.toLowerCase() == code?.toLowerCase() } ?: English
     }
 }
 enum class I18nKey(val key: String) {
@@ -41,6 +45,7 @@ enum class I18nKey(val key: String) {
     Name("name"),
     Surname("surname"),
     Logout("logout"),
+    NoNetworkConnection("no_network_connection"),
     Unknown("-");
 
 

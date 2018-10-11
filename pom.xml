@@ -22,7 +22,7 @@
         <app.filename>LittleGit</app.filename>
 
         <!-- The JavaFX Application class name -->
-        <app.mainClass>org.littlegit.client.app.Main</app.mainClass>
+        <app.mainClass>org.littlegit.client.ui.app.Main</app.mainClass>
 
         <!-- Optional override to specify where the cached files are stored. Default is current working directory -->
         <app.cacheDir>USERLIB/FxlDemo</app.cacheDir>

@@ -16,6 +16,7 @@ class Localizer: Controller(), InitableController {
     private val languageChangeListeners = mutableListOf<LanguageChangeListener>()
 
     private val defaultLanguage = Language.English
+    var currentLanguage = defaultLanguage; private set
     private val moshiProvider: MoshiProvider by inject()
 
     private var translations: Map<LocalizationKey, LocalizedString> = emptyMap()
@@ -48,6 +49,7 @@ class Localizer: Controller(), InitableController {
     fun updateLanguage(language: Language, completion: (() -> Unit)? = null) {
         runAsync {
             translations = getTranslations(language)
+            currentLanguage = language
         } ui {
             languageChangeListeners.forEach { it.invoke(language) }
             completion?.invoke()
@@ -58,7 +60,7 @@ class Localizer: Controller(), InitableController {
     fun removeListener(listener: LanguageChangeListener) = languageChangeListeners.remove(listener)
 }
 
-class ObservableTranslation(val key: I18nKey, val translationProvider: Localizer): ObservableValue<String> {
+class ObservableTranslation(private val key: I18nKey, private val translationProvider: Localizer): ObservableValue<String> {
 
     private var currentValue = translationProvider[key]
     private val listeners = mutableListOf<ChangeListener<in String>?>()
