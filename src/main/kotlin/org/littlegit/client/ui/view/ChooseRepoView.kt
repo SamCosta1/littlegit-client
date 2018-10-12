@@ -5,6 +5,7 @@ import javafx.collections.ModifiableObservableListBase
 import javafx.collections.ObservableList
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Repo
+import org.littlegit.client.ui.app.Main
 import org.littlegit.client.ui.app.Styles
 import tornadofx.*
 
@@ -18,7 +19,9 @@ class ChooseRepoView : BaseView() {
         }
         button(localizer.observable(I18nKey.OpenNewProject)).action {
             chooseDirectory()?.let {
-                
+                repoController.setCurrentRepo(it) {
+                    replaceWith(MainView::class)
+                }
             }
         }
         listview(repos) {

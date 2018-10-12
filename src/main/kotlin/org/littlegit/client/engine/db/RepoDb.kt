@@ -12,6 +12,9 @@ class RepoDb: LocalDb() {
     private var repos: List<Repo>? = null
 
     fun getAllRepos(completion: (List<Repo>?) -> Unit) {
+        if (repos != null) {
+            completion(repos)
+        }
         readListAsync(REPOS_KEY, Repo::class.java) {
             repos = it
             completion(it)
@@ -32,8 +35,9 @@ class RepoDb: LocalDb() {
         }
     }
 
-    private fun updateRepos(allRepos: List<Repo>?) {
+    fun updateRepos(allRepos: List<Repo>? = repos) {
         allRepos?.let {
+            repos = allRepos
             writeListAsync(REPOS_KEY, allRepos, Repo::class.java)
         }
     }
