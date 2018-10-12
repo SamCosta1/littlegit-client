@@ -1,3 +1,4 @@
+
 package org.littlegit.client.engine.model
 
 import org.littlegit.client.ui.util.Image
@@ -46,7 +47,11 @@ enum class I18nKey(val key: String) {
     Surname("surname"),
     Logout("logout"),
     NoNetworkConnection("no_network_connection"),
+    ChooseRepo("choose_repo"),
+    OpenNewProject("open_new_project"),
     Unknown("-");
+
+
 
 
     companion object {

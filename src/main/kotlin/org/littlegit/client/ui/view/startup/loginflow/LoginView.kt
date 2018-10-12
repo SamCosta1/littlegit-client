@@ -6,6 +6,7 @@ import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Language
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.util.Image
+import org.littlegit.client.ui.util.NavigationUtils
 import org.littlegit.client.ui.util.imageView
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.MainView
@@ -56,7 +57,7 @@ class LoginView : BaseView() {
                         useMaxWidth = true
                         action {
                             authController.login(email.value, password.value) {
-                                replaceWith(MainView::class)
+                                NavigationUtils.navigateFromLoginFlow(this@LoginView, repoController)
                             }
                         }
                     }
