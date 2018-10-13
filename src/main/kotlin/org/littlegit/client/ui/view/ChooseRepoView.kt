@@ -3,11 +3,13 @@ package org.littlegit.client.ui.view
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ModifiableObservableListBase
 import javafx.collections.ObservableList
+import javafx.event.EventHandler
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.client.ui.app.Main
 import org.littlegit.client.ui.app.Styles
 import tornadofx.*
+import java.io.File
 
 class ChooseRepoView : BaseView() {
 
@@ -24,13 +26,7 @@ class ChooseRepoView : BaseView() {
             action {
                 isLoading.value = true
                 chooseDirectory()?.let {
-                    repoController.setCurrentRepo(it) {
-                        if (it) {
-                            replaceWith(MainView::class)
-                        } else {
-                            isLoading.value = false
-                        }
-                    }
+                    repoController.setCurrentRepo(it, this@ChooseRepoView::onRepoChosen)
                 }
             }
         }
@@ -39,9 +35,24 @@ class ChooseRepoView : BaseView() {
             disableWhen(isLoading)
             cellFormat { repo ->
                 graphic = cache {
-                    label(repo.path.fileName.toString())
+                    vbox {
+                        label(repo.path.fileName.toString())
+
+                        onMouseClicked = EventHandler {
+                            repoController.setCurrentRepo(repo, this@ChooseRepoView::onRepoChosen)
+                        }
+                    }
+
                 }
             }
+        }
+    }
+
+    private fun onRepoChosen(success: Boolean) {
+        if (success) {
+            replaceWith(MainView::class)
+        } else {
+            isLoading.value = false
         }
     }
 

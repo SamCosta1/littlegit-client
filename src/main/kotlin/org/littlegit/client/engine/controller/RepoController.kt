@@ -63,6 +63,11 @@ class RepoController: Controller(), InitableController {
         }
     }
 
+    fun setCurrentRepo(repo: Repo, completion: (success: Boolean) -> Unit) {
+        repoDb.setCurrentRepoId(repo.localId)
+        initialiseRepoIfNeeded(repo, completion)
+    }
+
     private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean) -> Unit) {
         littleGitCoreController.currentRepoPath = repo.path
 
