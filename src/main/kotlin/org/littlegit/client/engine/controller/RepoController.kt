@@ -84,14 +84,15 @@ class RepoController: Controller(), InitableController {
                 println(result)
             }
             unstagedChanges?.trackedFilesDiff?.fileDiffs?.forEach { fileDiff ->
-                val file = when(fileDiff) {
+                when(fileDiff) {
                     is FileDiff.ChangedFile -> fileDiff.filePath
                     is FileDiff.DeletedFile -> fileDiff.filePath
                     is FileDiff.RenamedFile -> fileDiff.newPath
                     is FileDiff.NewFile -> fileDiff.filePath
-                    else -> ""
+                    else -> null
+                } ?.let { path ->
+                    it.repoModifier.stageFile(path.toFile())
                 }
-                it.repoModifier.stageFile(File(file))
             }
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
