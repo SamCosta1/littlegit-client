@@ -31,7 +31,7 @@ class RepoDb: LocalDb() {
         } else {
             val newList = repos?.toMutableList() ?: mutableListOf()
             newList.add(repo)
-            updateRepos(repos)
+            updateRepos(newList)
         }
     }
 
