@@ -54,7 +54,7 @@ enum class I18nKey(val key: String) {
     ChooseLanguage("choose_language"),
     IncorrectLoginDetails("incorrect_login_details"),
     UnknownError("unknown_error"),
-    Recents("recents"),
+    RecentRepos("recent_repos"),
     Unknown("-");
 
 

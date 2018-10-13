@@ -1,13 +1,5 @@
 [
     {
-        "term": "app_name",
-        "definition": "LittleGit",
-        "context": "",
-        "term_plural": "",
-        "reference": "",
-        "comment": ""
-    },
-    {
         "term": "invalid_email",
         "definition": "Mae'r ebost yn edrych yn anghywir",
         "context": "",
@@ -218,6 +210,86 @@
     {
         "term": "surname",
         "definition": "Cyfenw",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "logout",
+        "definition": "Allgofnodi",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "no_network_connection",
+        "definition": "Nid oes cysylltiad i'r we",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "choose_repo",
+        "definition": "Dewis project",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "open_new_project",
+        "definition": "Agor project newydd",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "commit_all",
+        "definition": "Comitio popeth",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "change_project",
+        "definition": "Newid project",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "choose_language",
+        "definition": "Dewiswch eich hiaith",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "incorrect_login_details",
+        "definition": "Nid yw'r manylion yna'n gywir",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "unknown_error",
+        "definition": "Mae rhywbeth annisgwyl wedi digwydd",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "recent_repos",
+        "definition": "Projectau diweddar ",
         "context": "",
         "term_plural": "",
         "reference": "",

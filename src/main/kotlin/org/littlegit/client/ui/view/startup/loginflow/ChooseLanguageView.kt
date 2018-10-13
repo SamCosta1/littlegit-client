@@ -1,7 +1,6 @@
 package org.littlegit.client.ui.view.startup.loginflow
 
 import javafx.event.EventHandler
-import javafx.scene.paint.Color.rgb
 import javafx.scene.text.TextAlignment
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Language
@@ -14,7 +13,7 @@ class ChooseLanguageView: BaseView() {
 
 
     override val root = vbox {
-        addClass(Styles.loginFlow)
+        addClass(Styles.primaryBackground)
         padding = tornadofx.insets(10)
         spacing = 50.0
         label(localizer.observable(I18nKey.ChooseLanguage)) {

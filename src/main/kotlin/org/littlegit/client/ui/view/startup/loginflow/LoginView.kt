@@ -5,11 +5,9 @@ import javafx.geometry.Orientation
 import org.littlegit.client.engine.api.CallFailure
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
-import org.littlegit.client.engine.model.Language
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.util.*
 import org.littlegit.client.ui.view.BaseView
-import org.littlegit.client.ui.view.MainView
 import org.littlegit.client.ui.view.modal.NoNetworkConnectionModal
 import tornadofx.*
 
@@ -26,7 +24,7 @@ class LoginView : BaseView() {
     private var passwordError: I18nKey? = null
 
     override val root = borderpane {
-        addClass(Styles.loginFlow)
+        addClass(Styles.primaryBackground)
         top {
             borderpane {
                 left {

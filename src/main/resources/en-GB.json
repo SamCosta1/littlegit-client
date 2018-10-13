@@ -1,13 +1,5 @@
 [
     {
-        "term": "app_name",
-        "definition": "LittleGit",
-        "context": "",
-        "term_plural": "",
-        "reference": "",
-        "comment": ""
-    },
-    {
         "term": "invalid_email",
         "definition": "Your email doesn't look quite right",
         "context": "",
@@ -218,6 +210,86 @@
     {
         "term": "surname",
         "definition": "Surname",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "logout",
+        "definition": "Logout",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "no_network_connection",
+        "definition": "No internet connection",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "choose_repo",
+        "definition": "Choose a project",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "open_new_project",
+        "definition": "Open new project",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "commit_all",
+        "definition": "Commit all",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "change_project",
+        "definition": "Change project",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "choose_language",
+        "definition": "Choose your language",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "incorrect_login_details",
+        "definition": "Sorry, those details aren't quite right",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "unknown_error",
+        "definition": "Something unexpected went wrong!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "recent_repos",
+        "definition": "Recent Projects",
         "context": "",
         "term_plural": "",
         "reference": "",

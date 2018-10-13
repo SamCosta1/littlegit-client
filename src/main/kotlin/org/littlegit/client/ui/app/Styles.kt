@@ -1,11 +1,7 @@
 package org.littlegit.client.ui.app
 
-import com.sun.jmx.snmp.EnumRowStatus.active
-import javafx.scene.control.OverrunStyle
-import javafx.scene.layout.BorderStroke
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.scene.text.FontWeight
 import tornadofx.*
 
@@ -13,7 +9,7 @@ class Styles : Stylesheet() {
     companion object {
         val heading by cssclass()
         val subheading by cssclass()
-        val loginFlow by cssclass()
+        val primaryBackground by cssclass()
         val secondaryLabel by cssclass()
         val cardView by cssclass()
         val selectableCardView by cssclass()
@@ -21,7 +17,7 @@ class Styles : Stylesheet() {
     }
 
     init {
-        loginFlow {
+        primaryBackground {
             backgroundColor += ThemeColors.LightPrimary
             padding = box(10.px)
 
@@ -58,7 +54,7 @@ class Styles : Stylesheet() {
 
         button {
             backgroundColor += ThemeColors.Accent
-            backgroundRadius += box(100.px)
+            backgroundRadius += box(50.px)
             padding = box(10.px)
         }
 
