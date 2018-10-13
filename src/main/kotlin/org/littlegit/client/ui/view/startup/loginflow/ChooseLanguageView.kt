@@ -14,6 +14,7 @@ class ChooseLanguageView: BaseView() {
 
 
     override val root = vbox {
+        addClass(Styles.loginFlow)
         padding = tornadofx.insets(10)
         spacing = 50.0
         label(localizer.observable(I18nKey.ChooseLanguage)) {

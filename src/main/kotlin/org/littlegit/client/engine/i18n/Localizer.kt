@@ -42,7 +42,7 @@ class Localizer: Controller(), InitableController {
 
     operator fun get(key: I18nKey): String = translations[key.key]?.definition
             ?: defaultLanguageTranslations[key.key]?.definition
-            ?: key.key
+            ?: key.key.replace("_", " ")
 
     fun observable(key: I18nKey) = ObservableTranslation(key, this)
 

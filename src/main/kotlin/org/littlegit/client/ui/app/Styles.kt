@@ -15,6 +15,7 @@ class Styles : Stylesheet() {
         val secondaryLabel by cssclass()
         val cardView by cssclass()
         val selectableCardView by cssclass()
+        val error by cssclass()
     }
 
     init {
@@ -66,12 +67,19 @@ class Styles : Stylesheet() {
 
         cardView {
             padding = box(10.px)
-            backgroundColor += ThemeColors.LightPrimary
+            borderStyle += BorderStrokeStyle.SOLID
+            borderColor += box(ThemeColors.Primary)
             backgroundRadius += box(15.px)
+            borderRadius += box(15.px)
         }
 
         cardView and selectableCardView and hover {
-            backgroundColor += ThemeColors.Primary
+            borderWidth += box(2.px)
+            borderColor += box(ThemeColors.DarkPrimary)
+        }
+
+        error {
+            textFill = ThemeColors.Error
         }
     }
 }
@@ -85,4 +93,5 @@ object ThemeColors {
     val DarkestAccent = c("#bb4722")
     val PrimaryText = c("#212121")
     val SecondaryText = c("#757575")
+    val Error = c("#771422")
 }

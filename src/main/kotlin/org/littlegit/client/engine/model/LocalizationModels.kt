@@ -52,6 +52,8 @@ enum class I18nKey(val key: String) {
     CommitAll("commit_all"),
     ChangeProject("change_project"),
     ChooseLanguage("choose_language"),
+    IncorrectLoginDetails("incorrect_login_details"),
+    UnknownError("unknown_error"),
     Unknown("-");
 
 
