@@ -4,12 +4,17 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ModifiableObservableListBase
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
+import javafx.geometry.Pos
+import javafx.scene.control.OverrunStyle
+import javafx.scene.text.TextAlignment
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.client.ui.app.Main
 import org.littlegit.client.ui.app.Styles
+import org.littlegit.client.ui.util.secondarylabel
 import tornadofx.*
 import java.io.File
+import javax.swing.GroupLayout
 
 class ChooseRepoView : BaseView() {
 
@@ -18,11 +23,17 @@ class ChooseRepoView : BaseView() {
     private val isLoading = model.bind { SimpleBooleanProperty() }
 
     override val root = vbox {
+        addClass(Styles.loginFlow)
+        padding = tornadofx.insets(10)
+        spacing = 20.0
+
         label(localizer.observable(I18nKey.ChooseRepo)) {
             addClass(Styles.heading)
         }
+
         button(localizer.observable(I18nKey.OpenNewProject)) {
             disableWhen(isLoading)
+            useMaxWidth = true
             action {
                 isLoading.value = true
                 chooseDirectory()?.let {
@@ -31,12 +42,25 @@ class ChooseRepoView : BaseView() {
             }
         }
 
+        separator()
+
+        label(localizer.observable(I18nKey.Recents)).addClass(Styles.subheading)
+
         listview(repos) {
             disableWhen(isLoading)
             cellFormat { repo ->
                 graphic = cache {
                     vbox {
+                        addClass(Styles.cardView)
+                        addClass(Styles.selectableCardView)
                         label(repo.path.fileName.toString())
+
+                        stackpane {
+                            minWidth = 0.0
+                            prefWidth = 1.0
+                            alignment = Pos.CENTER_LEFT
+                            secondarylabel(repo.path.toAbsolutePath().toString())
+                        }
 
                         onMouseClicked = EventHandler {
                             repoController.setCurrentRepo(repo, this@ChooseRepoView::onRepoChosen)
@@ -49,6 +73,7 @@ class ChooseRepoView : BaseView() {
     }
 
     private fun onRepoChosen(success: Boolean) {
+        isLoading.value = false
         if (success) {
             replaceWith(MainView::class)
         } else {

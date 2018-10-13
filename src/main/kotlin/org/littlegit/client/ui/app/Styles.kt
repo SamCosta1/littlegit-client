@@ -1,6 +1,7 @@
 package org.littlegit.client.ui.app
 
 import com.sun.jmx.snmp.EnumRowStatus.active
+import javafx.scene.control.OverrunStyle
 import javafx.scene.layout.BorderStroke
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
@@ -11,6 +12,7 @@ import tornadofx.*
 class Styles : Stylesheet() {
     companion object {
         val heading by cssclass()
+        val subheading by cssclass()
         val loginFlow by cssclass()
         val secondaryLabel by cssclass()
         val cardView by cssclass()
@@ -25,10 +27,17 @@ class Styles : Stylesheet() {
 
         }
         label and heading {
-            fontSize = 20.px
+            fontSize = 25.px
             fontWeight = FontWeight.BOLD
-            textFill = ThemeColors.Accent;
+            textFill = ThemeColors.Accent
         }
+
+        label and subheading {
+            fontSize = 15.px
+            fontWeight = FontWeight.BOLD
+            textFill = ThemeColors.Accent
+        }
+
         textField {
             borderStyle += BorderStrokeStyle.SOLID
             borderWidth += box(0.px,0.px,1.px,0.px)
@@ -80,6 +89,11 @@ class Styles : Stylesheet() {
 
         error {
             textFill = ThemeColors.Error
+        }
+
+        separator {
+            backgroundColor += ThemeColors.Primary
+            backgroundRadius += box(1.px)
         }
     }
 }
