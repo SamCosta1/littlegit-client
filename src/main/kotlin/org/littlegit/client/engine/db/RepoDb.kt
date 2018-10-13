@@ -6,7 +6,7 @@ import java.text.MessageFormat
 class RepoDb: LocalDb() {
     companion object {
         private const val REPOS_KEY = "repos_key"
-        private const val CURRENT_REPO_ID = "repos_key"
+        private const val CURRENT_REPO_ID = "current_repos_key"
     }
 
     private var repos: List<Repo>? = null
@@ -24,13 +24,13 @@ class RepoDb: LocalDb() {
     fun saveRepo(repo: Repo) {
         if (repos == null) {
             getAllRepos {
-                val newList = it?.toMutableList()
-                newList?.add(repo)
+                val newList = it?.toMutableList() ?: mutableListOf()
+                newList.add(repo)
                 updateRepos(newList)
             }
         } else {
-            val newList = repos?.toMutableList()
-            newList?.add(repo)
+            val newList = repos?.toMutableList() ?: mutableListOf()
+            newList.add(repo)
             updateRepos(repos)
         }
     }
@@ -46,6 +46,10 @@ class RepoDb: LocalDb() {
         readAsync(CURRENT_REPO_ID, String::class.java) {
             completion(it)
         }
+    }
+
+    fun setCurrentRepoId(repoId: String) {
+        writeAsync(CURRENT_REPO_ID, repoId, String::class.java)
     }
 }
 

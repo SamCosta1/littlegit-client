@@ -10,7 +10,7 @@ object NavigationUtils {
     fun navigateFromLoginFlow(context: UIComponent, repoController: RepoController) {
         if (repoController.hasCurrentRepo) {
             repoController.getCurrentRepo {
-                if (it != null) {
+                if (it == null) {
                     context.replaceWith(ChooseRepoView::class)
                 } else {
                     context.replaceWith(MainView::class)

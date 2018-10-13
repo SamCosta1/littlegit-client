@@ -12,19 +12,31 @@ import tornadofx.*
 class ChooseRepoView : BaseView() {
 
     private val repos: ObservableList<Repo> = mutableListOf<Repo>().observable()
+    private val model = ViewModel()
+    private val isLoading = model.bind { SimpleBooleanProperty() }
 
     override val root = vbox {
         label(localizer.observable(I18nKey.ChooseRepo)) {
             addClass(Styles.heading)
         }
-        button(localizer.observable(I18nKey.OpenNewProject)).action {
-            chooseDirectory()?.let {
-                repoController.setCurrentRepo(it) {
-                    replaceWith(MainView::class)
+        button(localizer.observable(I18nKey.OpenNewProject)) {
+            disableWhen(isLoading)
+            action {
+                isLoading.value = true
+                chooseDirectory()?.let {
+                    repoController.setCurrentRepo(it) {
+                        if (it) {
+                            replaceWith(MainView::class)
+                        } else {
+                            isLoading.value = false
+                        }
+                    }
                 }
             }
         }
+
         listview(repos) {
+            disableWhen(isLoading)
             cellFormat { repo ->
                 graphic = cache {
                     label(repo.path.fileName.toString())

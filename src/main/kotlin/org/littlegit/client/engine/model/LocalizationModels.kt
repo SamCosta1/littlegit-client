@@ -49,9 +49,9 @@ enum class I18nKey(val key: String) {
     NoNetworkConnection("no_network_connection"),
     ChooseRepo("choose_repo"),
     OpenNewProject("open_new_project"),
-    Unknown("-");
-
-
+    CommitAll("commit_all"),
+    ChangeProject("change_project"),
+    Unknown("-");,
 
 
     companion object {
