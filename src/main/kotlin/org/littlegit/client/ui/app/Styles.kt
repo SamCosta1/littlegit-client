@@ -1,5 +1,6 @@
 package org.littlegit.client.ui.app
 
+import com.sun.jmx.snmp.EnumRowStatus.active
 import javafx.scene.layout.BorderStroke
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
@@ -12,6 +13,8 @@ class Styles : Stylesheet() {
         val heading by cssclass()
         val loginFlow by cssclass()
         val secondaryLabel by cssclass()
+        val cardView by cssclass()
+        val selectableCardView by cssclass()
     }
 
     init {
@@ -35,15 +38,40 @@ class Styles : Stylesheet() {
 
         }
 
+        listView {
+            backgroundColor += Color.TRANSPARENT
+        }
+
+        listCell {
+            backgroundColor += Color.TRANSPARENT
+        }
+
         button {
             backgroundColor += ThemeColors.Accent
             backgroundRadius += box(100.px)
             padding = box(10.px)
+        }
 
+        button and pressed {
+            backgroundColor += ThemeColors.DarkestAccent
+        }
+
+        button and hover {
+            backgroundColor += ThemeColors.DarkAccent
         }
 
         secondaryLabel {
             textFill = ThemeColors.SecondaryText
+        }
+
+        cardView {
+            padding = box(10.px)
+            backgroundColor += ThemeColors.LightPrimary
+            backgroundRadius += box(15.px)
+        }
+
+        cardView and selectableCardView and hover {
+            backgroundColor += ThemeColors.Primary
         }
     }
 }
@@ -53,6 +81,8 @@ object ThemeColors {
     val DarkPrimary = c("#455A64")
     val LightPrimary = c("#CFD8DC")
     val Accent = c("#FF5722")
+    val DarkAccent = c("#f25423")
+    val DarkestAccent = c("#bb4722")
     val PrimaryText = c("#212121")
     val SecondaryText = c("#757575")
 }
