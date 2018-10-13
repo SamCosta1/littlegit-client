@@ -110,7 +110,7 @@ class SignupView: BaseView() {
                         action {
                             authController.signup(email.value, password.value, name.value) {
                                 when {
-                                    it.isSuccess -> replaceWith(MainView::class)
+                                    it.isSuccess -> NavigationUtils.navigateFromLoginFlow(this@SignupView, repoController)
                                     it.errorBody is CallFailure.ApiError -> {
                                         emailError = it.errorBody.localisedMessage.findOneOf(I18nKey.EmailInUse, I18nKey.InvalidEmail)
                                         passwordError = it.errorBody.localisedMessage.findOneOf(I18nKey.InvalidPassword)

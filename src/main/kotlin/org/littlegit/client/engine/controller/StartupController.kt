@@ -9,7 +9,8 @@ class StartupController: Controller() {
     private val controllers: List<InitableController> = listOf(
             find(Localizer::class),
             find(AuthController::class),
-            find(UserController::class)
+            find(UserController::class),
+            find(RepoController::class)
     )
 
     private var numFinished = AtomicInteger(0)

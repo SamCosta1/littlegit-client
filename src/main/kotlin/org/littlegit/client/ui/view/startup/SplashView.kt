@@ -2,6 +2,7 @@ package org.littlegit.client.ui.view.startup
 
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.StartupController
+import org.littlegit.client.ui.util.NavigationUtils
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.MainView
 import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
@@ -29,7 +30,7 @@ class SplashView : BaseView() {
             startupController.onStartup {
                 println("Splashview")
                 if (authController.isLoggedIn) {
-                    replaceWith(MainView::class)
+                    NavigationUtils.navigateFromLoginFlow(this@SplashView, repoController)
                 } else {
                     replaceWith(ChooseLanguageView::class)
                 }
