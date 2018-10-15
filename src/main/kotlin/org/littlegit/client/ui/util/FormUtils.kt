@@ -22,3 +22,9 @@ inline fun <reified T> EventTarget.secondarylabel(
     return label(observable, graphicProperty, converter, op).addClass(Styles.secondaryLabel)
 
 }
+
+fun EventTarget.secondarylabel(str: String
+): Label {
+    return label(str).addClass(Styles.secondaryLabel)
+
+}

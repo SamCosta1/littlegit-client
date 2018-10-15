@@ -6,10 +6,7 @@ object ValidationUtils {
 
     // Simple validation for now
     fun validateEmail(email: String): Boolean {
-        return email.length > 5
-                && email.contains('@')
-                && email.contains('.')
-                && email.length < 50
+        return email.isNotBlank()
     }
 
     fun validatePassword(password: String): Boolean {

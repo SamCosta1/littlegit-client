@@ -1,5 +1,7 @@
 package org.littlegit.client.engine.controller
 
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ObservableValue
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.core.commandrunner.GitResult
@@ -7,6 +9,7 @@ import org.littlegit.core.model.FileDiff
 import tornadofx.*
 import java.io.File
 import java.time.OffsetDateTime
+import java.util.*
 
 class RepoController: Controller(), InitableController {
 
@@ -15,10 +18,14 @@ class RepoController: Controller(), InitableController {
     private var currentRepoId: String? = null
     private var currentRepo: Repo? = null; set(newValue) {
         field = newValue
-        newValue?.let { currentRepoId = it.localId }
+        newValue?.let {
+            currentRepoId = it.localId
+            currentRepoNameObservable.value = newValue.remoteRepo?.repoName ?: newValue.path.fileName.toString()
+        }
     }
 
     val hasCurrentRepo: Boolean; get() = currentRepoId != null
+    val currentRepoNameObservable: SimpleStringProperty = SimpleStringProperty(currentRepo?.path?.fileName.toString())
 
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
@@ -26,7 +33,6 @@ class RepoController: Controller(), InitableController {
                 currentRepo = it?.find { it.localId == repoId }
                 littleGitCoreController.currentRepoPath = currentRepo?.path?.toAbsolutePath()
                 onReady(this)
-
             }
         }
     }
@@ -70,6 +76,7 @@ class RepoController: Controller(), InitableController {
 
     private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean) -> Unit) {
         littleGitCoreController.currentRepoPath = repo.path
+        currentRepo = repo
 
         littleGitCoreController.doNext {
             if (it.repoReader.isInitialized().data == true) {
