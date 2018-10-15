@@ -1,17 +1,14 @@
 package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.model.Repo
-import org.littlegit.core.commandrunner.GitResult
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
 import tornadofx.*
 import java.io.File
 import java.time.OffsetDateTime
-import java.util.*
 
 class RepoController: Controller(), InitableController {
 
@@ -44,6 +41,7 @@ class RepoController: Controller(), InitableController {
             repoDb.getAllRepos {
                 currentRepo = it?.find { it.localId == repoId }
                 littleGitCoreController.currentRepoPath = currentRepo?.path?.toAbsolutePath()
+                loadLog()
                 onReady(this)
             }
         }
@@ -87,12 +85,14 @@ class RepoController: Controller(), InitableController {
     }
 
     private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean) -> Unit) {
+        logObservable.setAll(emptyList())
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo
 
         littleGitCoreController.doNext {
             if (it.repoReader.isInitialized().data == true) {
                 runLater { completion(true) }
+                loadLog()
             } else {
                 val result = it.repoModifier.initializeRepo(bare = false)
                 runLater { completion(!result.isError) }
@@ -128,7 +128,7 @@ class RepoController: Controller(), InitableController {
     }
 
     fun loadLog() {
-        littleGitCoreController.doNext {
+        littleGitCoreController.doNext(notifyListeners = false) {
             val commits = it.repoReader.getCommitList().data ?: emptyList()
             runLater {
                 logObservable.setAll(commits)

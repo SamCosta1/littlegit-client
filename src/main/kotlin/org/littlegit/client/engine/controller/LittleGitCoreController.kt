@@ -27,14 +27,17 @@ class LittleGitCoreController: Controller() {
         listeners.add(listener)
     }
     // Should only be called on the main ui thread
-    fun doNext(action: (LittleGitCore) -> Unit) {
+    fun doNext(notifyListeners: Boolean = false, action: (LittleGitCore) -> Unit) {
         if (littleGitCore == null) {
             throw Exception("Littlegit core not initialized")
         }
 
         executor.execute {
             action(littleGitCore!!)
-            listeners.forEach { it.invoke() }
+
+            if (notifyListeners) {
+                listeners.forEach { it.invoke() }
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ class GraphView: BaseView() {
             vgrow = Priority.ALWAYS
 
             cellFormat {
-                graphic = cache {
+                graphic = cache(it.hash) {
                     vbox {
                         label(it.commitSubject)
                         secondarylabel(it.date.format())
@@ -23,10 +23,5 @@ class GraphView: BaseView() {
                 }
             }
         }
-    }
-
-    override fun onDock() {
-        super.onDock()
-        repoController.loadLog()
     }
 }
