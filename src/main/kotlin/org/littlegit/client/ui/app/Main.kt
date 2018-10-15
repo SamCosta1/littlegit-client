@@ -9,6 +9,6 @@ class Main: App(SplashView::class, Styles::class) {
         super.start(stage)
         stage.width = 400.0
         stage.height = 700.0
-
+        stage.centerOnScreen()
     }
 }

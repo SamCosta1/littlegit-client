@@ -6,7 +6,8 @@ import tornadofx.*
 
 enum class Image(private val raw: String) {
     WelshFlag("lang_cy.png"),
-    EnglishFlag("lang_en-gb.png");
+    EnglishFlag("lang_en-gb.png"),
+    Logo("logo.png");
 
     val path; get() = "images/$raw"
 }
