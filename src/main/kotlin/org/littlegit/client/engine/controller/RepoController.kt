@@ -2,10 +2,12 @@ package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
+import javafx.collections.ObservableList
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.core.commandrunner.GitResult
 import org.littlegit.core.model.FileDiff
+import org.littlegit.core.model.RawCommit
 import tornadofx.*
 import java.io.File
 import java.time.OffsetDateTime
@@ -26,6 +28,16 @@ class RepoController: Controller(), InitableController {
 
     val hasCurrentRepo: Boolean; get() = currentRepoId != null
     val currentRepoNameObservable: SimpleStringProperty = SimpleStringProperty(currentRepo?.path?.fileName.toString())
+
+    val logObservable: ObservableList<RawCommit> = mutableListOf<RawCommit>().observable()
+
+    init {
+        littleGitCoreController.addListener(this::onCommandFinished)
+    }
+
+    private fun onCommandFinished() {
+        loadLog()
+    }
 
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
@@ -88,7 +100,7 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    fun stageAllAndCommit() {
+    fun stageAllAndCommit(callback: () -> Unit) {
         littleGitCoreController.doNext {
             val unstagedChanges = it.repoReader.getUnStagedChanges().data
             unstagedChanges?.unTrackedFiles?.forEach { file ->
@@ -109,6 +121,17 @@ class RepoController: Controller(), InitableController {
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
                 it.repoModifier.commit("Commit message")
+            }
+
+            runLater{ callback() }
+        }
+    }
+
+    fun loadLog() {
+        littleGitCoreController.doNext {
+            val commits = it.repoReader.getCommitList().data ?: emptyList()
+            runLater {
+                logObservable.setAll(commits)
             }
         }
     }

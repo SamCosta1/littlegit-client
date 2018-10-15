@@ -7,6 +7,9 @@ import java.util.concurrent.Executors
 
 class LittleGitCoreController: Controller() {
 
+    private val listeners: MutableList<() -> Unit> = mutableListOf()
+
+
     private val executor = Executors.newSingleThreadExecutor()
     private var littleGitCore: LittleGitCore? = null
     var currentRepoPath: Path? = null; set(newValue) {
@@ -19,6 +22,10 @@ class LittleGitCoreController: Controller() {
                     .build()
         }
     }
+
+    fun addListener(listener: () -> Unit) {
+        listeners.add(listener)
+    }
     // Should only be called on the main ui thread
     fun doNext(action: (LittleGitCore) -> Unit) {
         if (littleGitCore == null) {
@@ -27,6 +34,7 @@ class LittleGitCoreController: Controller() {
 
         executor.execute {
             action(littleGitCore!!)
+            listeners.forEach { it.invoke() }
         }
     }
 }
