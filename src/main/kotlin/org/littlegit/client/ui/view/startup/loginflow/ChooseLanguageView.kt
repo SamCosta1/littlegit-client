@@ -5,6 +5,7 @@ import javafx.scene.text.TextAlignment
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Language
 import org.littlegit.client.ui.app.Styles
+import org.littlegit.client.ui.app.ThemeColors
 import org.littlegit.client.ui.util.imageView
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
@@ -37,7 +38,9 @@ class ChooseLanguageView: BaseView() {
                         }
 
                         borderpane().center {
-                            label(lang.displayName)
+                            label(lang.displayName).style {
+                                textFill = ThemeColors.PrimaryText
+                            }
                         }
 
                         onMouseClicked = EventHandler {

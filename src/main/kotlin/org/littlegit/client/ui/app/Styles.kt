@@ -18,20 +18,20 @@ class Styles : Stylesheet() {
 
     init {
         primaryBackground {
-            backgroundColor += ThemeColors.LightPrimary
+            backgroundColor += ThemeColors.DarkPrimary2
             padding = box(10.px)
 
         }
         label and heading {
             fontSize = 25.px
             fontWeight = FontWeight.BOLD
-            textFill = ThemeColors.Accent
+            textFill = ThemeColors.PrimaryText
         }
 
         label and subheading {
             fontSize = 15.px
             fontWeight = FontWeight.BOLD
-            textFill = ThemeColors.Accent
+            textFill = ThemeColors.PrimaryText
         }
 
         textField {
@@ -54,6 +54,7 @@ class Styles : Stylesheet() {
 
         button {
             backgroundColor += ThemeColors.Accent
+            textFill = ThemeColors.PrimaryText
             backgroundRadius += box(50.px)
             padding = box(10.px)
         }
@@ -80,7 +81,7 @@ class Styles : Stylesheet() {
 
         cardView and selectableCardView and hover {
             borderWidth += box(2.px)
-            borderColor += box(ThemeColors.DarkPrimary)
+            borderColor += box(ThemeColors.DarkPrimary1)
         }
 
         error {
@@ -95,13 +96,14 @@ class Styles : Stylesheet() {
 }
 
 object ThemeColors {
+    val LightPrimary = c("#6a8a9a")
     val Primary = c("#607D8B")
-    val DarkPrimary = c("#455A64")
-    val LightPrimary = c("#CFD8DC")
-    val Accent = c("#FF5722")
+    val DarkPrimary1 = c("#455A64")
+    val DarkPrimary2 = c("#3c3f41")
+    val Accent = c("#b86414")
     val DarkAccent = c("#f25423")
     val DarkestAccent = c("#bb4722")
-    val PrimaryText = c("#212121")
+    val PrimaryText = c("#e2e2e2")
     val SecondaryText = c("#757575")
     val Error = c("#771422")
 }
