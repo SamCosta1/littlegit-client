@@ -30,8 +30,12 @@ class ChooseRepoView : BaseView() {
             useMaxWidth = true
             action {
                 isLoading.value = true
-                chooseDirectory()?.let {
+                val file = chooseDirectory()
+
+                file?.let {
                     repoController.setCurrentRepo(it, this@ChooseRepoView::onRepoChosen)
+                } ?: run {
+                    isLoading.value = false
                 }
             }
         }

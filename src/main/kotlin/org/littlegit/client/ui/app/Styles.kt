@@ -22,10 +22,14 @@ class Styles : Stylesheet() {
             padding = box(10.px)
 
         }
+
+        label {
+            textFill = ThemeColors.PrimaryText
+        }
+
         label and heading {
             fontSize = 25.px
             fontWeight = FontWeight.BOLD
-            textFill = ThemeColors.PrimaryText
         }
 
         label and subheading {
@@ -97,7 +101,7 @@ class Styles : Stylesheet() {
 
 object ThemeColors {
     val LightPrimary = c("#6a8a9a")
-    val Primary = c("#607D8B")
+    val Primary = c("#31628b")
     val DarkPrimary1 = c("#455A64")
     val DarkPrimary2 = c("#3c3f41")
     val Accent = c("#b86414")

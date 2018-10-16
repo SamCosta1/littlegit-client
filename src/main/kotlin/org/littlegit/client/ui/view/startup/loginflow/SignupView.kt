@@ -41,7 +41,8 @@ class SignupView: BaseView() {
             }
         }
         center {
-            imageView(Image.WelshFlag)
+            //imageView(Image.Logo)
+            label("Logo goes here")
         }
         bottom {
             form {

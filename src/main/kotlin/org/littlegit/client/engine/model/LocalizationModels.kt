@@ -55,8 +55,8 @@ enum class I18nKey(val key: String) {
     IncorrectLoginDetails("incorrect_login_details"),
     UnknownError("unknown_error"),
     RecentRepos("recent_repos"),
+    QuickCommit("quick_commit"),
     Unknown("-");
-
 
 
     companion object {

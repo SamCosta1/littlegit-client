@@ -14,6 +14,7 @@ import tornadofx.*
 class MainView : BaseView(fullScreen = true) {
     private val authController: AuthController by inject()
 
+    private val graphView: GraphView by inject()
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty(false) }
 
@@ -46,6 +47,7 @@ class MainView : BaseView(fullScreen = true) {
                 style {
                     backgroundColor += ThemeColors.Primary
                 }
+                add(graphView.root)
             }
         }
         vbox {
@@ -68,7 +70,10 @@ class MainView : BaseView(fullScreen = true) {
 
             button(localizer.observable(I18nKey.CommitAll)).action {
                 disableWhen(isLoading)
-                openInternalWindow<CommitDialog>()
+                isLoading.value = true
+                repoController.stageAllAndCommit {
+                    isLoading.value = false
+                }
             }
 
         }
