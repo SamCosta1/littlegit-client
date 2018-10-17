@@ -1,4 +1,4 @@
-package org.littlegit.client.ui.app
+package org.littlegit.client.ui.app.graph
 
 import org.littlegit.core.commandrunner.CommitHash
 import org.littlegit.core.model.RawCommit
@@ -43,8 +43,10 @@ class GitGraph(commits: List<RawCommit>) {
                 assignedColumns[parentHash] = firstParentPos
 
                 for (i in 1 until commit.parentHashes.size) {
-                    val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else nextColumn++
-                    assignedColumns[commit.parentHashes[i]] = nextFreeColumn
+                    val hash = commit.parentHashes[i]
+                    val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else ++nextColumn
+                    val parentPos = assignedColumns[hash] ?: nextFreeColumn
+                    assignedColumns[hash] = min(parentPos, nextFreeColumn)
                 }
             }
         }
@@ -52,7 +54,7 @@ class GitGraph(commits: List<RawCommit>) {
         commitLocations.forEach { commitLocation ->
             commitLocation.commit.parentHashes.forEach { parentHash ->
                 commitLocationsMap[parentHash]?.location?.let {
-                    connections.add(Connection(commitLocation.location, it);
+                    connections.add(Connection(commitLocation.location, it))
                 }
             }
         }
