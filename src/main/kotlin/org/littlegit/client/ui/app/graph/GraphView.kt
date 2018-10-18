@@ -15,6 +15,7 @@ import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
+import kotlin.system.measureTimeMillis
 
 
 class GraphView: BaseView(), EventHandler<ScrollEvent> {
@@ -33,9 +34,13 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         canvasPane.addOnResizeListener(this@GraphView::drawGraph)
         addChildIfPossible(canvasPane)
         repoController.logObservable.addListener(ListChangeListener {
-            graph = GitGraph(repoController.currentLog)
-            lastYPos = pointToCoordinate(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
-            drawGraph(canvasPane.canvas.graphicsContext2D)
+            runAsync {
+                GitGraph(repoController.currentLog)
+            } ui {
+                graph = it
+                lastYPos = pointToCoordinate(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
+                drawGraph(canvasPane.canvas.graphicsContext2D)
+            }
         })
 
         canvasPane.onScroll = this@GraphView
@@ -68,7 +73,13 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             drawConnection(gc, it)
         }
 
+        drawCommitBlobs(graph, gc)
+    }
+
+    private fun drawCommitBlobs(graph: GitGraph, gc: GraphicsContext) {
         val minVisibleRow = floor(abs(scrollY) / gridSize)
+        var count = 0
+
         for (commitLocation in graph.commitLocations) {
             if (commitLocation.location.y < minVisibleRow) {
                 continue
