@@ -36,17 +36,34 @@ class GitGraph(commits: List<RawCommit>) {
 
             // Now deal with it's parents
             if (commit.parentHashes.isNotEmpty()) {
+                // We keept track of whether any of this commit's parent maintain the same column as it, because if not, that column gets freed up
+                var thisColumnStillInUse = false
                 val parentHash = commit.parentHashes[0]
+
+                // Assign the first parent to be the same column as this commit if possible
                 var firstParentPos = assignedColumns[parentHash] ?: column
                 firstParentPos = min(column, firstParentPos)
 
                 assignedColumns[parentHash] = firstParentPos
 
+                if (column == firstParentPos) {
+                    thisColumnStillInUse = true
+                }
+
                 for (i in 1 until commit.parentHashes.size) {
-                    val hash = commit.parentHashes[i]
+                    val parentiHash = commit.parentHashes[i]
                     val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else ++nextColumn
-                    val parentPos = assignedColumns[hash] ?: nextFreeColumn
-                    assignedColumns[hash] = min(parentPos, nextFreeColumn)
+                    var parentiPos = assignedColumns[parentiHash] ?: nextFreeColumn
+                    parentiPos = min(parentiPos, nextFreeColumn)
+                    assignedColumns[parentiHash] = parentiPos
+
+                    if (parentiPos == column) {
+                        thisColumnStillInUse = true
+                    }
+                }
+
+                if (!thisColumnStillInUse) {
+                    availableColumnsQueue.add(column)
                 }
             }
         }
