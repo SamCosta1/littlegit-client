@@ -6,11 +6,13 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import org.littlegit.client.ui.util.strokeLine
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 import java.awt.Point
 import java.awt.geom.Point2D
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -20,8 +22,18 @@ import kotlin.system.measureTimeMillis
 
 class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
+    private val branchColours = with(this) {
+        val rand = Random()
+        val initial = mutableListOf(Color.BLUE, Color.BLUE, Color.BLACK, Color.BROWN, Color.RED, Color.CRIMSON)
+        for (i in 0 until 100) {
+            initial.add(Color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), 1.0))
+        }
+
+        initial
+    }
+
     private val gridSize = 50
-    private val commitWidth = 10.0
+    private val commitWidth = 20.0
     private var scrollY = 0.0
     private lateinit var canvasPane: CanvasPane
     private var graph: GitGraph? = null
@@ -66,9 +78,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private fun drawGraph(gc: GraphicsContext, canvas: Canvas = gc.canvas) {
         val graph = this.graph ?: return
-
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
-
+        gc.lineWidth = 2.0
         graph.connections.forEach {
             drawConnection(gc, it)
         }
@@ -78,7 +89,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private fun drawCommitBlobs(graph: GitGraph, gc: GraphicsContext) {
         val minVisibleRow = floor(abs(scrollY) / gridSize)
-        var count = 0
 
         for (commitLocation in graph.commitLocations) {
             if (commitLocation.location.y < minVisibleRow) {
@@ -104,18 +114,27 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val start = pointToCoordinate(connection.point1)
         val end = pointToCoordinate(connection.point2)
 
+        val oldFill = gc.stroke
         // Same column => Simple vertical line
         when {
-            start.x == end.x -> gc.strokeLine(start, end)
+            start.x == end.x -> {
+                gc.stroke = branchColours[connection.point1.x % branchColours.size]
+                gc.strokeLine(start, end)
+            }
             start.x < end.x -> {
+                gc.stroke = branchColours[connection.point2.x % branchColours.size]
                 gc.strokeLine(start.x, start.y, end.x, start.y)
                 gc.strokeLine(end.x, start.y, end.x, end.y)
+
             }
             else -> {
+                gc.stroke = branchColours[connection.point1.x % branchColours.size]
                 gc.strokeLine(start.x, start.y, start.x, end.y)
                 gc.strokeLine(start.x, end.y, end.x, end.y)
             }
         }
+
+        gc.stroke = oldFill
     }
 
     private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
