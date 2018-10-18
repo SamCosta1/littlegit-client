@@ -11,6 +11,9 @@ import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 import java.awt.Point
 import java.awt.geom.Point2D
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.max
 
 
@@ -31,6 +34,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         addChildIfPossible(canvasPane)
         repoController.logObservable.addListener(ListChangeListener {
             graph = GitGraph(repoController.currentLog)
+            lastYPos = pointToCoordinate(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
             drawGraph(canvasPane.canvas.graphicsContext2D)
         })
 
@@ -64,12 +68,25 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             drawConnection(gc, it)
         }
 
-        graph.commitLocations.forEach {
-            val location = pointToCoordinate(it)
-            lastYPos = max(lastYPos, location.y)
-            drawCommitBlob(gc, location, it)
-        }
+        val minVisibleRow = floor(abs(scrollY) / gridSize)
+        for (commitLocation in graph.commitLocations) {
+            if (commitLocation.location.y < minVisibleRow) {
+                continue
+            }
 
+            val location = pointToCoordinate(commitLocation)
+
+            if (isInView(location)) {
+                drawCommitBlob(gc, location, commitLocation)
+            } else {
+                break
+            }
+        }
+    }
+
+    // For now ignoring the x coordinate
+    private fun isInView(location: Point2D.Double): Boolean {
+        return location.y <= canvasPane.height + commitWidth
     }
 
     private fun drawConnection(gc: GraphicsContext, connection: Connection) {
