@@ -44,8 +44,10 @@ class RepoController: Controller(), InitableController {
         repoDb.getCurrentRepoId { repoId ->
             repoDb.getAllRepos {
                 currentRepo = it?.find { it.localId == repoId }
-                littleGitCoreController.currentRepoPath = currentRepo?.path?.toAbsolutePath()
-                loadLog()
+                currentRepo?.let {
+                    littleGitCoreController.currentRepoPath = currentRepo?.path?.toAbsolutePath()
+                    loadLog()
+                }
                 onReady(this)
             }
         }

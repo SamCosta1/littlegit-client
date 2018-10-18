@@ -1,9 +1,13 @@
 package org.littlegit.client.ui.view
 
+import javafx.beans.InvalidationListener
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
+import javafx.event.EventTarget
 import javafx.geometry.Pos
+import javafx.scene.control.Label
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.client.ui.app.Styles
@@ -15,7 +19,7 @@ class ChooseRepoView : BaseView() {
     private val repos: ObservableList<Repo> = mutableListOf<Repo>().observable()
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty() }
-
+    private lateinit var recentReposHeading: Label
     override val root = vbox {
         addClass(Styles.primaryBackground)
         padding = tornadofx.insets(10)
@@ -42,7 +46,9 @@ class ChooseRepoView : BaseView() {
 
         separator()
 
-        label(localizer.observable(I18nKey.RecentRepos)).addClass(Styles.subheading)
+        recentReposHeading = label(localizer.observable(I18nKey.RecentRepos)) {
+            addClass(Styles.subheading)
+        }
 
         listview(repos) {
             disableWhen(isLoading)
@@ -83,6 +89,7 @@ class ChooseRepoView : BaseView() {
         super.onDock()
         repoController.getRepos {
             repos.setAll(it ?: emptyList())
+            recentReposHeading.isVisible = repos.isNotEmpty()
         }
 
     }
