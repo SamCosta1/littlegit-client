@@ -11,8 +11,6 @@ import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 import java.awt.Point
 import java.awt.geom.Point2D
-import kotlin.math.abs
-import kotlin.math.log2
 import kotlin.math.max
 
 
@@ -63,25 +61,54 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
 
         graph.connections.forEach {
-            gc.strokeLine(pointToCoordinate(it.point1), pointToCoordinate(it.point2.location))
+            drawConnection(gc, it)
         }
 
         graph.commitLocations.forEach {
             val location = pointToCoordinate(it)
             lastYPos = max(lastYPos, location.y)
-            gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
-            gc.strokeText(it.commit.hash, 500.0, location.y)
-            gc.strokeText(it.commit.commitSubject, 500.0, location.y + 20)
+            drawCommitBlob(gc, location, it)
+        }
+
+    }
+
+    private fun drawConnection(gc: GraphicsContext, connection: Connection) {
+        val start = pointToCoordinate(connection.point1)
+        val end = pointToCoordinate(connection.point2)
+
+        // Same column => Simple vertical line
+        when {
+            start.x == end.x -> gc.strokeLine(start, end)
+            start.x < end.x -> {
+                gc.strokeLine(start.x, start.y, end.x, start.y)
+                gc.strokeLine(end.x, start.y, end.x, end.y)
+            }
+            else -> {
+                gc.strokeLine(start.x, start.y, start.x, end.y)
+                gc.strokeLine(start.x, end.y, end.x, end.y)
+            }
         }
     }
 
-    fun pointToCoordinate(point: Point): Point2D.Double {
+    private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
+        gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+        gc.strokeText(commitLocation.commit.hash, 500.0, location.y)
+        gc.strokeText(commitLocation.commit.commitSubject, 500.0, location.y + 20)
+
+    }
+
+    private fun pointToCoordinate(point: Point): Point2D.Double {
         val xGridPos = point.x
         val yGridPos = point.y
         return Point2D.Double((xGridPos + 0.5) * gridSize, (yGridPos + 0.5) * gridSize + scrollY)
 
     }
-    fun pointToCoordinate(commitLocation: CommitLocation): Point2D.Double {
+
+    private fun pointToCoordinate(commitLocation: CommitLocation): Point2D.Double {
         return pointToCoordinate(commitLocation.location)
+    }
+
+    fun drawCoordsText(gc: GraphicsContext, point: Point2D) {
+        gc.strokeText("(${point.x}, ${point.y}", point.x, point.y)
     }
 }
