@@ -38,7 +38,6 @@ class SplashView : BaseView() {
 
         runLater {
             startupController.onStartup {
-                println("Splashview")
                 if (authController.isLoggedIn) {
                     NavigationUtils.navigateFromLoginFlow(this@SplashView, repoController)
                 } else {

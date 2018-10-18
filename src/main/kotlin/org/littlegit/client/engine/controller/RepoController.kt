@@ -26,6 +26,10 @@ class RepoController: Controller(), InitableController {
     val hasCurrentRepo: Boolean; get() = currentRepoId != null
     val currentRepoNameObservable: SimpleStringProperty = SimpleStringProperty(currentRepo?.path?.fileName.toString())
 
+    var currentLog: List<RawCommit> = mutableListOf(); private set(value) {
+        field = value
+        logObservable.setAll(value)
+    }
     val logObservable: ObservableList<RawCommit> = mutableListOf<RawCommit>().observable()
 
     init {
@@ -85,7 +89,7 @@ class RepoController: Controller(), InitableController {
     }
 
     private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean) -> Unit) {
-        logObservable.setAll(emptyList())
+        currentLog = emptyList()
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo
 
@@ -131,7 +135,7 @@ class RepoController: Controller(), InitableController {
         littleGitCoreController.doNext(notifyListeners = false) {
             val commits = it.repoReader.getCommitList().data ?: emptyList()
             runLater {
-                logObservable.setAll(commits)
+                currentLog = commits
             }
         }
     }

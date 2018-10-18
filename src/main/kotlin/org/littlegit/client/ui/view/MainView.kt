@@ -8,6 +8,7 @@ import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.app.ThemeColors
+import org.littlegit.client.ui.app.graph.GraphView
 import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
 import tornadofx.*
 
