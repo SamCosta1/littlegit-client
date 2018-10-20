@@ -57,6 +57,23 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         canvasPane.onScroll = this@GraphView
         drawGraph(canvasPane.canvas.graphicsContext2D, canvasPane.canvas)
+
+    }
+
+    private fun drawGrid(gc: GraphicsContext) {
+        gc.lineWidth = 0.4
+        var x = 0.0
+        var y = 0.0 + scrollY % gridSize
+
+        while (x < canvasPane.width) {
+            x += gridSize
+            gc.strokeLine(x, 0.0, x, canvasPane.height)
+        }
+
+        while (y < canvasPane.height) {
+            y += gridSize
+            gc.strokeLine(0.0, y, canvasPane.width, y)
+        }
     }
 
 
@@ -79,6 +96,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private fun drawGraph(gc: GraphicsContext, canvas: Canvas = gc.canvas) {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
+
+        drawGrid(canvasPane.canvas.graphicsContext2D)
         gc.lineWidth = 2.0
         graph.connections.forEach {
             drawConnection(gc, it)

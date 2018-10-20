@@ -51,9 +51,13 @@ class GitGraph(commits: List<RawCommit>) {
                 for (i in 1 until commit.parentHashes.size) {
                     val parentiHash = commit.parentHashes[i]
 
-                    val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else ++nextColumn
+                    val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else nextColumn
 
                     val parentiPos = assignParent(assignedColumns, parentiHash, nextFreeColumn)
+
+                    if (parentiPos == nextColumn) {
+                        ++nextColumn
+                    }
 
                     assignedColumns[parentiHash] = ColumnAssignment(assignerColumn = column, assignedColumn = parentiPos)
 
