@@ -14,10 +14,7 @@ import java.awt.Point
 import java.awt.geom.Point2D
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.max
-import kotlin.system.measureTimeMillis
 
 
 class GraphView: BaseView(), EventHandler<ScrollEvent> {
@@ -50,7 +47,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
                 GitGraph(repoController.currentLog)
             } ui {
                 graph = it
-                lastYPos = pointToCoordinate(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
+                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
                 drawGraph(canvasPane.canvas.graphicsContext2D)
             }
         })
@@ -114,7 +111,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
                 continue
             }
 
-            val location = pointToCoordinate(commitLocation)
+            val location = gridCenterPoint(commitLocation)
 
             if (isInView(location)) {
                 drawCommitBlob(gc, location, commitLocation)
@@ -130,29 +127,37 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private fun drawConnection(gc: GraphicsContext, connection: Connection) {
-        val start = pointToCoordinate(connection.point1)
-        val end = pointToCoordinate(connection.point2)
+        val start = gridCenterPoint(connection.point1)
+        val end = gridCenterPoint(connection.point2)
 
         val oldFill = gc.stroke
         when {
             // Same column => Simple vertical line
             start.x == end.x -> {
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
-               gc.strokeLine(start, end)
+                gc.strokeLine(start, end)
             }
             start.x < end.x -> {
                 gc.stroke = branchColours[connection.point2.x % branchColours.size]
 
-                gc.curve(start.x, start.y, end.x, start.y, end.x, end.y)
-//                gc.strokeLine(start.x, start.y, end.x, start.y)
-//                gc.strokeLine(end.x, start.y, end.x, end.y)
+                val line1EndX = end.x - end.x % gridSize
+                val line2StartY = start.y + start.y % gridSize
+
+                gc.strokeLine(start.x, start.y, line1EndX, start.y)
+                gc.curve(line1EndX, start.y, end.x, start.y, end.x, line2StartY)
+                gc.strokeLine(end.x, line2StartY, end.x, end.y)
 
             }
             else -> {
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
-                gc.curve(start.x, start.y, start.x, end.y, end.x, end.y)
-//                gc.strokeLine(start.x, start.y, start.x, end.y)
-//                gc.strokeLine(start.x, end.y, end.x, end.y)
+
+                val line1EndY = end.y - end.y % gridSize
+                val line2StartX = start.x - start.x % gridSize
+
+                gc.strokeLine(start.x, start.y, start.x, line1EndY)
+                gc.curve(start.x, line1EndY, start.x, end.y, line2StartX, end.y)
+                gc.strokeLine(line2StartX, end.y, end.x, end.y)
+
             }
         }
 
@@ -169,20 +174,23 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
         gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+        val oldLineWidth = gc.lineWidth
+        gc.lineWidth = 1.0
         gc.strokeText(commitLocation.commit.hash, 500.0, location.y)
         gc.strokeText(commitLocation.commit.commitSubject, 500.0, location.y + 20)
+        gc.lineWidth = oldLineWidth
 
     }
 
-    private fun pointToCoordinate(point: Point): Point2D.Double {
+    private fun gridCenterPoint(point: Point): Point2D.Double {
         val xGridPos = point.x
         val yGridPos = point.y
         return Point2D.Double((xGridPos + 0.5) * gridSize, (yGridPos + 0.5) * gridSize + scrollY)
 
     }
 
-    private fun pointToCoordinate(commitLocation: CommitLocation): Point2D.Double {
-        return pointToCoordinate(commitLocation.location)
+    private fun gridCenterPoint(commitLocation: CommitLocation): Point2D.Double {
+        return gridCenterPoint(commitLocation.location)
     }
 
     fun drawCoordsText(gc: GraphicsContext, point: Point2D) {
