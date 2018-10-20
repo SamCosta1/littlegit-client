@@ -115,26 +115,37 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val end = pointToCoordinate(connection.point2)
 
         val oldFill = gc.stroke
-        // Same column => Simple vertical line
         when {
+            // Same column => Simple vertical line
             start.x == end.x -> {
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
-                gc.strokeLine(start, end)
+               gc.strokeLine(start, end)
             }
             start.x < end.x -> {
                 gc.stroke = branchColours[connection.point2.x % branchColours.size]
-                gc.strokeLine(start.x, start.y, end.x, start.y)
-                gc.strokeLine(end.x, start.y, end.x, end.y)
+
+                gc.curve(start.x, start.y, end.x, start.y, end.x, end.y)
+//                gc.strokeLine(start.x, start.y, end.x, start.y)
+//                gc.strokeLine(end.x, start.y, end.x, end.y)
 
             }
             else -> {
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
-                gc.strokeLine(start.x, start.y, start.x, end.y)
-                gc.strokeLine(start.x, end.y, end.x, end.y)
+                gc.curve(start.x, start.y, start.x, end.y, end.x, end.y)
+//                gc.strokeLine(start.x, start.y, start.x, end.y)
+//                gc.strokeLine(start.x, end.y, end.x, end.y)
             }
         }
 
         gc.stroke = oldFill
+    }
+
+    private fun GraphicsContext.curve(startX: Double, startY: Double, controlX: Double, controlY: Double, endX: Double, endY: Double) {
+        beginPath()
+        moveTo(startX, startY)
+        quadraticCurveTo(controlX, controlY, endX, endY)
+        stroke()
+
     }
 
     private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
