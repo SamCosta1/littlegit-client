@@ -24,7 +24,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private val branchColours = with(this) {
         val rand = Random()
-        val initial = mutableListOf(Color.BLUE, Color.BLUE, Color.BLACK, Color.BROWN, Color.RED, Color.CRIMSON)
+        val initial = mutableListOf(Color.RED, Color.GREEN, Color.BROWN, Color.TEAL, Color.CRIMSON)
         for (i in 0 until 100) {
             initial.add(Color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), 1.0))
         }
@@ -32,7 +32,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         initial
     }
 
-    private val gridSize = 50
+    private val gridSize = 40
     private val commitWidth = 20.0
     private var scrollY = 0.0
     private lateinit var canvasPane: CanvasPane
@@ -103,7 +103,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
 
-        gc.lineWidth = 2.0
+        gc.lineWidth = 2.5
         graph.connections.forEach {
             drawConnection(gc, it)
         }
@@ -182,6 +182,12 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
         gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+
+        val oldStroke = gc.stroke
+        gc.stroke = branchColours[commitLocation.location.x % branchColours.size]
+        gc.strokeOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+        gc.stroke = oldStroke
+
         val oldLineWidth = gc.lineWidth
         gc.lineWidth = 1.0
         gc.fillText(commitLocation.commit.hash, 500.0, location.y)
