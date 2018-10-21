@@ -4,7 +4,6 @@ import org.littlegit.core.commandrunner.CommitHash
 import org.littlegit.core.model.RawCommit
 import java.awt.Point
 import java.util.*
-import kotlin.math.min
 
 
 data class Connection(val point1: Point, val point2: Point)
@@ -14,10 +13,11 @@ class GitGraph(commits: List<RawCommit>) {
     val connections: List<Connection>
     val commitLocations: List<CommitLocation>
 
-
+    private data class ColumnAssignment(val assignerColumn: Int, val assignedColumn: Int)
 
     init {
-        val assignedColumns = mutableMapOf<CommitHash, Int>() // The reserved column number for each commit
+
+        val assignedColumns = mutableMapOf<CommitHash, ColumnAssignment>() // The reserved column number for each commit
         val commitLocationsMap = mutableMapOf<CommitHash, CommitLocation>()
         commitLocations = mutableListOf()
         connections = mutableListOf()
@@ -28,7 +28,7 @@ class GitGraph(commits: List<RawCommit>) {
         commits.forEach { commit ->
 
             // If this commit has been assigned a column then put it there otherwise get a new one
-            val column = assignedColumns[commit.hash] ?: nextColumn++
+            val column = assignedColumns[commit.hash]?.assignedColumn ?: nextColumn++
 
             val location = CommitLocation(commit, Point(column, nextRow++))
             commitLocations.add(location)
@@ -40,11 +40,9 @@ class GitGraph(commits: List<RawCommit>) {
                 var thisColumnStillInUse = false
                 val parentHash = commit.parentHashes[0]
 
-                // Assign the first parent to be the same column as this commit if possible
-                var firstParentPos = assignedColumns[parentHash] ?: column
-                firstParentPos = min(column, firstParentPos)
+                val firstParentPos = assignParent(assignedColumns, parentHash, column)
 
-                assignedColumns[parentHash] = firstParentPos
+                assignedColumns[parentHash] = ColumnAssignment(assignerColumn = column, assignedColumn = firstParentPos)
 
                 if (column == firstParentPos) {
                     thisColumnStillInUse = true
@@ -52,10 +50,16 @@ class GitGraph(commits: List<RawCommit>) {
 
                 for (i in 1 until commit.parentHashes.size) {
                     val parentiHash = commit.parentHashes[i]
-                    val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else ++nextColumn
-                    var parentiPos = assignedColumns[parentiHash] ?: nextFreeColumn
-                    parentiPos = min(parentiPos, nextFreeColumn)
-                    assignedColumns[parentiHash] = parentiPos
+
+                    val nextFreeColumn = if (availableColumnsQueue.isNotEmpty()) availableColumnsQueue.remove() else nextColumn
+
+                    val parentiPos = assignParent(assignedColumns, parentiHash, nextFreeColumn)
+
+                    if (parentiPos == nextColumn) {
+                        ++nextColumn
+                    }
+
+                    assignedColumns[parentiHash] = ColumnAssignment(assignerColumn = column, assignedColumn = parentiPos)
 
                     if (parentiPos == column) {
                         thisColumnStillInUse = true
@@ -74,6 +78,16 @@ class GitGraph(commits: List<RawCommit>) {
                     connections.add(Connection(commitLocation.location, it))
                 }
             }
+        }
+    }
+
+    private fun assignParent(assignedColumns: MutableMap<CommitHash, ColumnAssignment>, parentHash: String, column: Int): Int {
+        val currentColumnAssignment = assignedColumns[parentHash]
+
+        return when {
+            currentColumnAssignment == null -> column
+            currentColumnAssignment.assignerColumn < column -> currentColumnAssignment.assignedColumn
+            else -> column
         }
     }
 }
