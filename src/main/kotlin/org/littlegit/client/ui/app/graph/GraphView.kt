@@ -2,9 +2,12 @@ package org.littlegit.client.ui.app.graph
 
 import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
+import javafx.event.EventType
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import javafx.scene.input.GestureEvent
 import javafx.scene.input.ScrollEvent
+import javafx.scene.input.SwipeEvent
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.littlegit.client.ui.util.strokeLine
@@ -36,7 +39,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private var graph: GitGraph? = null
     private var lastYPos = 1.0
 
-    override val root = vbox {
+    override val root = stackpane {
         vgrow = Priority.ALWAYS
 
         canvasPane = CanvasPane(500.0, 500.0)
@@ -52,11 +55,17 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             }
         })
 
-        canvasPane.onScroll = this@GraphView
+
+        canvasPane.addEventFilter(ScrollEvent.ANY, {
+            handle(it)
+        })
+
+
         drawGraph(canvasPane.canvas.graphicsContext2D, canvasPane.canvas)
 
     }
 
+    // Pretty much only used for debugging
     private fun drawGrid(gc: GraphicsContext) {
         gc.lineWidth = 0.4
         var x = 0.0
@@ -76,7 +85,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     override fun handle(event: ScrollEvent) {
         val newScrollY = scrollY + event.deltaY
-
+        println()
         // Prevent users scrolling higher up and out of sight of the graph or down below the graph
 
         val lowerBoundary = canvasPane.height - lastYPos - 2* gridSize
@@ -94,7 +103,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
 
-        drawGrid(canvasPane.canvas.graphicsContext2D)
         gc.lineWidth = 2.0
         graph.connections.forEach {
             drawConnection(gc, it)
@@ -140,8 +148,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             start.x < end.x -> {
                 gc.stroke = branchColours[connection.point2.x % branchColours.size]
 
-                val line1EndX = end.x - end.x % gridSize
-                val line2StartY = start.y + start.y % gridSize
+                val line1EndX = end.x - gridSize / 2
+                val line2StartY = start.y + gridSize / 2
 
                 gc.strokeLine(start.x, start.y, line1EndX, start.y)
                 gc.curve(line1EndX, start.y, end.x, start.y, end.x, line2StartY)
@@ -151,8 +159,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             else -> {
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
 
-                val line1EndY = end.y - end.y % gridSize
-                val line2StartX = start.x - start.x % gridSize
+                val line1EndY = end.y - gridSize / 2
+                val line2StartX = start.x - gridSize / 2
 
                 gc.strokeLine(start.x, start.y, start.x, line1EndY)
                 gc.curve(start.x, line1EndY, start.x, end.y, line2StartX, end.y)
@@ -176,8 +184,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
         val oldLineWidth = gc.lineWidth
         gc.lineWidth = 1.0
-        gc.strokeText(commitLocation.commit.hash, 500.0, location.y)
-        gc.strokeText(commitLocation.commit.commitSubject, 500.0, location.y + 20)
+        gc.fillText(commitLocation.commit.hash, 500.0, location.y)
+        gc.fillText(commitLocation.commit.commitSubject, 500.0, location.y + 20)
         gc.lineWidth = oldLineWidth
 
     }
