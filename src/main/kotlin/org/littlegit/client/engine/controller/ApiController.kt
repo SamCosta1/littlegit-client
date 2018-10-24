@@ -48,7 +48,7 @@ class ApiController: Controller() {
                     }
 
                     val authorisedRequest = chain.request().newBuilder()
-                            .addHeader("Authorization", tokens.accessToken).build()
+                            .addHeader("Authorization", "Bearer ${tokens.accessToken}").build()
 
                     val result = chain.proceed(authorisedRequest)
 
@@ -59,7 +59,7 @@ class ApiController: Controller() {
                             val refreshedRequest = chain
                                     .request()
                                     .newBuilder()
-                                    .addHeader("Authorization", refreshResponse.body.accessToken)
+                                    .addHeader("Authorization", "Bearer ${refreshResponse.body.accessToken}")
                                     .build()
 
                             chain.proceed(refreshedRequest)

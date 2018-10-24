@@ -1,16 +1,17 @@
 package org.littlegit.client.engine.controller
 
-import org.littlegit.client.engine.db.SShDb
-import org.littlegit.client.engine.util.SimpleCallback
-import tornadofx.*
-import java.io.File
-import java.nio.file.Paths
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.KeyPair
+import org.littlegit.client.engine.api.ApiCallCompletion
 import org.littlegit.client.engine.api.enqueue
+import org.littlegit.client.engine.db.SShDb
 import org.littlegit.client.engine.model.SshKeyRequest
+import org.littlegit.client.engine.util.SimpleCallback
 import org.littlegit.core.util.joinWithSpace
+import tornadofx.*
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class SShController: Controller() {
@@ -25,31 +26,24 @@ class SShController: Controller() {
         }
     }
 
-    fun generateAndAddSshKey() {
+    fun generateAndAddSshKey( completion: ApiCallCompletion<Void>) {
 
         runAsync {
 
             val sshPath = if (defaultSshKeysExist()) {
-                Paths.get(System.getProperty("user.dir", ".ssh"))
+                Paths.get(System.getProperty("user.dir"), ".ssh")
             } else {
-                Paths.get(System.getProperty("user.home"), "ssh", "id_rsa")
+                Paths.get(System.getProperty("user.home"), ".ssh")
             }
 
-            try {
-                generateAndWrite(sshPath)
-            } catch (e: Exception) {
-
-            }
+            generateAndWrite(sshPath)
 
             val publicKeyString = getPublicKeyPath(sshPath).readLines().joinWithSpace()
             userApi.addSshKey(SshKeyRequest(publicKeyString, userController.currentUser?.id!!)).enqueue {
-
+                sshDb.setSshKeyPath(sshPath)
+                completion(it)
             }
-
-
         }
-
-
     }
 
     private fun generateAndWrite(sshPath: Path) {
@@ -57,6 +51,7 @@ class SShController: Controller() {
         val publicKey = getPublicKeyPath((sshPath))
         val jsch = JSch()
 
+        Files.createDirectories(sshPath)
         val kpair = KeyPair.genKeyPair(jsch, KeyPair.RSA)
         kpair.writePrivateKey(privatePath.canonicalPath)
         kpair.writePublicKey(publicKey.canonicalPath, "SSHCerts")
