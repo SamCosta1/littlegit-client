@@ -5,6 +5,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import org.littlegit.client.engine.controller.AuthController
+import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.app.ThemeColors
@@ -14,6 +15,7 @@ import tornadofx.*
 
 class MainView : BaseView(fullScreen = true) {
     private val authController: AuthController by inject()
+    private val sshController: SShController by inject()
 
     private val graphView: GraphView by inject()
     private val model = ViewModel()
@@ -77,6 +79,20 @@ class MainView : BaseView(fullScreen = true) {
                 }
             }
 
+        }
+    }
+
+    override fun onDock() {
+        super.onDock()
+
+        sshController.checkSshKeysExist { exist ->
+            if (!exist) {
+                sshController.generateAndAddSshKey {
+                    if (!it.isSuccess) {
+                        // TODO: Warn the user something went wrong
+                    }
+                }
+            }
         }
 
     }

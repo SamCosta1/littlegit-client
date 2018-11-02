@@ -1,9 +1,6 @@
 package org.littlegit.client.engine.controller
 
-import org.littlegit.client.engine.api.ApiCallCompletion
-import org.littlegit.client.engine.api.AuthApi
-import org.littlegit.client.engine.api.CallFailure
-import org.littlegit.client.engine.api.enqueue
+import org.littlegit.client.engine.api.*
 import org.littlegit.client.engine.db.AuthDb
 import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.*
@@ -17,10 +14,11 @@ class AuthController : Controller(), InitableController {
     private val userController: UserController by inject()
     private val localizer: Localizer by inject()
 
-    private var authTokens: AuthTokens? = null
+    var authTokens: AuthTokens? = null; private set
     private val authDb: AuthDb by inject()
 
     override fun onStart(onReady: (InitableController) -> Unit) {
+        find(ApiController::class.java).authController = this
         authDb.getTokens {
             authTokens = it
             onReady(this)
@@ -50,6 +48,19 @@ class AuthController : Controller(), InitableController {
 
             completion(it)
         }
+    }
+
+    fun refreshToken(): ApiResponse<RefreshResponse>? {
+        authTokens?.let { tokens ->
+            val it = authApi.refreshToken(RefreshRequest(tokens.refreshToken, userController.currentUser!!.id)).executeSync()
+            if (it.isSuccess && it.body != null) {
+                updateAuthTokens(it.body.accessToken, tokens.refreshToken)
+            }
+
+            return it
+        }
+
+        return null
     }
 
     private fun updateAuthTokens(accessToken: String, refreshToken: String) {

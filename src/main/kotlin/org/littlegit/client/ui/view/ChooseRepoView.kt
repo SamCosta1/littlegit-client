@@ -76,9 +76,19 @@ class ChooseRepoView : BaseView() {
         }
     }
 
-    private fun onRepoChosen(success: Boolean) {
+    private fun onRepoChosen(success: Boolean, repo: Repo) {
+        if (success && repo.remoteRepo == null) {
+            repoController.createRemoteRepo(repo) {
+                moveToMainIfNeeded(it.isSuccess)
+            }
+        } else {
+            moveToMainIfNeeded(success)
+        }
+    }
+
+    private fun moveToMainIfNeeded(move: Boolean) {
         isLoading.value = false
-        if (success) {
+        if (move) {
             replaceWith(MainView::class)
         } else {
             isLoading.value = false

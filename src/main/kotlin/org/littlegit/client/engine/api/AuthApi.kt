@@ -10,7 +10,7 @@ interface AuthApi {
     @POST("auth/login")
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
 
-    @POST
+    @POST("auth/refresh")
     fun refreshToken(@Body refreshRequest: RefreshRequest): Call<RefreshResponse>
 
     @POST("/user/signup")

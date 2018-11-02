@@ -51,6 +51,18 @@ class RepoDb: LocalDb() {
     fun setCurrentRepoId(repoId: String) {
         writeAsync(CURRENT_REPO_ID, repoId, String::class.java)
     }
+
+    fun updateRepo(repo: Repo) {
+        getAllRepos { repos ->
+            val mutableList = repos?.toMutableList()
+            val index = mutableList?.indexOfFirst { it.localId == repo.localId }
+
+            if (index != null) {
+                mutableList[index] = repo
+                updateRepos(mutableList)
+            }
+        }
+    }
 }
 
 fun String.inject(vararg params: Any) = MessageFormat.format(this, *params)!!

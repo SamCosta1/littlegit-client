@@ -132,6 +132,7 @@ buildNumber.properties
 
 # Local database
 .db
+.ssh
 # End of https://www.gitignore.io/api/java,maven,kotlin,intellij
 
 # Created by https://www.gitignore.io/api/firebase

@@ -22,25 +22,29 @@ private fun parseError(response: Response<*>): CallFailure.ApiError? {
 
 fun <T>Call<T>.enqueue(completion: ApiCallCompletion<T>) {
     runAsync {
-
-        val response: Response<T>
-
-        try {
-            response = this@enqueue.execute()
-        } catch (e: Throwable) {
-            return@runAsync ApiResponse.failure<T>(e)
-        }
-
-
-        if (response.isSuccessful) {
-            return@runAsync ApiResponse.success(response.body())
-        } else {
-            return@runAsync ApiResponse.error<T>(parseError(response))
-        }
+        executeSync()
     } ui {
         completion(it)
     }
 }
+
+fun <T>Call<T>.executeSync(): ApiResponse<T> {
+
+    val response: Response<T>
+
+    try {
+        response = this@executeSync.execute()
+    } catch (e: Throwable) {
+        return ApiResponse.failure<T>(e)
+    }
+
+    return if (response.isSuccessful) {
+        ApiResponse.success(response.body())
+    } else {
+        ApiResponse.error<T>(parseError(response))
+    }
+}
+
 
 data class ApiResponse<T>(val isSuccess: Boolean, val body: T?, val errorBody: CallFailure?) {
     companion object {

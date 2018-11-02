@@ -2,7 +2,14 @@ package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import org.littlegit.client.engine.api.ApiCallCompletion
+import org.littlegit.client.engine.api.CallFailure
+import org.littlegit.client.engine.api.RepoApi
+import org.littlegit.client.engine.api.enqueue
 import org.littlegit.client.engine.db.RepoDb
+import org.littlegit.client.engine.model.CreateRepoRequest
+import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.engine.model.RemoteRepoSummary
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
@@ -12,7 +19,12 @@ import java.time.OffsetDateTime
 
 class RepoController: Controller(), InitableController {
 
+    companion object {
+        private const val REMOTE_NAME = "littlegit-origin"
+    }
+
     private val littleGitCoreController: LittleGitCoreController by inject()
+    private val repoApi: RepoApi = find(ApiController::class).repoApi
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
     private var currentRepo: Repo? = null; set(newValue) {
@@ -67,7 +79,7 @@ class RepoController: Controller(), InitableController {
         repoDb.getAllRepos(completion)
     }
 
-    fun setCurrentRepo(dir: File, completion: (success: Boolean) -> Unit) {
+    fun setCurrentRepo(dir: File, completion: (success: Boolean, repo: Repo) -> Unit) {
         repoDb.getAllRepos { repos ->
 
             repos?.find { it.path == dir.toPath() }?.let {
@@ -85,23 +97,67 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    fun setCurrentRepo(repo: Repo, completion: (success: Boolean) -> Unit) {
+    fun createRemoteRepo(repo: Repo, completion: ApiCallCompletion<RemoteRepoSummary>) {
+        createRemoteRepo(repo, repo.path.fileName.toString(), 0, completion)
+    }
+
+    // Can't guarantee the user won't have multiple directories of the same name, though that'd be stupid. So if this happens just do the same as people
+    // Are used to when duplicating files. e.g.  myRepo -> myRepo-1
+    private fun createRemoteRepo(repo: Repo, repoName: String, iteration: Int, completion: ApiCallCompletion<RemoteRepoSummary>) {
+        val name = if (iteration > 0) {
+            "$repoName-$iteration"
+        } else {
+            repoName
+        }
+
+        repoApi.createRemoteRepo(CreateRepoRequest(name)).enqueue {
+            if (it.isSuccess && it.body != null) {
+                repo.remoteRepo = it.body
+                repoDb.updateRepo(repo)
+                setOrigin(remoteRepo = it.body)
+                completion(it)
+                return@enqueue
+            }
+
+            if (it.errorBody is CallFailure.ApiError && it.errorBody.localisedMessage.contains(I18nKey.ValueAlreadyExists)) {
+                createRemoteRepo(repo, repoName, iteration + 1, completion)
+            } else {
+                completion(it)
+            }
+        }
+    }
+
+    private fun setOrigin(remoteRepo: RemoteRepoSummary) {
+        littleGitCoreController.doNext {
+            it.repoModifier.addRemote(REMOTE_NAME, remoteRepo.cloneUrlPath)
+        }
+    }
+
+    fun setCurrentRepo(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
         repoDb.setCurrentRepoId(repo.localId)
         initialiseRepoIfNeeded(repo, completion)
     }
 
-    private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean) -> Unit) {
+    private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
         currentLog = emptyList()
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo
 
         littleGitCoreController.doNext {
             if (it.repoReader.isInitialized().data == true) {
-                runLater { completion(true) }
+                runLater { completion(true, repo) }
                 loadLog()
             } else {
                 val result = it.repoModifier.initializeRepo(bare = false)
-                runLater { completion(!result.isError) }
+                runLater { completion(!result.isError, repo) }
+            }
+        }
+    }
+
+    fun push() {
+        littleGitCoreController.doNext {
+            it.repoReader.getBranches().data?.find { it.isHead }?.let { currentBranch ->
+                it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
             }
         }
     }
@@ -126,7 +182,10 @@ class RepoController: Controller(), InitableController {
             }
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                it.repoModifier.commit("Commit message")
+                val result = it.repoModifier.commit("Commit message")
+                if (!result.isError) {
+                    push()
+                }
             }
 
             runLater{ callback() }
