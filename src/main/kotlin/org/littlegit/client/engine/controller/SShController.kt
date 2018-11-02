@@ -12,6 +12,9 @@ import tornadofx.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
+import java.util.*
 
 
 class SShController: Controller() {
@@ -53,9 +56,13 @@ class SShController: Controller() {
 
         Files.createDirectories(sshPath)
         val kpair = KeyPair.genKeyPair(jsch, KeyPair.RSA)
+
         kpair.writePrivateKey(privatePath.canonicalPath)
         kpair.writePublicKey(publicKey.canonicalPath, "SSHCerts")
         kpair.dispose()
+
+
+        Files.setPosixFilePermissions(privatePath.toPath(), EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE))
     }
 
     private fun getPublicKeyPath(sshPath: Path) = sshPath.resolve("id_rsa.pub").normalize().toFile()
