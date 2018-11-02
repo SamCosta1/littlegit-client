@@ -11,6 +11,7 @@ import tornadofx.*
 import com.sun.corba.se.spi.presentation.rmi.StubAdapter.request
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.littlegit.client.engine.api.RepoApi
 import java.io.IOException
 
 
@@ -19,6 +20,7 @@ class ApiController: Controller() {
 
     val authApi: AuthApi
     val userApi: UserApi
+    val repoApi: RepoApi
     private val moshiProvider: MoshiProvider by inject()
     lateinit var authController: AuthController
 
@@ -28,6 +30,7 @@ class ApiController: Controller() {
 
         authApi = retrofit.create(AuthApi::class.java)
         userApi = authorizedRetrofit.create(UserApi::class.java)
+        repoApi = authorizedRetrofit.create(RepoApi::class.java)
     }
 
     private fun buildAuthorizedRetrofit(): Retrofit

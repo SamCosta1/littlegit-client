@@ -85,7 +85,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     override fun handle(event: ScrollEvent) {
         val newScrollY = scrollY + event.deltaY
-        println()
         // Prevent users scrolling higher up and out of sight of the graph or down below the graph
 
         val lowerBoundary = canvasPane.height - lastYPos - 2* gridSize
