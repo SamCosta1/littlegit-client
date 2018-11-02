@@ -154,6 +154,14 @@ class RepoController: Controller(), InitableController {
         }
     }
 
+    fun push() {
+        littleGitCoreController.doNext {
+            it.repoReader.getBranches().data?.find { it.isHead }?.let { currentBranch ->
+                it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
+            }
+        }
+    }
+
     fun stageAllAndCommit(callback: () -> Unit) {
         littleGitCoreController.doNext {
             val unstagedChanges = it.repoReader.getUnStagedChanges().data
@@ -174,7 +182,10 @@ class RepoController: Controller(), InitableController {
             }
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                it.repoModifier.commit("Commit message")
+                val result = it.repoModifier.commit("Commit message")
+                if (!result.isError) {
+                    push()
+                }
             }
 
             runLater{ callback() }
