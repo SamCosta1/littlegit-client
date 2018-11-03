@@ -1,24 +1,36 @@
 package org.littlegit.client.db
 
-import org.awaitility.kotlin.await
 import org.junit.Test
 import org.littlegit.client.engine.db.AuthDb
 import org.littlegit.client.engine.model.AuthTokens
-import java.time.LocalDateTime
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.system.measureTimeMillis
-import kotlin.test.assertFalse
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class AuthDbTests: BaseDbTests<AuthDb>(AuthDb::class) {
 
 
     @Test
     fun testGetUpdateClearAuthTokens() = runTest { completion ->
+        val tokens = AuthTokens("accessToken", "refreshToken")
 
-        db.updateTokens(AuthTokens("ERg,","ERG")) {
-            assertFalse(true)
-            completion.invoke()
+        db.clearTokens()
+
+        // Insert the tokens
+        db.updateTokens(tokens) {
+
+            // Retrieve them
+            db.getTokens {  retrievedTokens ->
+                assertEquals(tokens, retrievedTokens)
+
+                // Clear them
+                db.clearTokens()
+
+                // Ensure they're cleared
+                db.getTokens {
+                    assertNull(it)
+                    completion.invoke()
+                }
+            }
         }
     }
 }
