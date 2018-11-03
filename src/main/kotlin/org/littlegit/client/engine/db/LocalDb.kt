@@ -3,6 +3,7 @@ package org.littlegit.client.engine.db
 import com.squareup.moshi.Moshi
 import org.littlegit.client.engine.serialization.MoshiProvider
 import org.littlegit.client.engine.serialization.listAdapter
+import org.littlegit.client.engine.util.SimpleCallback
 import org.mapdb.DB
 import org.mapdb.DBMaker
 import org.mapdb.Serializer
@@ -72,13 +73,14 @@ open class LocalDb: Controller() {
         }
     }
 
-    fun clear(key: String) {
+    fun clear(key: String, completion: SimpleCallback<Unit>? = null) {
         runAsync {
             synchronized(dbAccessor) {
                 dbAccessor.getDb().use { db ->
                     db.map.use {
                         it.remove(key)
                         db.commit()
+                        completion?.invoke(Unit)
                     }
                 }
             }
@@ -99,10 +101,10 @@ open class LocalDb: Controller() {
         completion(it)
     }
 
-    fun <T>writeAsync(key: String, obj: T, clazz: Class<T>, completion: (() -> Unit)? = null) = runAsync {
+    fun <T>writeAsync(key: String, obj: T, clazz: Class<T>, completion: SimpleCallback<Unit>? = null) = runAsync {
         write(key, obj, clazz)
     } ui {
-        completion?.invoke()
+        completion?.invoke(Unit)
     }
 
     fun <T>readListAsync(key: String, clazz: Class<T>, completion: (List<T>?) -> Unit) = runAsync {
@@ -111,10 +113,10 @@ open class LocalDb: Controller() {
         completion(it)
     }
 
-    fun <T>writeListAsync(key: String, obj: List<T>, clazz: Class<T>, completion: (() -> Unit)? = null) = runAsync {
+    fun <T>writeListAsync(key: String, obj: List<T>, clazz: Class<T>, completion: SimpleCallback<Unit>? = null) = runAsync {
         writeList(key, obj, clazz)
     } ui {
-        completion?.invoke()
+        completion?.invoke(Unit)
     }
 }
 

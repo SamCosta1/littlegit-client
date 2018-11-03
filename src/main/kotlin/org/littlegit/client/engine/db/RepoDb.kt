@@ -1,6 +1,7 @@
 package org.littlegit.client.engine.db
 
 import org.littlegit.client.engine.model.Repo
+import org.littlegit.client.engine.util.SimpleCallback
 import java.text.MessageFormat
 
 class RepoDb: LocalDb() {
@@ -21,24 +22,24 @@ class RepoDb: LocalDb() {
         }
     }
 
-    fun saveRepo(repo: Repo) {
+    fun saveRepo(repo: Repo, completion: SimpleCallback<Unit>? = null) {
         if (repos == null) {
             getAllRepos {
                 val newList = it?.toMutableList() ?: mutableListOf()
                 newList.add(repo)
-                updateRepos(newList)
+                updateRepos(newList, completion)
             }
         } else {
             val newList = repos?.toMutableList() ?: mutableListOf()
             newList.add(repo)
-            updateRepos(newList)
+            updateRepos(newList, completion)
         }
     }
 
-    fun updateRepos(allRepos: List<Repo>? = repos) {
+    fun updateRepos(allRepos: List<Repo>? = repos, completion: SimpleCallback<Unit>? = null) {
         allRepos?.let {
             repos = allRepos
-            writeListAsync(REPOS_KEY, allRepos, Repo::class.java)
+            writeListAsync(REPOS_KEY, allRepos, Repo::class.java, completion)
         }
     }
 
@@ -48,18 +49,18 @@ class RepoDb: LocalDb() {
         }
     }
 
-    fun setCurrentRepoId(repoId: String) {
-        writeAsync(CURRENT_REPO_ID, repoId, String::class.java)
+    fun setCurrentRepoId(repoId: String, completion: SimpleCallback<Unit>? = null) {
+        writeAsync(CURRENT_REPO_ID, repoId, String::class.java, completion)
     }
 
-    fun updateRepo(repo: Repo) {
+    fun updateRepo(repo: Repo, completion: SimpleCallback<Unit>? = null) {
         getAllRepos { repos ->
             val mutableList = repos?.toMutableList()
             val index = mutableList?.indexOfFirst { it.localId == repo.localId }
 
             if (index != null) {
                 mutableList[index] = repo
-                updateRepos(mutableList)
+                updateRepos(mutableList, completion)
             }
         }
     }

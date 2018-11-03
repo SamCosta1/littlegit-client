@@ -8,7 +8,6 @@ import kotlin.test.assertNull
 
 class AuthDbTests: BaseDbTests<AuthDb>(AuthDb::class) {
 
-
     @Test
     fun testGetUpdateClearAuthTokens() = runTest { completion ->
         val tokens = AuthTokens("accessToken", "refreshToken")
@@ -23,12 +22,13 @@ class AuthDbTests: BaseDbTests<AuthDb>(AuthDb::class) {
                 assertEquals(tokens, retrievedTokens)
 
                 // Clear them
-                db.clearTokens()
+                db.clearTokens {
 
-                // Ensure they're cleared
-                db.getTokens {
-                    assertNull(it)
-                    completion.invoke()
+                    // Ensure they're cleared
+                    db.getTokens {
+                        assertNull(it)
+                        completion.invoke()
+                    }
                 }
             }
         }
