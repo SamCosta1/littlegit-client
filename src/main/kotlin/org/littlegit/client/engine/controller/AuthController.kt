@@ -6,19 +6,19 @@ import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.*
 import tornadofx.*
 
-class AuthController : Controller(), InitableController {
+class AuthController : Controller(), InitableController, AuthTokensProvider {
 
     var isLoggedIn: Boolean = false; get() = authTokens != null
 
-    private val authApi: AuthApi = find(ApiController::class.java).authApi
+    private val apiController: ApiController by inject()
+    private val authApi: AuthApi; get() = apiController.authApi
     private val userController: UserController by inject()
     private val localizer: Localizer by inject()
 
-    var authTokens: AuthTokens? = null; private set
+    override var authTokens: AuthTokens? = null; private set
     private val authDb: AuthDb by inject()
 
     override fun onStart(onReady: (InitableController) -> Unit) {
-        find(ApiController::class.java).authController = this
         authDb.getTokens {
             authTokens = it
             onReady(this)
@@ -50,7 +50,7 @@ class AuthController : Controller(), InitableController {
         }
     }
 
-    fun refreshToken(): ApiResponse<RefreshResponse>? {
+    override fun refreshToken(): ApiResponse<RefreshResponse>? {
         authTokens?.let { tokens ->
             val it = authApi.refreshToken(RefreshRequest(tokens.refreshToken, userController.currentUser!!.id)).executeSync()
             if (it.isSuccess && it.body != null) {

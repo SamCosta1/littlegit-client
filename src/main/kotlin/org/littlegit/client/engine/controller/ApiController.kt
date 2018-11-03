@@ -11,18 +11,20 @@ import tornadofx.*
 import com.sun.corba.se.spi.presentation.rmi.StubAdapter.request
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.littlegit.client.engine.api.ApiResponse
 import org.littlegit.client.engine.api.RepoApi
+import org.littlegit.client.engine.model.AuthTokens
+import org.littlegit.client.engine.model.RefreshResponse
 import java.io.IOException
 
-
-
 class ApiController: Controller() {
+
 
     val authApi: AuthApi
     val userApi: UserApi
     val repoApi: RepoApi
     private val moshiProvider: MoshiProvider by inject()
-    lateinit var authController: AuthController
+    private val authController: AuthController by inject()
 
     init {
         val retrofit = buildLittlGitRetrofit()
@@ -43,37 +45,7 @@ class ApiController: Controller() {
     private fun buildClient(): OkHttpClient {
 
         return OkHttpClient.Builder()
-                .addInterceptor(Interceptor { chain ->
-                    val tokens = authController.authTokens
-
-                    if (tokens == null || tokens.accessToken.isEmpty()) {
-                        return@Interceptor chain.proceed(chain.request())
-                    }
-
-                    val authorisedRequest = chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer ${tokens.accessToken}").build()
-
-                    val result = chain.proceed(authorisedRequest)
-
-                    if (result.code() == 401) {
-                        val refreshResponse = authController.refreshToken()
-
-                        if (refreshResponse?.isSuccess == true && refreshResponse.body?.accessToken != null) {
-                            val refreshedRequest = chain
-                                    .request()
-                                    .newBuilder()
-                                    .addHeader("Authorization", "Bearer ${refreshResponse.body.accessToken}")
-                                    .build()
-
-                            chain.proceed(refreshedRequest)
-                        } else {
-                            result
-                        }
-                    } else {
-                        result
-                    }
-
-                }).build()
+                .addInterceptor(AuthInterceptor(authController)).build()
     }
 
     private fun buildLittlGitRetrofit(): Retrofit
@@ -83,4 +55,49 @@ class ApiController: Controller() {
                 .build()
 
 
+}
+
+interface AuthTokensProvider {
+    val authTokens: AuthTokens?
+
+    fun refreshToken(): ApiResponse<RefreshResponse>? { return null }
+}
+
+class AuthInterceptor(private val tokensProvider: AuthTokensProvider): Interceptor {
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val tokens = tokensProvider.authTokens
+
+        if (tokens == null || tokens.accessToken.isEmpty()) {
+            return chain.proceed(chain.request())
+        }
+
+        val authorisedRequest = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer ${tokens.accessToken}").build()
+
+        val result = chain.proceed(authorisedRequest)
+
+        return if (result.code() == 401) {
+
+            val refreshResponse = tokensProvider.refreshToken()
+            refreshIfPossible(refreshResponse, chain, result)
+
+        } else {
+            result
+        }
+    }
+
+    private fun refreshIfPossible(refreshResponse: ApiResponse<RefreshResponse>?, chain: Interceptor.Chain, result: Response): Response {
+        return if (refreshResponse?.isSuccess == true && refreshResponse.body?.accessToken != null) {
+            val refreshedRequest = chain
+                    .request()
+                    .newBuilder()
+                    .addHeader("Authorization", "Bearer ${refreshResponse.body.accessToken}")
+                    .build()
+
+            chain.proceed(refreshedRequest)
+        } else {
+            result
+        }
+    }
 }

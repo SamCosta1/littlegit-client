@@ -1,4 +1,4 @@
-package org.littlegit.client
+package org.littlegit.client.db
 
 import org.junit.Before
 import org.junit.Rule
@@ -11,7 +11,6 @@ import tornadofx.*
 import java.nio.file.Paths
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class LocalDbTests {
 

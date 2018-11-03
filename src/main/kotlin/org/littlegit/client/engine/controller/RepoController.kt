@@ -24,7 +24,10 @@ class RepoController: Controller(), InitableController {
     }
 
     private val littleGitCoreController: LittleGitCoreController by inject()
-    private val repoApi: RepoApi = find(ApiController::class).repoApi
+
+    private val apiController: ApiController by inject()
+    private val repoApi: RepoApi; get() = apiController.repoApi
+
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
     private var currentRepo: Repo? = null; set(newValue) {
