@@ -73,22 +73,28 @@ class AuthInterceptorTests {
     @Test
     fun testRefreshRequired_IsSuccessful() {
         val tokens = AuthTokens("accessToken", "refreshToken")
+        val refreshResponse = RefreshResponse("new-access-token", "Bearer", 10)
         val tokensProvider = mock(AuthTokensProvider::class.java)
 
         val firstResponse = buildResponse(401)
-        val tokensProviderSpy = spy(tokensProvider)
         val captor = ArgumentCaptor.forClass(Request::class.java)
 
         upon(tokensProvider.authTokens).thenReturn(tokens)
-        upon(tokensProvider.refreshToken()).thenReturn(ApiResponse.success(RefreshResponse("new-access-token", "Bearer", 10)))
+        upon(tokensProvider.refreshToken()).thenReturn(ApiResponse.success(refreshResponse))
         upon(mockChain.proceed(captor.capture())).thenReturn(firstResponse)
 
         val interceptor = AuthInterceptor(tokensProvider)
         interceptor.intercept(mockChain)
 
-        assertNotNull(captor.value.header("Authorization"))
-        assertEquals(captor.value.header("Authorization"), "Bearer ${tokens.accessToken}")
-        verify(tokensProviderSpy, times(1)).refreshToken()
+        // The original auth tokens should have been added to first request
+        assertNotNull(captor.allValues.first().header("Authorization"))
+        assertEquals(captor.allValues.first().header("Authorization"), "Bearer ${tokens.accessToken}")
+
+        // New authtokens should have been added to the second
+        assertNotNull(captor.allValues.last().header("Authorization"))
+        assertEquals(captor.allValues.last().header("Authorization"), "Bearer ${refreshResponse.accessToken}")
+
+        verify(tokensProvider, times(1)).refreshToken()
     }
 
 
