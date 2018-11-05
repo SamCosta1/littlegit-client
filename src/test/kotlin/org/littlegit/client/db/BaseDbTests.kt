@@ -1,5 +1,7 @@
 package org.littlegit.client.db
 
+import javafx.application.Application
+import javafx.application.Platform
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -18,10 +20,11 @@ open class BaseDbTests<T : LocalDb>(private val clazz: KClass<T>): BaseAsyncTest
     @JvmField var testFolder = TemporaryFolder()
 
     @Before
-    fun setup() {
+    override fun setup() {
         scope = Scope()
         scope.set(LocalDbAccessor(Paths.get(testFolder.root.canonicalPath, "temp.txt")))
         db = find(clazz, scope)
-        com.sun.javafx.application.PlatformImpl.startup { }
+
+        super.setup()
     }
 }

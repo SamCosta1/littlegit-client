@@ -10,6 +10,7 @@ class AuthDbTests: BaseDbTests<AuthDb>(AuthDb::class) {
 
     @Test
     fun testGetUpdateClearAuthTokens() = runTest { completion ->
+
         val tokens = AuthTokens("accessToken", "refreshToken")
 
         db.clearTokens()

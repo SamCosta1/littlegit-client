@@ -80,7 +80,10 @@ open class LocalDb: Controller() {
                     db.map.use {
                         it.remove(key)
                         db.commit()
-                        completion?.invoke(Unit)
+
+                        runLater {
+                            completion?.invoke(Unit)
+                        }
                     }
                 }
             }
@@ -96,27 +99,23 @@ open class LocalDb: Controller() {
     }
 
     fun <T>readAsync(key: String, clazz: Class<T>, completion: (T?) -> Unit) = runAsync {
-        read(key, clazz)
-    } ui {
-        completion(it)
+        val result = read(key, clazz)
+        runLater { completion(result) }
     }
 
     fun <T>writeAsync(key: String, obj: T, clazz: Class<T>, completion: SimpleCallback<Unit>? = null) = runAsync {
         write(key, obj, clazz)
-    } ui {
-        completion?.invoke(Unit)
+        runLater { completion?.invoke(Unit) }
     }
 
     fun <T>readListAsync(key: String, clazz: Class<T>, completion: (List<T>?) -> Unit) = runAsync {
-        readList(key, clazz)
-    } ui {
-        completion(it)
+        val result = readList(key, clazz)
+        runLater { completion(result) }
     }
 
     fun <T>writeListAsync(key: String, obj: List<T>, clazz: Class<T>, completion: SimpleCallback<Unit>? = null) = runAsync {
         writeList(key, obj, clazz)
-    } ui {
-        completion?.invoke(Unit)
+        runLater{ completion?.invoke(Unit) }
     }
 }
 

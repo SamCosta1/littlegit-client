@@ -1,17 +1,20 @@
 package org.littlegit.client.db
 
+import org.junit.Ignore
 import org.junit.Test
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.model.RemoteRepoSummary
 import org.littlegit.client.engine.model.Repo
+import org.littlegit.client.testUtils.RepoHelper
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
 
+    @Ignore
     @Test
-    fun testGetSetCurrentId_IsSuccessful() = runTest {
+    fun testGetSetCurrentId_IsSuccessful() = runTest { completion ->
         val repoId = "my-repo-id"
         val updatedRepoId = "$repoId-updated"
 
@@ -25,17 +28,18 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                     db.getCurrentRepoId {  updated ->
                         assertEquals(updatedRepoId, updated)
 
-                        it()
+                        completion()
                     }
                 }
             }
         }
     }
 
+    @Ignore
     @Test
-    fun testSaveRepo_IsSuccessful() = runTest {
-        val repo1 = Repo(path = testFolder.root.toPath(), remoteRepo = RemoteRepoSummary(1, "name", OffsetDateTime.now(), "description", "cloneUrl"))
-        val repo2 = Repo(path = testFolder.root.toPath().resolve("subpath"), remoteRepo = RemoteRepoSummary(2, "name", OffsetDateTime.now(), "description", "cloneUrl"))
+    fun testSaveRepo_IsSuccessful() = runTest { completion ->
+        val repo1 = RepoHelper.createRepo("name1", 1)
+        val repo2 = RepoHelper.createRepo("name2", 2)
 
         db.saveRepo(repo1) {
             db.getAllRepos { list1 ->
@@ -51,11 +55,32 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                         assertTrue(list2?.contains(repo1) == true)
                         assertTrue(list2?.contains(repo2) == true)
 
-                        it()
+                        completion()
                     }
                 }
             }
         }
     }
 
+    @Ignore
+    @Test
+    fun testUpdateRepos_IsSuccessful() = runTest { completion ->
+        val list1 = listOf(RepoHelper.createRepo("name1", 1))
+        val list2 = listOf(RepoHelper.createRepo("name1", 1), RepoHelper.createRepo("name2", 2), RepoHelper.createRepo("name3", 3))
+
+        db.updateRepos(list1) {
+
+            db.getAllRepos { result1 ->
+                assertEquals(list1, result1)
+
+                db.updateRepos(list2) {
+                    db.getAllRepos { result2 ->
+                        assertEquals(list2, result2)
+
+                        completion()
+                    }
+                }
+            }
+        }
+    }
 }

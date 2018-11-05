@@ -33,10 +33,12 @@ class Localizer: Controller(), InitableController {
 
     override fun onStart(onReady: (InitableController) -> Unit) {
         runAsync {
-            getTranslations(defaultLanguage)
-        } ui {
-            defaultLanguageTranslations = it
-            onReady(this)
+            val result = getTranslations(defaultLanguage)
+
+            runLater {
+                defaultLanguageTranslations = result
+                onReady(this@Localizer)
+            }
         }
     }
 
@@ -50,9 +52,11 @@ class Localizer: Controller(), InitableController {
         runAsync {
             translations = getTranslations(language)
             currentLanguage = language
-        } ui {
-            languageChangeListeners.forEach { it.invoke(language) }
-            completion?.invoke()
+
+            runLater {
+                languageChangeListeners.forEach { it.invoke(language) }
+                completion?.invoke()
+            }
         }
     }
 
