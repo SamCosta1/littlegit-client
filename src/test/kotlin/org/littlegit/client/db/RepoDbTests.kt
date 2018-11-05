@@ -1,10 +1,7 @@
 package org.littlegit.client.db
 
-import org.junit.Ignore
 import org.junit.Test
 import org.littlegit.client.engine.db.RepoDb
-import org.littlegit.client.engine.model.RemoteRepoSummary
-import org.littlegit.client.engine.model.Repo
 import org.littlegit.client.testUtils.RepoHelper
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
@@ -12,7 +9,6 @@ import kotlin.test.assertTrue
 
 class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
 
-    @Ignore
     @Test
     fun testGetSetCurrentId_IsSuccessful() = runTest { completion ->
         val repoId = "my-repo-id"
@@ -35,7 +31,6 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
         }
     }
 
-    @Ignore
     @Test
     fun testSaveRepo_IsSuccessful() = runTest { completion ->
         val repo1 = RepoHelper.createRepo("name1", 1)
@@ -62,7 +57,6 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
         }
     }
 
-    @Ignore
     @Test
     fun testUpdateRepos_IsSuccessful() = runTest { completion ->
         val list1 = listOf(RepoHelper.createRepo("name1", 1))
@@ -80,6 +74,32 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                         completion()
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    fun testUpdateRepo_IsSuccessful() = runTest { completion ->
+
+        val repo = RepoHelper.createRepo("repoName", 10)
+
+        db.saveRepo(repo) {
+
+            db.getAllRepos { list1 ->
+                assertEquals(1, list1?.size)
+                assertEquals(repo, list1?.first())
+
+                repo.lastAccessedDate = OffsetDateTime.now().plusDays(5)
+//
+//                db.updateRepo(repo) {
+//                    db.getAllRepos { list2 ->
+//                        assertEquals(1, list2?.size)
+//                        assertEquals(repo, list2?.first())
+//
+//                        completion()
+//                    }
+//                }
+                completion()
             }
         }
     }
