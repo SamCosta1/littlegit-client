@@ -25,14 +25,8 @@ class RepoDb: LocalDb() {
     }
 
     fun saveRepo(repo: Repo, completion: SimpleCallback<Unit>? = null) {
-        if (repos == null) {
-            getAllRepos {
-                val newList = it?.toMutableList() ?: mutableListOf()
-                newList.add(repo)
-                updateRepos(newList, completion)
-            }
-        } else {
-            val newList = repos?.toMutableList() ?: mutableListOf()
+        getAllRepos {
+            val newList = it?.toMutableList() ?: mutableListOf()
             newList.add(repo)
             updateRepos(newList, completion)
         }
