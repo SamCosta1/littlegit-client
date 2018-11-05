@@ -66,6 +66,11 @@ class RepoDb: LocalDb() {
             }
         }
     }
+
+    // Mainly for testing
+    fun clearCache() {
+        repos = null
+    }
 }
 
 fun String.inject(vararg params: Any) = MessageFormat.format(this, *params)!!

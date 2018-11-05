@@ -90,15 +90,42 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                 assertEquals(repo, list1?.first())
 
                 repo.lastAccessedDate = OffsetDateTime.now().plusDays(5)
-//
-//                db.updateRepo(repo) {
-//                    db.getAllRepos { list2 ->
-//                        assertEquals(1, list2?.size)
-//                        assertEquals(repo, list2?.first())
-//
-//                        completion()
-//                    }
-//                }
+
+                db.updateRepo(repo) {
+                    db.getAllRepos { list2 ->
+                        assertEquals(1, list2?.size)
+                        assertEquals(repo, list2?.first())
+
+                        completion()
+                    }
+                }
+                completion()
+            }
+        }
+    }
+
+    @Test
+    fun testUpdateRepo_WithoutCache_IsSuccessful() = runTest { completion ->
+
+        val repo = RepoHelper.createRepo("repoName", 10)
+
+        db.saveRepo(repo) {
+            db.clearCache()
+            db.getAllRepos { list1 ->
+                assertEquals(1, list1?.size)
+                assertEquals(repo, list1?.first())
+
+                repo.lastAccessedDate = OffsetDateTime.now().plusDays(5)
+
+                db.updateRepo(repo) {
+                    db.clearCache()
+                    db.getAllRepos { list2 ->
+                        assertEquals(1, list2?.size)
+                        assertEquals(repo, list2?.first())
+
+                        completion()
+                    }
+                }
                 completion()
             }
         }
