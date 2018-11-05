@@ -21,10 +21,10 @@ open class BaseDbTests<T : LocalDb>(private val clazz: KClass<T>): BaseAsyncTest
 
     @Before
     override fun setup() {
-        val scope = Scope()
-        scope.set(LocalDbAccessor(Paths.get(testFolder.root.canonicalPath, "temp.txt")))
-        db = find(clazz, scope)
-
         super.setup()
+
+        addToScope(LocalDbAccessor(Paths.get(testFolder.root.canonicalPath, "temp.txt")), LocalDbAccessor::class)
+        db = findInTestScope(clazz)
+
     }
 }

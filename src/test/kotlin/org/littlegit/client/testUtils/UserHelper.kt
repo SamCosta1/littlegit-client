@@ -5,5 +5,5 @@ import org.littlegit.client.engine.model.User
 
 object UserHelper {
 
-    fun createUser(id: Int, firstName: String = "Ned", surname: String = "Stark") = User(id, "$firstName@$surname.com".trim(), firstName, surname, 0, Language.English.code, firstName)
+    fun createUser(id: Int = 10, firstName: String = "Ned", surname: String = "Stark") = User(id, "$firstName@$surname.com".trim(), firstName, surname, 0, Language.English.code, firstName)
 }

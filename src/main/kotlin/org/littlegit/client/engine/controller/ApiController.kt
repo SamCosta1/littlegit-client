@@ -17,12 +17,11 @@ import org.littlegit.client.engine.model.AuthTokens
 import org.littlegit.client.engine.model.RefreshResponse
 import java.io.IOException
 
-class ApiController: Controller() {
+open class ApiController: Controller() {
 
-
-    val authApi: AuthApi
-    val userApi: UserApi
-    val repoApi: RepoApi
+    open val authApi: AuthApi
+    open val userApi: UserApi
+    open val repoApi: RepoApi
     private val moshiProvider: MoshiProvider by inject()
     private val authController: AuthController by inject()
 
