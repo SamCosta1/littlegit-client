@@ -1,6 +1,5 @@
 package org.littlegit.client.db
 
-import org.junit.Ignore
 import org.junit.Test
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.testUtils.RepoHelper
@@ -32,7 +31,6 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
         }
     }
 
-    @Ignore
     @Test
     fun testSaveRepo_IsSuccessful() = runTest { completion ->
         val repo1 = RepoHelper.createRepo("name1", 1)
@@ -65,11 +63,12 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
         val list2 = listOf(RepoHelper.createRepo("name1", 1), RepoHelper.createRepo("name2", 2), RepoHelper.createRepo("name3", 3))
 
         db.updateRepos(list1) {
-
             db.getAllRepos { result1 ->
+
                 assertEquals(list1, result1)
 
                 db.updateRepos(list2) {
+
                     db.getAllRepos { result2 ->
                         assertEquals(list2, result2)
 
@@ -78,6 +77,7 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                 }
             }
         }
+
     }
 
     @Test
@@ -101,7 +101,6 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                         completion()
                     }
                 }
-                completion()
             }
         }
     }
@@ -128,7 +127,6 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
                         completion()
                     }
                 }
-                completion()
             }
         }
     }
