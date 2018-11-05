@@ -1,5 +1,6 @@
 package org.littlegit.client.db
 
+import org.junit.Ignore
 import org.junit.Test
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.testUtils.RepoHelper
@@ -31,6 +32,7 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
         }
     }
 
+    @Ignore
     @Test
     fun testSaveRepo_IsSuccessful() = runTest { completion ->
         val repo1 = RepoHelper.createRepo("name1", 1)
