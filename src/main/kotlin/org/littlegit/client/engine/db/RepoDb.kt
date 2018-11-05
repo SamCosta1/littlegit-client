@@ -15,7 +15,9 @@ class RepoDb: LocalDb() {
     fun getAllRepos(completion: (List<Repo>?) -> Unit) {
         if (repos != null) {
             completion(repos)
+            return
         }
+
         readListAsync(REPOS_KEY, Repo::class.java) {
             repos = it
             completion(it)

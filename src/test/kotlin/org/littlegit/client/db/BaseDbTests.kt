@@ -13,7 +13,7 @@ import java.nio.file.Paths
 import kotlin.reflect.KClass
 
 open class BaseDbTests<T : LocalDb>(private val clazz: KClass<T>): BaseAsyncTest() {
-    private lateinit var scope: Scope
+
     lateinit var db: T; private set
 
     @Rule
@@ -21,7 +21,7 @@ open class BaseDbTests<T : LocalDb>(private val clazz: KClass<T>): BaseAsyncTest
 
     @Before
     override fun setup() {
-        scope = Scope()
+        val scope = Scope()
         scope.set(LocalDbAccessor(Paths.get(testFolder.root.canonicalPath, "temp.txt")))
         db = find(clazz, scope)
 
