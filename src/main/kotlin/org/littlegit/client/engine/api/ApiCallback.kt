@@ -22,9 +22,8 @@ private fun parseError(response: Response<*>): CallFailure.ApiError? {
 
 fun <T>Call<T>.enqueue(completion: ApiCallCompletion<T>) {
     runAsync {
-        executeSync()
-    } ui {
-        completion(it)
+       val result = executeSync()
+       runLater { completion(result) }
     }
 }
 

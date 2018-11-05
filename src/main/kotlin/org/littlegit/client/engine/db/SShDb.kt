@@ -1,5 +1,6 @@
 package org.littlegit.client.engine.db
 
+import org.littlegit.client.engine.util.SimpleCallback
 import java.nio.file.Path
 
 class SShDb: LocalDb() {
@@ -9,15 +10,24 @@ class SShDb: LocalDb() {
         private const val DB_KEY = "ssh_key_path"
     }
 
-    fun setSshKeyPath(path: Path) {
+    fun setSshKeyPath(path: Path, completion: SimpleCallback<Unit>? = null) {
         sshKeyPath = path
-        writeAsync(DB_KEY, path, Path::class.java)
+        writeAsync(DB_KEY, path, Path::class.java, completion)
     }
 
     fun getSshKeyPath(completion: (Path?) -> Unit) {
+        if (sshKeyPath != null) {
+            completion(sshKeyPath)
+            return
+        }
+
         readAsync(DB_KEY, Path::class.java) {
             sshKeyPath = it
             completion(it)
         }
+    }
+
+    fun clearCache() {
+        sshKeyPath = null
     }
 }

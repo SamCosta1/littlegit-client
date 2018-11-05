@@ -1,4 +1,4 @@
-package org.littlegit.client
+package org.littlegit.client.db
 
 import org.junit.Before
 import org.junit.Rule
@@ -11,21 +11,10 @@ import tornadofx.*
 import java.nio.file.Paths
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
-class LocalDbTests {
+class LocalDbTests: BaseDbTests<LocalDb>(LocalDb::class) {
 
-    private lateinit var localDb: LocalDb
-
-    @Rule
-    @JvmField var testFolder = TemporaryFolder()
-
-    @Before
-    fun setup() {
-        val scope = Scope()
-        scope.set(LocalDbAccessor(Paths.get(testFolder.root.canonicalPath, "temp.txt")))
-        localDb = find(scope)
-    }
+    private val localDb: LocalDb; get() = db
 
     @Test
     fun testWriteObject() {
