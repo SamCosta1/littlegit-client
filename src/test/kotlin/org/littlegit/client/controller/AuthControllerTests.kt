@@ -109,4 +109,22 @@ class AuthControllerTests: BaseControllerTest() {
             completion()
         }
     }
+
+    @Test
+    fun testLogin_WhenValidCredentials_IsSuccessful() = runTest { completion ->
+        val loginResponse = LoginResponse("accessToken", "refreshToken", "Bearer", UserHelper.createUser())
+
+        upon(loginCall.execute()).thenReturn(Response.success(loginResponse))
+        upon(authDb.updateTokens(anyOf(AuthTokens::class), any())).thenReturn(runAsync {  })
+
+        val email = "rob@stark.com"
+        val password = "W1nterfell!"
+        authController.login(email, password) { response ->
+            assertTrue(response.isSuccess)
+            assertEquals(loginResponse, response.body)
+            verify(authDb, times(1)).updateTokens(anyOf(AuthTokens::class), any())
+            verify(authApi, times(1)).login(anyOf(LoginRequest::class))
+            completion()
+        }
+    }
 }
