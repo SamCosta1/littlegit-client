@@ -7,7 +7,6 @@ import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.db.AuthDb
 import org.littlegit.client.engine.model.*
 import org.littlegit.client.testUtils.*
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import retrofit2.Call
 import retrofit2.Response
@@ -60,6 +59,8 @@ class AuthControllerTests: BaseControllerTest() {
             assertTrue(response.isSuccess)
             assertEquals(loginResponse, response.body)
             verify(authDb, times(1)).updateTokens(anyOf(AuthTokens::class), any())
+            verify(authApi, times(1)).signup(anyOf(SignupRequest::class))
+            verify(authApi, times(1)).login(anyOf(LoginRequest::class))
             completion()
         }
     }
@@ -80,6 +81,31 @@ class AuthControllerTests: BaseControllerTest() {
             assertEquals(1, errorBody.localisedMessage.size)
             assertEquals(error.localisedMessage.first(), errorBody.localisedMessage.first())
 
+            verify(authApi, times(1)).signup(anyOf(SignupRequest::class))
+            verify(authApi, times(0)).login(anyOf(LoginRequest::class))
+
+            completion()
+        }
+    }
+
+    @Test
+    fun testSignup_WhenDuplicateUserName_TriesAgainWithNewUserName() = runTest { completion ->
+        val loginResponse = LoginResponse("accessToken", "refreshToken", "Bearer", UserHelper.createUser())
+        val initialError = ErrorResponse("Bad Request", listOf(I18nKey.UsernameInUse))
+
+        val initialErrResponse = Response.error<Unit>(400, serializeErrorResponse(initialError))
+        upon(signupCall.execute()).thenReturn(initialErrResponse, Response.success(Unit))
+        upon(loginCall.execute()).thenReturn(Response.success(loginResponse))
+        upon(authDb.updateTokens(anyOf(AuthTokens::class), any())).thenReturn(runAsync {  })
+
+        val email = "rob@stark.com"
+        val password = "W1nterfell!"
+        authController.signup(email, password, "YoungWolf") { response ->
+            assertTrue(response.isSuccess)
+            assertEquals(loginResponse, response.body)
+            verify(authDb, times(1)).updateTokens(anyOf(AuthTokens::class), any())
+            verify(authApi, times(2)).signup(anyOf(SignupRequest::class))
+            verify(authApi, times(1)).login(anyOf(LoginRequest::class))
             completion()
         }
     }
