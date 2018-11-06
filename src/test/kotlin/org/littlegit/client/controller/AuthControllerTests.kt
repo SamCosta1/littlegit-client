@@ -127,4 +127,26 @@ class AuthControllerTests: BaseControllerTest() {
             completion()
         }
     }
+
+    @Test
+    fun testLogin_WhenInValidCredentials_GivesError() = runTest { completion ->
+        val error = ErrorResponse("Unauthorized")
+
+        upon(loginCall.execute()).thenReturn(Response.error<Unit>(401, serializeErrorResponse(error)))
+
+        val email = "rob@stark.com"
+        val password = "W1nterfell!"
+        authController.login(email, password) { response ->
+            assertFalse(response.isSuccess)
+
+            val errorBody = response.errorBody
+            assertTrue(errorBody is CallFailure.ApiError); errorBody as CallFailure.ApiError
+            assertEquals(error.rawMessage, errorBody.rawMessage)
+
+            verify(authDb, times(0)).updateTokens(anyOf(AuthTokens::class), any())
+            verify(authApi, times(1)).login(anyOf(LoginRequest::class))
+
+            completion()
+        }
+    }
 }
