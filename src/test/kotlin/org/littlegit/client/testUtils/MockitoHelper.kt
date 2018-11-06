@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 
 fun <T>upon(call: T): OngoingStubbing<T> = Mockito.`when`(call)
 
-fun <T: Any>any(clazz: KClass<T>): T {
+fun <T: Any>anyOf(clazz: KClass<T>): T {
     ArgumentMatchers.any<T>()
     return clazz.java.newInstance()
 }

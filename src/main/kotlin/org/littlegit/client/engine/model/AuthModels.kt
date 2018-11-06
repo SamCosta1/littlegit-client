@@ -41,7 +41,7 @@ data class SignupRequest (
         val username: String = ""
 )
 
-data class AuthTokens(val accessToken: String, val refreshToken: String)
+data class AuthTokens(val accessToken: String = "", val refreshToken: String = "")
 
 interface AuthResponse {
     val accessToken: String
