@@ -1,8 +1,10 @@
 package org.littlegit.client.testUtils
 
+import com.squareup.moshi.Moshi
 import org.awaitility.kotlin.await
 import org.junit.Before
 import org.littlegit.client.engine.db.LocalDbAccessor
+import org.littlegit.client.engine.serialization.MoshiProvider
 import tornadofx.*
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
@@ -10,7 +12,7 @@ import kotlin.reflect.KClass
 
 abstract class BaseAsyncTest {
 
-     lateinit var scope: Scope
+    lateinit var scope: Scope
 
     @Before
     open fun setup() {
