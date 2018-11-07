@@ -29,15 +29,16 @@ class SShController: Controller() {
         }
     }
 
-    fun generateAndAddSshKey( completion: ApiCallCompletion<Void>) {
+    fun generateAndAddSshKey(path: Path? = null, completion: ApiCallCompletion<Void>) {
 
         runAsync {
 
-            val sshPath = if (defaultSshKeysExist()) {
-                Paths.get(System.getProperty("user.dir"), ".ssh")
-            } else {
-                Paths.get(System.getProperty("user.home"), ".ssh")
+            val sshPath = when {
+                path != null -> path
+                defaultSshKeysExist() -> Paths.get(System.getProperty("user.dir"), ".ssh")
+                else -> Paths.get(System.getProperty("user.home"), ".ssh")
             }
+
 
             generateAndWrite(sshPath)
 
@@ -73,6 +74,6 @@ class SShController: Controller() {
     // However, this will mess up if they're using an old version of git since the command to specify ssh key locations via the
     // config doesn't exist, but there's not much we can do about that
     private fun defaultSshKeysExist(): Boolean {
-        return true//Paths.get(System.getProperty("user.home"), "ssh", "id_rsa").toFile().exists()
+        return Paths.get(System.getProperty("user.home"), "ssh", "id_rsa").toFile().exists()
     }
 }

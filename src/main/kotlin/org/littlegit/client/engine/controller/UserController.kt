@@ -5,9 +5,9 @@ import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.User
 import tornadofx.*
 
-class UserController: Controller(), InitableController {
+open class UserController: Controller(), InitableController {
 
-    var currentUser: User? = null; private set
+    open var currentUser: User? = null;
 
     private val userDb: UserDb by inject()
     private val localizer: Localizer by inject()
