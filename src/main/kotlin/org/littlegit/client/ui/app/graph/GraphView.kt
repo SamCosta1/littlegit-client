@@ -22,6 +22,9 @@ import kotlin.math.floor
 
 class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
+    companion object {
+        private val ScrollYKey = "${GraphView::class.simpleName}_scroll_y"
+    }
     private val branchColours = with(this) {
         val rand = Random()
         val initial = mutableListOf(Color.RED, Color.GREEN, Color.BROWN, Color.TEAL, Color.CRIMSON)
@@ -34,7 +37,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private val gridSize = 40
     private val commitWidth = 20.0
-    private var scrollY = 0.0
+    private var scrollY = 0.0; set(value) {
+        field = value
+        stateStore.add(ScrollYKey, value)
+    }
     private lateinit var canvasPane: CanvasPane
     private var graph: GitGraph? = null
     private var lastYPos = 1.0
@@ -45,14 +51,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         canvasPane = CanvasPane(500.0, 500.0)
         canvasPane.addOnResizeListener(this@GraphView::drawGraph)
         addChildIfPossible(canvasPane)
+
+        restoreState()
         repoController.logObservable.addListener(ListChangeListener {
-            runAsync {
-                GitGraph(repoController.currentLog)
-            } ui {
-                graph = it
-                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
-                drawGraph(canvasPane.canvas.graphicsContext2D)
-            }
+            scrollY = 0.0
+            reGenerateGraph()
         })
 
 
@@ -60,9 +63,17 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             handle(it)
         })
 
+        reGenerateGraph()
+    }
 
-        drawGraph(canvasPane.canvas.graphicsContext2D, canvasPane.canvas)
-
+    private fun reGenerateGraph() {
+        runAsync {
+            GitGraph(repoController.currentLog)
+        } ui {
+            graph = it
+            lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
+            drawGraph(canvasPane.canvas.graphicsContext2D)
+        }
     }
 
     // Pretty much only used for debugging
@@ -90,7 +101,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val lowerBoundary = canvasPane.height - lastYPos - 2* gridSize
 
         scrollY = when {
-            newScrollY > 0 -> 0.0
+            newScrollY > 0 || lastYPos < canvasPane.height -> 0.0
             newScrollY < lowerBoundary -> lowerBoundary
             else -> newScrollY
         }
@@ -208,5 +219,9 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     fun drawCoordsText(gc: GraphicsContext, point: Point2D) {
         gc.strokeText("(${point.x}, ${point.y}", point.x, point.y)
+    }
+
+    fun restoreState() {
+        scrollY = stateStore.get(ScrollYKey) ?: 0.0
     }
 }
