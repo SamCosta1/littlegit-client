@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
+import org.littlegit.client.UnauthorizedEvent
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.model.I18nKey
@@ -66,8 +67,7 @@ class MainView : BaseView(fullScreen = true) {
             stackpane {
                 alignment = Pos.CENTER_RIGHT
                 button(localizer.observable(I18nKey.Logout)).action {
-                    authController.logout()
-                    replaceWith(ChooseLanguageView::class)
+                    logout()
                 }
             }
 
@@ -80,6 +80,11 @@ class MainView : BaseView(fullScreen = true) {
             }
 
         }
+    }
+
+    private fun logout() {
+        authController.logout()
+        replaceWith(ChooseLanguageView::class)
     }
 
     override fun onDock() {
@@ -95,6 +100,12 @@ class MainView : BaseView(fullScreen = true) {
             }
         }
 
+    }
+
+    init {
+        subscribe<UnauthorizedEvent> {
+            logout()
+        }
     }
 
 }
