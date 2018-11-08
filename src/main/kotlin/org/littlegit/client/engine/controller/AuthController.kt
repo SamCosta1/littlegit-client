@@ -6,7 +6,7 @@ import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.*
 import tornadofx.*
 
-class AuthController : Controller(), InitableController, AuthTokensProvider {
+open class AuthController : Controller(), InitableController, AuthTokensProvider {
 
     var isLoggedIn: Boolean = false; get() = authTokens != null
 
@@ -15,7 +15,7 @@ class AuthController : Controller(), InitableController, AuthTokensProvider {
     private val userController: UserController by inject()
     private val localizer: Localizer by inject()
 
-    override var authTokens: AuthTokens? = null; private set
+    override var authTokens: AuthTokens? = null
     private val authDb: AuthDb by inject()
 
     override fun onStart(onReady: (InitableController) -> Unit) {
@@ -35,6 +35,8 @@ class AuthController : Controller(), InitableController, AuthTokensProvider {
                 signup(email, password, name, completion)
             } else if (it.isSuccess) {
                 login(email, password, completion)
+            } else {
+                completion(it.convert())
             }
         }
     }

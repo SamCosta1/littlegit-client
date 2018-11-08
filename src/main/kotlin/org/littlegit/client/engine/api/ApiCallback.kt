@@ -1,6 +1,7 @@
 package org.littlegit.client.engine.api
 
 import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.engine.model.LoginResponse
 import org.littlegit.client.engine.serialization.MoshiProvider
 import retrofit2.Call
 import retrofit2.Response
@@ -46,6 +47,15 @@ fun <T>Call<T>.executeSync(): ApiResponse<T> {
 
 
 data class ApiResponse<T>(val isSuccess: Boolean, val body: T?, val errorBody: CallFailure?) {
+
+    fun <S>convert(): ApiResponse<S> {
+        if (this.isSuccess) {
+            throw IllegalArgumentException("Can only convert error responses")
+        }
+
+        return ApiResponse(false, null, this.errorBody)
+    }
+
     companion object {
         fun <T> failure(throwable: Throwable?): ApiResponse<T> = ApiResponse(false, null, CallFailure.ApiFailure(throwable))
         fun <T> success(body: T?): ApiResponse<T> = ApiResponse(true, body, null)
@@ -53,7 +63,8 @@ data class ApiResponse<T>(val isSuccess: Boolean, val body: T?, val errorBody: C
     }
 }
 
-private data class ErrorResponse(val rawMessage: String = "", val localisedMessage: List<I18nKey> = emptyList(), val notes: List<String> = emptyList())
+data class ErrorResponse(val rawMessage: String = "", val localisedMessage: List<I18nKey> = emptyList(), val notes: List<String> = emptyList())
+
 sealed class CallFailure {
     data class ApiError(val errorCode: Int, val rawMessage: String, val localisedMessage: List<I18nKey>, val notes: List<String>): CallFailure()
     data class ApiFailure(val throwable: Throwable?): CallFailure()

@@ -1,6 +1,6 @@
 package org.littlegit.client.engine.model
 
-data class LoginRequest(val email: String, val password: String)
+data class LoginRequest(val email: String = "", val password: String = "")
 
 data class LoginResponse (
         override val accessToken: String,
@@ -33,15 +33,15 @@ data class RefreshResponse (
 ) : AuthResponse
 
 data class SignupRequest (
-        val email: String,
-        val password: String,
-        val firstName: String,
-        val surname: String,
-        val languageCode: String,
-        val username: String
+        val email: String = "",
+        val password: String = "",
+        val firstName: String = "",
+        val surname: String = "",
+        val languageCode: String = "",
+        val username: String = ""
 )
 
-data class AuthTokens(val accessToken: String, val refreshToken: String)
+data class AuthTokens(val accessToken: String = "", val refreshToken: String = "")
 
 interface AuthResponse {
     val accessToken: String
