@@ -26,7 +26,7 @@ open class UserController: Controller(), InitableController {
         }
     }
 
-    fun updateUserCache(user: User) {
+    open fun updateUserCache(user: User) {
         currentUser = user
         userDb.saveUser(user)
         localizer.updateLanguage(user.language)
