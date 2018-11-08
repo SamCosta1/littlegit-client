@@ -16,6 +16,10 @@ class StartupController: Controller() {
     private var numFinished = AtomicInteger(0)
 
     fun onStartup(onSetupComplete: () -> Unit) {
+
+        // Find it so it starts watching the network
+        find(NetworkController::class)
+
         controllers.forEach {
 
             it.onStart{
