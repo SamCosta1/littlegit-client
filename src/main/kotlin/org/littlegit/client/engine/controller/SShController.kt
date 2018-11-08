@@ -7,6 +7,8 @@ import org.littlegit.client.engine.api.enqueue
 import org.littlegit.client.engine.db.SShDb
 import org.littlegit.client.engine.model.SshKeyRequest
 import org.littlegit.client.engine.util.SimpleCallback
+import org.littlegit.core.util.OSType
+import org.littlegit.core.util.OperatingSystemUtils
 import org.littlegit.core.util.joinWithSpace
 import tornadofx.*
 import java.nio.file.Files
@@ -60,10 +62,11 @@ class SShController: Controller() {
 
         kpair.writePrivateKey(privatePath.canonicalPath)
         kpair.writePublicKey(publicKey.canonicalPath, "SSHCerts")
-        kpair.dispose()
+        kpair.dispose() 
 
-
-        Files.setPosixFilePermissions(privatePath.toPath(), EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE))
+        if (OperatingSystemUtils.osType != OSType.Windows) {
+            Files.setPosixFilePermissions(privatePath.toPath(), EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE))
+        }
     }
 
     private fun getPublicKeyPath(sshPath: Path) = sshPath.resolve("id_rsa.pub").normalize().toFile()
