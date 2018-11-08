@@ -16,9 +16,11 @@ import org.littlegit.client.testUtils.UserHelper
 import org.littlegit.client.testUtils.anyOf
 import org.littlegit.client.testUtils.upon
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
+import org.mockito.Mockito.*
 import retrofit2.Call
+import retrofit2.Response
 import tornadofx.*
+import kotlin.test.assertTrue
 
 class SshControllerTests: BaseControllerTest() {
 
@@ -55,7 +57,13 @@ class SshControllerTests: BaseControllerTest() {
     fun testGenerateSshKeys_IsSuccessful() = runTest { completion ->
         val sshController = SShController()
 
+        upon(signupCall.execute()).thenReturn(Response.success(Unit))
+
         sshController.generateAndAddSshKey(testFolder.root.toPath()) { response ->
+            assertTrue(response.isSuccess)
+            assertTrue(testFolder.root.toPath().resolve("id_rsa").toFile().exists())
+            assertTrue(testFolder.root.toPath().resolve("id_rsa.pub").toFile().exists())
+            verify(userApi, times(1)).addSshKey(anyOf(SshKeyRequest::class));
             completion()
         }
     }
