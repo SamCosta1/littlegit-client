@@ -8,14 +8,13 @@ import org.littlegit.client.env.EnvSwitcher
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import tornadofx.*
-import com.sun.corba.se.spi.presentation.rmi.StubAdapter.request
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.littlegit.client.UnauthorizedEvent
 import org.littlegit.client.engine.api.ApiResponse
 import org.littlegit.client.engine.api.RepoApi
 import org.littlegit.client.engine.model.AuthTokens
 import org.littlegit.client.engine.model.RefreshResponse
-import java.io.IOException
 
 open class ApiController: Controller() {
 
@@ -44,7 +43,7 @@ open class ApiController: Controller() {
     private fun buildClient(): OkHttpClient {
 
         return OkHttpClient.Builder()
-                .addInterceptor(AuthInterceptor(authController)).build()
+                .addInterceptor(AuthInterceptor(authController, this)).build()
     }
 
     private fun buildLittlGitRetrofit(): Retrofit
@@ -62,7 +61,7 @@ interface AuthTokensProvider {
     fun refreshToken(): ApiResponse<RefreshResponse>? { return null }
 }
 
-class AuthInterceptor(private val tokensProvider: AuthTokensProvider): Interceptor {
+class AuthInterceptor(private val tokensProvider: AuthTokensProvider, val fireable: Component? = null): Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val tokens = tokensProvider.authTokens
@@ -79,14 +78,21 @@ class AuthInterceptor(private val tokensProvider: AuthTokensProvider): Intercept
         return if (result.code() == 401) {
 
             val refreshResponse = tokensProvider.refreshToken()
-            refreshIfPossible(refreshResponse, chain, result)
+            val updatedResponse =  useRefreshedToken(refreshResponse, chain, result)
+
+            // Refresh token and access token have expired
+            if (updatedResponse.code() == 401) {
+                fireable?.fire(UnauthorizedEvent)
+            }
+
+            updatedResponse
 
         } else {
             result
         }
     }
 
-    private fun refreshIfPossible(refreshResponse: ApiResponse<RefreshResponse>?, chain: Interceptor.Chain, result: Response): Response {
+    private fun useRefreshedToken(refreshResponse: ApiResponse<RefreshResponse>?, chain: Interceptor.Chain, result: Response): Response {
         return if (refreshResponse?.isSuccess == true && refreshResponse.body?.accessToken != null) {
             val refreshedRequest = chain
                     .request()

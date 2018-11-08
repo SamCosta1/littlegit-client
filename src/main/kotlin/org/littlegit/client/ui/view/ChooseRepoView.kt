@@ -8,14 +8,19 @@ import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.control.Label
+import org.littlegit.client.UnauthorizedEvent
+import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.util.secondarylabel
+import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
+import org.littlegit.client.ui.view.startup.loginflow.LoginView
 import tornadofx.*
 
 class ChooseRepoView : BaseView() {
 
+    private val authController: AuthController by inject()
     private val repos: ObservableList<Repo> = mutableListOf<Repo>().observable()
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty() }
@@ -102,5 +107,16 @@ class ChooseRepoView : BaseView() {
             recentReposHeading.isVisible = repos.isNotEmpty()
         }
 
+    }
+
+    private fun logout() {
+        authController.logout()
+        replaceWith(LoginView::class)
+    }
+
+    init {
+        subscribe<UnauthorizedEvent> {
+            logout()
+        }
     }
 }
