@@ -3,23 +3,19 @@ package org.littlegit.client.controller
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.littlegit.client.engine.api.AuthApi
 import org.littlegit.client.engine.api.UserApi
 import org.littlegit.client.engine.controller.ApiController
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.controller.UserController
-import org.littlegit.client.engine.db.AuthDb
 import org.littlegit.client.engine.db.SShDb
-import org.littlegit.client.engine.model.*
+import org.littlegit.client.engine.model.SshKeyRequest
 import org.littlegit.client.testUtils.UserHelper
 import org.littlegit.client.testUtils.anyOf
 import org.littlegit.client.testUtils.upon
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 import retrofit2.Call
 import retrofit2.Response
-import tornadofx.*
 import kotlin.test.assertTrue
 
 class SshControllerTests: BaseControllerTest() {

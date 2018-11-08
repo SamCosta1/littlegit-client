@@ -4,6 +4,7 @@ import org.junit.Test
 import org.littlegit.client.engine.api.*
 import org.littlegit.client.engine.controller.ApiController
 import org.littlegit.client.engine.controller.AuthController
+import org.littlegit.client.engine.controller.UserController
 import org.littlegit.client.engine.db.AuthDb
 import org.littlegit.client.engine.model.*
 import org.littlegit.client.testUtils.*
@@ -24,11 +25,13 @@ class AuthControllerTests: BaseControllerTest() {
     private lateinit var signupCall: Call<*>
     private lateinit var loginCall: Call<*>
     private lateinit var apiController: ApiController
+    private lateinit var userController: UserController
 
     override fun setup() {
         super.setup()
 
         apiController = mock(ApiController::class.java)
+        userController = mock(UserController::class.java)
         authApi = mock(AuthApi::class.java)
         authDb = mock(AuthDb::class.java)
         signupCall = mock(Call::class.java)
@@ -36,6 +39,7 @@ class AuthControllerTests: BaseControllerTest() {
 
         upon(apiController.authApi).thenReturn(authApi)
 
+        addToScope(userController, UserController::class)
         addToScope(apiController, ApiController::class)
         addToScope(authDb, AuthDb::class)
         authController = findInTestScope(AuthController::class)
@@ -47,7 +51,8 @@ class AuthControllerTests: BaseControllerTest() {
     @Test
     fun testSignup_WhenDetailsCorrect_DoesLoginAndGivesSuccess() = runTest { completion ->
 
-        val loginResponse = LoginResponse("accessToken", "refreshToken", "Bearer", UserHelper.createUser())
+        val user = UserHelper.createUser()
+        val loginResponse = LoginResponse("accessToken", "refreshToken", "Bearer", user)
 
         upon(signupCall.execute()).thenReturn(Response.success(Unit))
         upon(loginCall.execute()).thenReturn(Response.success(loginResponse))
@@ -61,6 +66,7 @@ class AuthControllerTests: BaseControllerTest() {
             verify(authDb, times(1)).updateTokens(anyOf(AuthTokens::class), any())
             verify(authApi, times(1)).signup(anyOf(SignupRequest::class))
             verify(authApi, times(1)).login(anyOf(LoginRequest::class))
+            verify(userController, times(1)).updateUserCache(user)
             completion()
         }
     }
@@ -83,7 +89,6 @@ class AuthControllerTests: BaseControllerTest() {
 
             verify(authApi, times(1)).signup(anyOf(SignupRequest::class))
             verify(authApi, times(0)).login(anyOf(LoginRequest::class))
-
             completion()
         }
     }
