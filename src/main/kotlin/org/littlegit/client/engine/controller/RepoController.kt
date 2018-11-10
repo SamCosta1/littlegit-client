@@ -1,18 +1,17 @@
 package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
 import javafx.collections.ObservableList
 import org.littlegit.client.engine.api.ApiCallCompletion
 import org.littlegit.client.engine.api.CallFailure
 import org.littlegit.client.engine.api.RepoApi
 import org.littlegit.client.engine.api.enqueue
 import org.littlegit.client.engine.db.RepoDb
-import org.littlegit.client.engine.model.CreateRepoRequest
-import org.littlegit.client.engine.model.I18nKey
-import org.littlegit.client.engine.model.RemoteRepoSummary
-import org.littlegit.client.engine.model.Repo
+import org.littlegit.client.engine.model.*
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
+import sun.nio.ch.Net
 import tornadofx.*
 import java.io.File
 import java.time.OffsetDateTime
@@ -24,9 +23,10 @@ class RepoController: Controller(), InitableController {
     }
 
     private val littleGitCoreController: LittleGitCoreController by inject()
-
+    private val sshController: SShController by inject()
     private val apiController: ApiController by inject()
     private val repoApi: RepoApi; get() = apiController.repoApi
+    private val networkController: NetworkController by inject()
 
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
@@ -55,6 +55,7 @@ class RepoController: Controller(), InitableController {
         loadLog()
     }
 
+
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
             repoDb.getAllRepos {
@@ -66,6 +67,10 @@ class RepoController: Controller(), InitableController {
                 onReady(this)
             }
         }
+
+        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, newValue ->
+           // TODO: Update the repo wrt remote
+        })
     }
 
     fun getCurrentRepo(completion: (Repo?) -> Unit) {
@@ -146,12 +151,17 @@ class RepoController: Controller(), InitableController {
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo
 
-        littleGitCoreController.doNext {
-            if (it.repoReader.isInitialized().data == true) {
+        littleGitCoreController.doNext { core ->
+
+            sshController.getPrivateKeyPath {
+                it?.let { core.configModifier.setSshKeyPath(it) }
+            }
+
+            if (core.repoReader.isInitialized().data == true) {
                 runLater { completion(true, repo) }
                 loadLog()
             } else {
-                val result = it.repoModifier.initializeRepo(bare = false)
+                val result = core.repoModifier.initializeRepo(bare = false)
                 runLater { completion(!result.isError, repo) }
             }
         }
@@ -160,7 +170,8 @@ class RepoController: Controller(), InitableController {
     fun push() {
         littleGitCoreController.doNext {
             it.repoReader.getBranches().data?.find { it.isHead }?.let { currentBranch ->
-                it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
+                val result = it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
+                println(result)
             }
         }
     }

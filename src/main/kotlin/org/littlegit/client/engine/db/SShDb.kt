@@ -15,7 +15,7 @@ open class SShDb: LocalDb() {
         writeAsync(DB_KEY, path, Path::class.java, completion)
     }
 
-    open fun getSshKeyPath(completion: (Path?) -> Unit) {
+    open fun getSshKeyPath(completion: SimpleCallback<Path?>) {
         if (sshKeyPath != null) {
             completion(sshKeyPath)
             return

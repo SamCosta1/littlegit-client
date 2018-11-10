@@ -31,6 +31,10 @@ class SShController: Controller() {
         }
     }
 
+    fun getSshKeyPath(completion: SimpleCallback<Path?>) {
+        sshDb.getSshKeyPath(completion)
+    }
+
     fun generateAndAddSshKey(path: Path? = null, completion: ApiCallCompletion<Void>) {
 
         runAsync {
@@ -44,7 +48,7 @@ class SShController: Controller() {
 
             generateAndWrite(sshPath)
 
-            val publicKeyString = getPublicKeyPath(sshPath).readLines().joinWithSpace()
+            val publicKeyString = getPublicKeyPath(sshPath).toFile().readLines().joinWithSpace()
             userApi.addSshKey(SshKeyRequest(publicKeyString, userController.currentUser?.id!!)).enqueue {
                 sshDb.setSshKeyPath(sshPath)
                 completion(it)
@@ -60,18 +64,27 @@ class SShController: Controller() {
         Files.createDirectories(sshPath)
         val kpair = KeyPair.genKeyPair(jsch, KeyPair.RSA)
 
-        kpair.writePrivateKey(privatePath.canonicalPath)
-        kpair.writePublicKey(publicKey.canonicalPath, "SSHCerts")
+        kpair.writePrivateKey(privatePath.toFile().canonicalPath)
+        kpair.writePublicKey(publicKey.toFile().canonicalPath, "SSHCerts")
         kpair.dispose() 
 
         if (OperatingSystemUtils.osType != OSType.Windows) {
-            Files.setPosixFilePermissions(privatePath.toPath(), EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE))
+            Files.setPosixFilePermissions(privatePath, EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE))
         }
     }
 
-    private fun getPublicKeyPath(sshPath: Path) = sshPath.resolve("id_rsa.pub").normalize().toFile()
-    private fun getPrivateKeyPath(sshPath: Path) = sshPath.resolve("id_rsa").normalize().toFile()
+    fun getPublicKeyPath(sshPath: Path) = sshPath.resolve("id_rsa.pub").normalize()
+    fun getPrivateKeyPath(sshPath: Path) = sshPath.resolve("id_rsa").normalize()
 
+    fun getPrivateKeyPath(completion: SimpleCallback<Path?>) {
+        getSshKeyPath { it ->
+            if (it != null) {
+                completion(getPrivateKeyPath(it))
+            } else {
+                completion(null)
+            }
+        }
+    }
 
     // Check if the user already uses the default ssh keys because if they do, we'll leave them alone and put ours elsewhere
     // However, this will mess up if they're using an old version of git since the command to specify ssh key locations via the
