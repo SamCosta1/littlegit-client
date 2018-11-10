@@ -18,7 +18,7 @@ import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
 import org.littlegit.client.ui.view.startup.loginflow.LoginView
 import tornadofx.*
 
-class ChooseRepoView : BaseView() {
+class ChooseRepoView : BaseView(fullScreen = false) {
 
     private val authController: AuthController by inject()
     private val repos: ObservableList<Repo> = mutableListOf<Repo>().observable()

@@ -10,6 +10,7 @@ import org.littlegit.client.engine.api.enqueue
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.model.*
 import org.littlegit.core.model.FileDiff
+import org.littlegit.core.model.LocalBranch
 import org.littlegit.core.model.RawCommit
 import sun.nio.ch.Net
 import tornadofx.*
@@ -68,11 +69,24 @@ class RepoController: Controller(), InitableController {
             }
         }
 
-        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, newValue ->
-           // TODO: Update the repo wrt remote
+        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, hasInternetAccess ->
+           if (hasInternetAccess) {
+//               fetch()
+           }
         })
     }
 
+    fun fetch() {
+        littleGitCoreController.doNext {
+            it.repoModifier.fetch(true)
+
+            val currentBranch = it.repoReader.getBranches().data?.find { it.isHead } as? LocalBranch?
+            if (currentBranch?.upstream != null
+                            && currentBranch.commitHash != currentBranch.upstream?.commitHash) {
+                it.repoModifier.merge(currentBranch.upstream!!)
+            }
+        }
+    }
     fun getCurrentRepo(completion: (Repo?) -> Unit) {
         if (currentRepo != null) {
             completion(currentRepo)

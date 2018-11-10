@@ -11,7 +11,7 @@ import java.net.UnknownHostException
 
 class NetworkController: Controller() {
 
-    val networkAvailability: SimpleBooleanProperty = SimpleBooleanProperty(true)
+    val networkAvailability: SimpleBooleanProperty = SimpleBooleanProperty(false)
 
     private val timer = Timer()
     init {
