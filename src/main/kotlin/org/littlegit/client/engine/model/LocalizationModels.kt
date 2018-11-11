@@ -56,7 +56,11 @@ enum class I18nKey(val key: String) {
     UnknownError("unknown_error"),
     RecentRepos("recent_repos"),
     QuickCommit("quick_commit"),
+    UpdateAvailable("update_available"),
+    UpdateToLatest("update_to_latest"),
+    AutoCommitMessage("auto_commit_message"),
     Unknown("-");
+
 
 
     companion object {
