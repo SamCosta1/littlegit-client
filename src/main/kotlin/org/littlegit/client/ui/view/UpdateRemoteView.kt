@@ -1,14 +1,19 @@
 package org.littlegit.client.ui.view
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Parent
 import javafx.scene.control.Label
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.ThemeColors
 import tornadofx.*
+import tornadofx.Stylesheet.Companion.listView
 
 class UpdateRemoteView: BaseView() {
 
     private lateinit var label: Label
+    private val viewModel = ViewModel()
+    private val solvingConflicts = viewModel.bind { SimpleBooleanProperty(false) }
+
     override val root = vbox {
         maxWidth = 100.0
         maxHeight = 100.0
@@ -25,9 +30,18 @@ class UpdateRemoteView: BaseView() {
                         repoController.currentlyUpdating = false
                         repoController.push()
                         close()
+                    } else {
+                        currentStage?.isMaximized = true
+                        solvingConflicts.value = true
                     }
-                   label.text = if (it.data?.hasConflicts == false) "No Conflicts yey!" else  it.data?.conflictFiles.toString()
                 }
+            }
+        }
+
+        hbox {
+            visibleWhen(solvingConflicts)
+            vbox {
+
             }
         }
     }

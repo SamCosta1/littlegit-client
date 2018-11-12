@@ -10,6 +10,7 @@ import javafx.scene.input.ScrollEvent
 import javafx.scene.input.SwipeEvent
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import org.littlegit.client.ui.app.ThemeColors
 import org.littlegit.client.ui.util.strokeLine
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
@@ -114,11 +115,26 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
 
         gc.lineWidth = 2.5
+
+        highlightHeadCommitRow(graph, gc)
         graph.connections.forEach {
             drawConnection(gc, it)
         }
 
         drawCommitBlobs(graph, gc)
+    }
+
+    private fun highlightHeadCommitRow(graph: GitGraph, gc: GraphicsContext) {
+        val headCommit = graph.commitLocations.firstOrNull { it.commit.isHead } ?: return
+        val position = gridCenterPoint(headCommit.location)
+        if (isInView(position)) {
+
+            val oldFill = gc.fill
+            gc.fill = ThemeColors.LightPrimary
+            gc.fillRect(0.0, position.y - gridSize / 2, canvasPane.width, gridSize.toDouble())
+            gc.fill = oldFill
+
+        }
     }
 
     private fun drawCommitBlobs(graph: GitGraph, gc: GraphicsContext) {
@@ -191,9 +207,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
-        gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
 
         val oldStroke = gc.stroke
+        gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+
         gc.stroke = branchColours[commitLocation.location.x % branchColours.size]
         gc.strokeOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
         gc.stroke = oldStroke

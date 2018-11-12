@@ -48,6 +48,7 @@ class RepoController: Controller(), InitableController {
         }
     }
 
+
     val hasCurrentRepo: Boolean; get() = currentRepoId != null
     val currentRepoNameObservable: SimpleStringProperty = SimpleStringProperty(currentRepo?.path?.fileName.toString())
 
@@ -59,7 +60,7 @@ class RepoController: Controller(), InitableController {
 
     init {
         littleGitCoreController.addListener(this::onCommandFinished)
-        timer.schedule(300, 700) {
+        timer.schedule(300, 2000) {
             updateRepoIfNeeded()
         }
     }
