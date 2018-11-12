@@ -2,6 +2,7 @@ package org.littlegit.client.ui.view
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
+import javafx.scene.control.TextArea
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import org.littlegit.client.UnauthorizedEvent
@@ -21,6 +22,8 @@ class MainView : BaseView(fullScreen = true) {
     private val graphView: GraphView by inject()
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty(false) }
+
+    private lateinit var textArea: TextArea
 
     override val root = hbox {
         vbox {
@@ -71,10 +74,14 @@ class MainView : BaseView(fullScreen = true) {
                 }
             }
 
+            textArea = textarea()
+
             button(localizer.observable(I18nKey.CommitAll)).action {
                 disableWhen(isLoading)
                 isLoading.value = true
-                repoController.stageAllAndCommit {
+
+                repoController.stageAllAndCommit(textArea.text) {
+                    textArea.text = ""
                     isLoading.value = false
                 }
             }

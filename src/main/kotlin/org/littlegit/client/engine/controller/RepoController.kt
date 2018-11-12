@@ -1,7 +1,6 @@
 package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ChangeListener
 import javafx.collections.ObservableList
 import org.littlegit.client.engine.api.ApiCallCompletion
 import org.littlegit.client.engine.api.CallFailure
@@ -11,7 +10,6 @@ import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.model.*
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
-import sun.nio.ch.Net
 import tornadofx.*
 import java.io.File
 import java.time.OffsetDateTime
@@ -176,7 +174,7 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    fun stageAllAndCommit(callback: () -> Unit) {
+    fun stageAllAndCommit(message: String, callback: () -> Unit) {
         littleGitCoreController.doNext {
             val unstagedChanges = it.repoReader.getUnStagedChanges().data
             unstagedChanges?.unTrackedFiles?.forEach { file ->
@@ -196,7 +194,7 @@ class RepoController: Controller(), InitableController {
             }
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                val result = it.repoModifier.commit("Commit message")
+                val result = it.repoModifier.commit(message)
                 if (!result.isError) {
                     push()
                 }
