@@ -1,18 +1,34 @@
 package org.littlegit.client.ui.view
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.scene.Parent
 import javafx.scene.control.Label
+import org.littlegit.client.ConflictsResolvedEvent
+import org.littlegit.client.ResolveConflictView
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.ThemeColors
 import tornadofx.*
-import tornadofx.Stylesheet.Companion.listView
 
 class UpdateRemoteView: BaseView() {
 
     private lateinit var label: Label
     private val viewModel = ViewModel()
     private val solvingConflicts = viewModel.bind { SimpleBooleanProperty(false) }
+    private val conflictsView: ResolveConflictView by inject()
+
+    init {
+      subscribe<ConflictsResolvedEvent> {
+          littleGitCoreController.doNext {
+
+              try {
+                  repoController.commitAndPush(it)
+                  runLater {
+                      repoController.currentlyUpdating = false
+                      close()
+                  }
+              } catch (e: Exception) {}
+          }
+      }
+    }
 
     override val root = vbox {
         maxWidth = 100.0
@@ -31,6 +47,7 @@ class UpdateRemoteView: BaseView() {
                         repoController.push()
                         close()
                     } else {
+                        conflictsView.conflicts = it.data
                         currentStage?.isMaximized = true
                         solvingConflicts.value = true
                     }
@@ -38,11 +55,9 @@ class UpdateRemoteView: BaseView() {
             }
         }
 
-        hbox {
+        vbox {
+            add(conflictsView.root)
             visibleWhen(solvingConflicts)
-            vbox {
-
-            }
         }
     }
 

@@ -10,12 +10,16 @@ import org.littlegit.client.engine.api.enqueue
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.*
+import org.littlegit.client.engine.util.LittleGitCommandCallback
 import org.littlegit.client.engine.util.SimpleCallback
 import org.littlegit.core.LittleGitCommandResult
 import org.littlegit.core.LittleGitCore
+import org.littlegit.core.commandrunner.GitResult
 import org.littlegit.core.model.*
 import tornadofx.*
 import java.io.File
+import java.nio.charset.Charset
+import java.nio.file.Files
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.concurrent.schedule
@@ -239,13 +243,17 @@ class RepoController: Controller(), InitableController {
             val unstagedChanges = stageAllChanges(it)
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                val result = it.repoModifier.commit("Commit message")
-                if (!result.isError) {
-                    push()
-                }
+                commitAndPush(it)
             }
 
             runLater{ callback() }
+        }
+    }
+
+    fun commitAndPush(it: LittleGitCore) {
+        val result = it.repoModifier.commit("Commit message")
+        if (!result.isError) {
+            push()
         }
     }
 
@@ -275,6 +283,20 @@ class RepoController: Controller(), InitableController {
             runLater {
                 currentLog = commits
             }
+        }
+    }
+
+    fun writeAndStage(file: LittleGitFile?, completion: LittleGitCommandCallback<Unit>) {
+        if (file == null) {
+            completion(LittleGitCommandResult(Unit, GitResult.Success(emptyList())))
+            return
+        }
+
+        littleGitCoreController.doNext {
+            Files.write(file.file.toPath(), file.content, Charset.forName("UTF-8"))
+
+            val stageResult = it.repoModifier.stageFile(file.file)
+            completion(stageResult)
         }
     }
 
