@@ -7,6 +7,7 @@ import javafx.scene.Cursor
 import javafx.scene.control.TextArea
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import javafx.stage.StageStyle
 import org.littlegit.client.UnauthorizedEvent
 import org.littlegit.client.UpdateAvailable
@@ -26,7 +27,6 @@ class MainView : BaseView(fullScreen = true) {
     private val sshController: SShController by inject()
 
     private val graphView: GraphView by inject()
-    private val updateFromRemoteView: UpdateRemoteView by inject()
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty(false) }
 
@@ -77,17 +77,27 @@ class MainView : BaseView(fullScreen = true) {
             vgrow = Priority.ALWAYS
 
             vbox {
-                textArea = textarea()
-                prefWidth = 300.0
+                textArea = textarea {
+                    promptText = localizer[I18nKey.CommitPromptText]
+                    style {
+                        backgroundColor += Color.TRANSPARENT
+                    }
+                }
+                prefWidth = 400.0
                 addClass(Styles.primaryBackground)
 
-                button(localizer.observable(I18nKey.CommitAll)).action {
+                spacing = 10.0
+                button(localizer.observable(I18nKey.CommitAll)){
+                    useMaxWidth = true
                     disableWhen(isLoading)
-                    isLoading.value = true
 
-                    repoController.stageAllAndCommit(textArea.text) {
-                        textArea.text = ""
-                        isLoading.value = false
+                    action {
+                        isLoading.value = true
+
+                        repoController.stageAllAndCommit(textArea.text) {
+                            textArea.text = ""
+                            isLoading.value = false
+                        }
                     }
                 }
 
@@ -109,38 +119,6 @@ class MainView : BaseView(fullScreen = true) {
         }
     }
 
-
-
-//            }
-//            vbox {
-//                prefWidth = 300.0
-//                addClass(Styles.primaryBackground)
-//
-//                style {
-//                    borderStyle += BorderStrokeStyle.SOLID
-//                    borderWidth += box(0.px, 0.px, 0.px, 2.px)
-//                    borderColor += box(ThemeColors.DarkPrimary1)
-//                }
-//
-//                stackpane {
-//                    alignment = Pos.CENTER_RIGHT
-//                    button(localizer.observable(I18nKey.Logout)).action {
-//                        logout()
-//                    }
-//                }
-//
-//                button(localizer.observable(I18nKey.CommitAll)).action {
-//                    disableWhen(isLoading)
-//                    isLoading.value = true
-//                    repoController.stageAllAndCommit("Message") {
-//                        isLoading.value = false
-//                    }
-//                }
-//
-//
-//        }
-//    }
-
     private fun logout() {
         authController.logout()
         replaceWith(ChooseLanguageView::class)
@@ -149,6 +127,7 @@ class MainView : BaseView(fullScreen = true) {
     override fun onDock() {
         super.onDock()
 
+        root.requestFocus()
         sshController.checkSshKeysExist { exist ->
             if (!exist) {
                 sshController.generateAndAddSshKey {
@@ -169,6 +148,10 @@ class MainView : BaseView(fullScreen = true) {
         subscribe<UpdateAvailable> {
             repoController.loadLog()
             find(UpdateRemoteView::class).openWindow(StageStyle.UTILITY)
+        }
+
+        localizer.addListener {
+            textArea.promptText = localizer[I18nKey.CommitPromptText]
         }
     }
 }

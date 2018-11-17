@@ -59,6 +59,7 @@ enum class I18nKey(val key: String) {
     UpdateAvailable("update_available"),
     UpdateToLatest("update_to_latest"),
     AutoCommitMessage("auto_commit_message"),
+    CommitPromptText("commit_prompt_text"),
     Unknown("-");
 
 

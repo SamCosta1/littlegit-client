@@ -1,5 +1,6 @@
 package org.littlegit.client.ui.app
 
+import javafx.scene.layout.Border
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
@@ -20,11 +21,11 @@ class Styles : Stylesheet() {
     init {
         primaryBackground {
             backgroundColor += ThemeColors.DarkPrimary2
-            padding = box(10.px)
+            padding = box(15.px)
         }
 
         primaryPadding {
-            padding = box(10.px)
+            padding = box(15.px)
         }
 
         label {
@@ -62,9 +63,14 @@ class Styles : Stylesheet() {
         }
 
         button {
-            backgroundColor += ThemeColors.Accent
-            textFill = ThemeColors.PrimaryText
-            backgroundRadius += box(50.px)
+            backgroundColor += Color.TRANSPARENT
+            textFill = ThemeColors.Accent
+            borderStyle += BorderStrokeStyle.SOLID
+            borderWidth += box(5.px)
+            borderColor += box(ThemeColors.Accent)
+            borderRadius += box(14.px)
+            fontSize = 17.px
+            fontWeight = FontWeight.BOLD
             padding = box(10.px)
         }
 
@@ -78,6 +84,17 @@ class Styles : Stylesheet() {
 
         secondaryLabel {
             textFill = ThemeColors.SecondaryText
+        }
+
+        textArea {
+            textFill = ThemeColors.PrimaryText
+            content {
+                backgroundColor += ThemeColors.LightPrimary
+                borderStyle += BorderStrokeStyle.SOLID
+                borderColor += box(ThemeColors.DarkPrimary1)
+                borderWidth += box(1.px)
+            }
+
         }
 
         cardView {
