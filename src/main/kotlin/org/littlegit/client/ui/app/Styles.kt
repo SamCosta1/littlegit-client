@@ -81,11 +81,13 @@ class Styles : Stylesheet() {
         }
 
         button and pressed {
-            backgroundColor += ThemeColors.DarkestAccent
+            borderColor += box(ThemeColors.DarkestAccent)
+            textFill = ThemeColors.DarkestAccent
         }
 
         button and hover {
-            backgroundColor += ThemeColors.DarkAccent
+            borderColor += box(ThemeColors.DarkestAccent)
+            textFill = ThemeColors.DarkestAccent
         }
 
         secondaryLabel {
