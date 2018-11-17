@@ -60,9 +60,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         })
 
 
-        canvasPane.addEventFilter(ScrollEvent.ANY, {
-            handle(it)
-        })
+        canvasPane.onScroll = this@GraphView
 
         reGenerateGraph()
     }
