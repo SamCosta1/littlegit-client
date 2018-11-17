@@ -245,15 +245,15 @@ class RepoController: Controller(), InitableController {
             val unstagedChanges = stageAllChanges(it)
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                commitAndPush(it)
+                commitAndPush(it, message)
             }
 
             runLater{ callback() }
         }
     }
 
-    fun commitAndPush(it: LittleGitCore) {
-        val result = it.repoModifier.commit("Commit message")
+    fun commitAndPush(it: LittleGitCore, message: String) {
+        val result = it.repoModifier.commit(message)
         if (!result.isError) {
             push()
         }

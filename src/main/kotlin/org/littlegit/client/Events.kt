@@ -7,3 +7,5 @@ object UnauthorizedEvent: FXEvent()
 object UpdateAvailable: FXEvent()
 
 object ConflictsResolvedEvent: FXEvent()
+
+class CreateCommitEvent(val message: String): FXEvent()

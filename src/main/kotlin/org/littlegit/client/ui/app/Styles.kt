@@ -16,6 +16,7 @@ class Styles : Stylesheet() {
         val selectableCardView by cssclass()
         val error by cssclass()
         val primaryPadding by cssclass()
+        val bulletText by cssclass()
     }
 
     init {
@@ -36,6 +37,11 @@ class Styles : Stylesheet() {
             fontSize = 25.px
             fontWeight = FontWeight.BOLD
             textFill = ThemeColors.Accent
+        }
+
+        bulletText {
+            textFill = ThemeColors.TertiaryText
+            fontSize = 15.px
         }
 
         label and subheading {
@@ -126,11 +132,12 @@ object ThemeColors {
     val Primary = c("#31628b")
     val DarkPrimary1 = c("#455A64")
     val DarkPrimary2 = c("#333D49")
-    val DarkPrimary3 = c("#232C35")
+    val DarkPrimary3 = c("#1e252c")
     val Accent = c("#b86414")
     val DarkAccent = c("#f25423")
     val DarkestAccent = c("#bb4722")
     val PrimaryText = c("#e2e2e2")
     val SecondaryText = c("#757575")
+    val TertiaryText = c(1.0,1.0,1.0,0.46)
     val Error = c("#771422")
 }

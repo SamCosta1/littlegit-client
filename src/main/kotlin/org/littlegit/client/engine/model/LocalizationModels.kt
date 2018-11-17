@@ -60,6 +60,14 @@ enum class I18nKey(val key: String) {
     UpdateToLatest("update_to_latest"),
     AutoCommitMessage("auto_commit_message"),
     CommitPromptText("commit_prompt_text"),
+    WhatsThis("whats_this"),
+    WeBackupChanges("backup_changes"),
+    SeeInHistory("see_in_history"),
+    WriteAMessage("write_message"),
+    YouChangedFiles("you_changed_files"),
+    YouAdded("you_added"),
+    YouDeleted("you_deleted"),
+    YouModified("you_modified"),
     Unknown("-");
 
 

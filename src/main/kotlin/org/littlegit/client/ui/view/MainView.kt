@@ -9,6 +9,7 @@ import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.stage.StageStyle
+import org.littlegit.client.CreateCommitEvent
 import org.littlegit.client.UnauthorizedEvent
 import org.littlegit.client.UpdateAvailable
 import org.littlegit.client.engine.controller.AuthController
@@ -30,7 +31,7 @@ class MainView : BaseView(fullScreen = true) {
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty(false) }
 
-    private lateinit var textArea: TextArea
+    private val commitView: CommitView by inject()
     override val root = vbox {
 
         style {
@@ -41,7 +42,7 @@ class MainView : BaseView(fullScreen = true) {
             style {
                 borderStyle += BorderStrokeStyle.SOLID
                 borderWidth += box(0.px, 0.px, 2.px, 0.px)
-                borderColor += box(ThemeColors.LightPrimary)
+                borderColor += box(ThemeColors.DarkPrimary1)
                 backgroundColor += ThemeColors.LightPrimary
                 cursor = Cursor.HAND
             }
@@ -77,32 +78,15 @@ class MainView : BaseView(fullScreen = true) {
             vgrow = Priority.ALWAYS
 
             vbox {
-                textArea = textarea {
-                    promptText = localizer[I18nKey.CommitPromptText]
-                    style {
-                        backgroundColor += Color.TRANSPARENT
-                    }
-                }
-                prefWidth = 400.0
-                addClass(Styles.primaryBackground)
 
-                spacing = 10.0
-                button(localizer.observable(I18nKey.CommitAll)){
-                    useMaxWidth = true
-                    disableWhen(isLoading)
-
-                    action {
-                        isLoading.value = true
-
-                        repoController.stageAllAndCommit(textArea.text) {
-                            textArea.text = ""
-                            isLoading.value = false
-                        }
-                    }
+                style {
+                    borderStyle += BorderStrokeStyle.SOLID
+                    borderWidth += box(0.px, 2.px, 0.px, 0.px)
+                    borderColor += box(ThemeColors.DarkPrimary1)
                 }
 
+                add(commitView.root)
             }
-
 
 
             // Graph
@@ -150,8 +134,13 @@ class MainView : BaseView(fullScreen = true) {
             find(UpdateRemoteView::class).openWindow(StageStyle.UTILITY)
         }
 
-        localizer.addListener {
-            textArea.promptText = localizer[I18nKey.CommitPromptText]
+        subscribe<CreateCommitEvent> { event ->
+            isLoading.value = true
+            repoController.stageAllAndCommit(event.message) {
+                isLoading.value = false
+                commitView.notifyCommitFinished()
+
+            }
         }
     }
 }
