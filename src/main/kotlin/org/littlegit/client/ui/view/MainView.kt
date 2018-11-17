@@ -157,6 +157,7 @@ class MainView : BaseView(fullScreen = true) {
         }
 
         subscribe<UpdateAvailable> {
+            repoController.loadLog()
             find(UpdateRemoteView::class).openWindow(StageStyle.UTILITY)
         }
     }

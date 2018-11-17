@@ -50,6 +50,7 @@
     <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.2.21" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.jetbrains.kotlin:kotlin-test:1.2.21" level="project" />
     <orderEntry type="library" name="Maven: org.littlegit.core:littlegit-core:0.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.littlegit.core:littlegit-core:0.3.0" level="project" />
     <orderEntry type="library" name="Maven: org.mapdb:mapdb:3.0.5" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.collections:eclipse-collections-api:7.1.2" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />

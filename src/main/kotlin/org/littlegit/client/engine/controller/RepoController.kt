@@ -102,7 +102,7 @@ class RepoController: Controller(), InitableController {
             return
         }
 
-        littleGitCoreController.doNext {
+        littleGitCoreController.doNext(false) {
             it.repoModifier.fetch(true)
 
             val currentBranch = getCurrentBranch(it)
