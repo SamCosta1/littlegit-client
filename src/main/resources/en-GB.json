@@ -294,5 +294,45 @@
         "term_plural": "",
         "reference": "",
         "comment": ""
+    },
+    {
+        "term": "quick_commit",
+        "definition": "Quick Commit",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "update_available",
+        "definition": "This version is out of date!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "update_to_latest",
+        "definition": "Update",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "auto_commit_message",
+        "definition": "Littlegit automatic commit",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "commit_prompt_text",
+        "definition": "Write something about the snapshot you're about to create",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
     }
 ]

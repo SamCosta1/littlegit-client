@@ -294,5 +294,45 @@
         "term_plural": "",
         "reference": "",
         "comment": ""
+    },
+    {
+        "term": "quick_commit",
+        "definition": "Comit cyflym",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "update_available",
+        "definition": "Mae versiwn mwy diweradd ar gael!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "update_to_latest",
+        "definition": "Diweraddu",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "auto_commit_message",
+        "definition": "Comit awtomatic can littlegit",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "commit_prompt_text",
+        "definition": "Ysgrifennwch rhywbeth am y ciplun rydych am ei greu",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
     }
 ]
