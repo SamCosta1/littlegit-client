@@ -60,6 +60,16 @@ class MainView : BaseView(fullScreen = true) {
             onMouseClicked = EventHandler {
                 replaceWith(ChooseRepoView::class)
             }
+
+            spacer {
+                hgrow = Priority.ALWAYS
+            }
+            imageView(Image.IcLogout) {
+                fitHeight = 25.0
+                isPreserveRatio = true
+            }
+
+
         }
 
         hbox {
