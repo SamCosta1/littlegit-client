@@ -36,8 +36,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         initial
     }
 
-    private val gridSize = 40
-    private val commitWidth = 20.0
+    private val gridSize = 60
+    private val commitWidth = 40.0
     private var scrollY = 0.0; set(value) {
         field = value
         stateStore.add(ScrollYKey, value)

@@ -9,7 +9,8 @@ import java.awt.geom.Point2D
 enum class Image(private val raw: String) {
     WelshFlag("lang_cy.png"),
     EnglishFlag("lang_en-gb.png"),
-    Logo("logo.png");
+    Logo("logo.png"),
+    IcOpenRepo("ic_open_repo.png");
 
     val path; get() = "images/$raw"
 }
