@@ -2,17 +2,29 @@ package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import org.littlegit.client.UpdateAvailable
 import org.littlegit.client.engine.api.ApiCallCompletion
 import org.littlegit.client.engine.api.CallFailure
 import org.littlegit.client.engine.api.RepoApi
 import org.littlegit.client.engine.api.enqueue
 import org.littlegit.client.engine.db.RepoDb
+import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.*
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
+import org.littlegit.client.engine.util.LittleGitCommandCallback
+import org.littlegit.client.engine.util.SimpleCallback
+import org.littlegit.core.LittleGitCommandResult
+import org.littlegit.core.LittleGitCore
+import org.littlegit.core.commandrunner.GitResult
+import org.littlegit.core.model.*
 import tornadofx.*
 import java.io.File
+import java.nio.charset.Charset
+import java.nio.file.Files
 import java.time.OffsetDateTime
+import java.util.*
+import kotlin.concurrent.schedule
 
 class RepoController: Controller(), InitableController {
 
@@ -25,9 +37,15 @@ class RepoController: Controller(), InitableController {
     private val apiController: ApiController by inject()
     private val repoApi: RepoApi; get() = apiController.repoApi
     private val networkController: NetworkController by inject()
+    private val localizer: Localizer by inject()
 
+    private val timer = Timer()
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
+
+    // Gets set to true by UI when it is in the process of updating the local to match the remote, used to stop the controller from notifying it that it needs to happen
+    var currentlyUpdating: Boolean = false;
+
     private var currentRepo: Repo? = null; set(newValue) {
         field = newValue
         newValue?.let {
@@ -35,6 +53,7 @@ class RepoController: Controller(), InitableController {
             currentRepoNameObservable.value = newValue.remoteRepo?.repoName ?: newValue.path.fileName.toString()
         }
     }
+
 
     val hasCurrentRepo: Boolean; get() = currentRepoId != null
     val currentRepoNameObservable: SimpleStringProperty = SimpleStringProperty(currentRepo?.path?.fileName.toString())
@@ -47,6 +66,9 @@ class RepoController: Controller(), InitableController {
 
     init {
         littleGitCoreController.addListener(this::onCommandFinished)
+        timer.schedule(300, 2000) {
+            updateRepoIfNeeded()
+        }
     }
 
     private fun onCommandFinished() {
@@ -66,9 +88,53 @@ class RepoController: Controller(), InitableController {
             }
         }
 
-        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, newValue ->
-           // TODO: Update the repo wrt remote
+        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, hasInternetAccess ->
+           if (hasInternetAccess) {
+               if (currentRepo != null) {
+                   updateRepoIfNeeded()
+               }
+           }
         })
+    }
+
+    private fun updateRepoIfNeeded() {
+        if (!networkController.isInternetAvailable() || currentRepo == null || currentlyUpdating) {
+            return
+        }
+
+        littleGitCoreController.doNext {
+            it.repoModifier.fetch(true)
+
+            val currentBranch = getCurrentBranch(it)
+
+            if (currentBranch?.upstream != null) {
+                val changesToRemote = it.repoReader.getLogBetween(currentBranch, currentBranch.upstream!!)
+                if (changesToRemote.data?.isEmpty() == false) {
+                    fire(UpdateAvailable)
+                }
+            }
+        }
+    }
+
+    private fun getCurrentBranch(it: LittleGitCore): LocalBranch? {
+        return it.repoReader.getBranches().data?.find { it.isHead } as? LocalBranch?
+    }
+
+    fun updateToLatestFetched(callback: SimpleCallback<LittleGitCommandResult<MergeResult>>) {
+        littleGitCoreController.doNext {
+            // First commit any unstaged changes since otherwise we'll be in a world of trouble
+
+            val unstagedChanges = stageAllChanges(it)
+            if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
+                it.repoModifier.commit(localizer[I18nKey.AutoCommitMessage])
+            }
+
+            getCurrentBranch(it)?.upstream?.let { upstream ->
+
+                val mergeResult = it.repoModifier.merge(upstream)
+                runLater { callback(mergeResult) }
+            }
+        }
     }
 
     fun getCurrentRepo(completion: (Repo?) -> Unit) {
@@ -176,32 +242,41 @@ class RepoController: Controller(), InitableController {
 
     fun stageAllAndCommit(message: String, callback: () -> Unit) {
         littleGitCoreController.doNext {
-            val unstagedChanges = it.repoReader.getUnStagedChanges().data
-            unstagedChanges?.unTrackedFiles?.forEach { file ->
-                val result = it.repoModifier.stageFile(file.file)
-                println(result)
-            }
-            unstagedChanges?.trackedFilesDiff?.fileDiffs?.forEach { fileDiff ->
-                when(fileDiff) {
-                    is FileDiff.ChangedFile -> fileDiff.filePath
-                    is FileDiff.DeletedFile -> fileDiff.filePath
-                    is FileDiff.RenamedFile -> fileDiff.newPath
-                    is FileDiff.NewFile -> fileDiff.filePath
-                    else -> null
-                } ?.let { path ->
-                    it.repoModifier.stageFile(path.toFile())
-                }
-            }
+            val unstagedChanges = stageAllChanges(it)
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                val result = it.repoModifier.commit(message)
-                if (!result.isError) {
-                    push()
-                }
+                commitAndPush(it)
             }
 
             runLater{ callback() }
         }
+    }
+
+    fun commitAndPush(it: LittleGitCore) {
+        val result = it.repoModifier.commit("Commit message")
+        if (!result.isError) {
+            push()
+        }
+    }
+
+    private fun stageAllChanges(it: LittleGitCore): UnstagedChanges? {
+        val unstagedChanges = it.repoReader.getUnStagedChanges().data
+        unstagedChanges?.unTrackedFiles?.forEach { file ->
+            val result = it.repoModifier.stageFile(file.file)
+            println(result)
+        }
+        unstagedChanges?.trackedFilesDiff?.fileDiffs?.forEach { fileDiff ->
+            when (fileDiff) {
+                is FileDiff.ChangedFile -> fileDiff.filePath
+                is FileDiff.DeletedFile -> fileDiff.filePath
+                is FileDiff.RenamedFile -> fileDiff.newPath
+                is FileDiff.NewFile -> fileDiff.filePath
+                else -> null
+            }?.let { path ->
+                it.repoModifier.stageFile(path.toFile())
+            }
+        }
+        return unstagedChanges
     }
 
     fun loadLog() {
@@ -210,6 +285,20 @@ class RepoController: Controller(), InitableController {
             runLater {
                 currentLog = commits
             }
+        }
+    }
+
+    fun writeAndStage(file: LittleGitFile?, completion: LittleGitCommandCallback<Unit>) {
+        if (file == null) {
+            completion(LittleGitCommandResult(Unit, GitResult.Success(emptyList())))
+            return
+        }
+
+        littleGitCoreController.doNext {
+            Files.write(file.file.toPath(), file.content, Charset.forName("UTF-8"))
+
+            val stageResult = it.repoModifier.stageFile(file.file)
+            completion(stageResult)
         }
     }
 

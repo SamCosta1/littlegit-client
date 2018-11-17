@@ -10,7 +10,7 @@ import org.littlegit.client.ui.util.imageView
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 
-class ChooseLanguageView: BaseView() {
+class ChooseLanguageView: BaseView(fullScreen = false) {
 
 
     override val root = vbox {

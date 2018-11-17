@@ -1,11 +1,8 @@
 package org.littlegit.client.ui.view
 
-import javafx.beans.InvalidationListener
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
-import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import org.littlegit.client.UnauthorizedEvent
@@ -14,11 +11,10 @@ import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.engine.model.Repo
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.util.secondarylabel
-import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
 import org.littlegit.client.ui.view.startup.loginflow.LoginView
 import tornadofx.*
 
-class ChooseRepoView : BaseView() {
+class ChooseRepoView : BaseView(fullScreen = false) {
 
     private val authController: AuthController by inject()
     private val repos: ObservableList<Repo> = mutableListOf<Repo>().observable()

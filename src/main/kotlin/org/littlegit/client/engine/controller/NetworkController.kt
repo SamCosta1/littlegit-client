@@ -11,7 +11,7 @@ import java.net.UnknownHostException
 
 class NetworkController: Controller() {
 
-    val networkAvailability: SimpleBooleanProperty = SimpleBooleanProperty(true)
+    val networkAvailability: SimpleBooleanProperty = SimpleBooleanProperty(false)
 
     private val timer = Timer()
     init {
@@ -28,13 +28,11 @@ class NetworkController: Controller() {
     }
 
     // Credit: https://stackoverflow.com/questions/1402005/how-to-check-if-internet-connection-is-present-in-java
-    @Throws(IOException::class)
     fun isInternetAvailable(): Boolean {
         return (isHostAvailable("google.com") || isHostAvailable("amazon.com")
                 || isHostAvailable("facebook.com") || isHostAvailable("apple.com"))
     }
 
-    @Throws(IOException::class)
     private fun isHostAvailable(hostName: String): Boolean {
         try {
             Socket().use { socket ->
@@ -44,7 +42,7 @@ class NetworkController: Controller() {
 
                 return true
             }
-        } catch (unknownHost: UnknownHostException) {
+        } catch (exception: Exception) {
             return false
         }
 
