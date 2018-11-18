@@ -25,6 +25,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     companion object {
         private val ScrollYKey = "${GraphView::class.simpleName}_scroll_y"
+        private val HighlightColor = c(216, 216, 216, 0.41)
     }
     private val branchColours = with(this) {
         val rand = Random()
@@ -38,6 +39,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private val gridSize = 60
     private val commitWidth = 40.0
+    private val leftBarWidth = 10.0
     private var scrollY = 0.0; set(value) {
         field = value
         stateStore.add(ScrollYKey, value)
@@ -120,6 +122,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         }
 
         drawCommitBlobs(graph, gc)
+//        drawGrid(gc)
     }
 
     private fun highlightHeadCommitRow(graph: GitGraph, gc: GraphicsContext) {
@@ -128,7 +131,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         if (isInView(position)) {
 
             val oldFill = gc.fill
-            gc.fill = ThemeColors.LightPrimary
+            gc.fill = HighlightColor
             gc.fillRect(0.0, position.y - gridSize / 2, canvasPane.width, gridSize.toDouble())
             gc.fill = oldFill
 
@@ -144,13 +147,25 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             }
 
             val location = gridCenterPoint(commitLocation)
+            val color = branchColours[commitLocation.location.x % branchColours.size]
 
             if (isInView(location)) {
-                drawCommitBlob(gc, location, commitLocation)
+                drawCommitBlob(gc, color, location, commitLocation)
+                drawLeftBar(gc, if (commitLocation.commit.isHead) HighlightColor else color, gridTopPoint(commitLocation))
             } else {
                 break
             }
         }
+    }
+
+    private fun drawLeftBar(gc: GraphicsContext, color: Color, location: Point2D.Double) {
+        val height = gridSize * 0.8
+        val offset = (gridSize - height) / 2
+        val oldFill = gc.fill
+
+        gc.fill = color
+        gc.fillRoundRect(- leftBarWidth / 2, location.y + offset, leftBarWidth, height, 5.0, 5.0)
+        gc.fill = oldFill
     }
 
     // For now ignoring the x coordinate
@@ -204,32 +219,34 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     }
 
-    private fun drawCommitBlob(gc: GraphicsContext, location: Point2D.Double, commitLocation: CommitLocation) {
+    private fun drawCommitBlob(gc: GraphicsContext, color: Color, location: Point2D.Double, commitLocation: CommitLocation) {
 
         val oldStroke = gc.stroke
         gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
 
-        gc.stroke = branchColours[commitLocation.location.x % branchColours.size]
+        gc.stroke = color
         gc.strokeOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
         gc.stroke = oldStroke
-
-        val oldLineWidth = gc.lineWidth
-        gc.lineWidth = 1.0
-        gc.fillText(commitLocation.commit.hash, 500.0, location.y)
-        gc.fillText(commitLocation.commit.commitSubject, 500.0, location.y + 20)
-        gc.lineWidth = oldLineWidth
-
     }
 
     private fun gridCenterPoint(point: Point): Point2D.Double {
         val xGridPos = point.x
         val yGridPos = point.y
         return Point2D.Double((xGridPos + 0.5) * gridSize, (yGridPos + 0.5) * gridSize + scrollY)
+    }
 
+    private fun gridTopPoint(point: Point): Point2D.Double {
+        val xGridPos = point.x
+        val yGridPos = point.y
+        return Point2D.Double(xGridPos * gridSize.toDouble(), yGridPos * gridSize + scrollY)
     }
 
     private fun gridCenterPoint(commitLocation: CommitLocation): Point2D.Double {
         return gridCenterPoint(commitLocation.location)
+    }
+
+    private fun gridTopPoint(commitLocation: CommitLocation): Point2D.Double {
+        return gridTopPoint(commitLocation.location)
     }
 
     fun drawCoordsText(gc: GraphicsContext, point: Point2D) {
