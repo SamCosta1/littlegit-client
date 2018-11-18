@@ -2,15 +2,12 @@ package org.littlegit.client.ui.app.graph
 
 import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
-import javafx.event.EventType
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.input.GestureEvent
+import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
-import javafx.scene.input.SwipeEvent
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import org.littlegit.client.ui.app.ThemeColors
 import org.littlegit.client.ui.util.strokeLine
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
@@ -47,6 +44,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private lateinit var canvasPane: CanvasPane
     private var graph: GitGraph? = null
     private var lastYPos = 1.0
+    private var hoveredRowIndex: Int? = null
 
     override val root = stackpane {
         vgrow = Priority.ALWAYS
@@ -63,6 +61,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
 
         canvasPane.onScroll = this@GraphView
+        canvasPane.onMouseMoved = EventHandler { mouseMoved(it) }
+        canvasPane.onMouseExited = EventHandler {
+            hoveredRowIndex = null
+            drawGraph(canvasPane.canvas.graphicsContext2D)
+        }
 
         reGenerateGraph()
     }
@@ -110,13 +113,29 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         drawGraph(canvasPane.canvas.graphicsContext2D)
     }
 
+    private fun mouseMoved(event: MouseEvent) {
+        val index = (event.y - scrollY).toInt() / gridSize
+
+        hoveredRowIndex = if (index > 0) {
+            index
+        } else {
+            null
+        }
+        drawGraph(canvasPane.canvas.graphicsContext2D)
+    }
+
     private fun drawGraph(gc: GraphicsContext, canvas: Canvas = gc.canvas) {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
 
         gc.lineWidth = 2.5
 
-        highlightHeadCommitRow(graph, gc)
+        val headLocation = highlightHeadCommitRow(graph, gc)
+        
+        if (headLocation?.y != hoveredRowIndex) {
+            highlightHoveredRow(graph, gc)
+        }
+
         graph.connections.forEach {
             drawConnection(gc, it)
         }
@@ -125,14 +144,28 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 //        drawGrid(gc)
     }
 
-    private fun highlightHeadCommitRow(graph: GitGraph, gc: GraphicsContext) {
-        val headCommit = graph.commitLocations.firstOrNull { it.commit.isHead } ?: return
-        val position = gridCenterPoint(headCommit.location)
+    private fun highlightHoveredRow(graph: GitGraph, gc: GraphicsContext) {
+        hoveredRowIndex?.let { index ->
+            val color = branchColours[graph.commitLocations[index - 1].location.x % branchColours.size]
+
+            highlightRow(gridTopPoint(Point(0, index)), gc, Color(color.red, color.green, color.blue, 0.2))
+        }
+    }
+
+    private fun highlightHeadCommitRow(graph: GitGraph, gc: GraphicsContext): Point? {
+        val headCommit = graph.commitLocations.firstOrNull { it.commit.isHead } ?: return null
+        val position = gridTopPoint(headCommit.location)
+        highlightRow(position, gc, HighlightColor)
+
+        return headCommit.location
+    }
+
+    private fun highlightRow(position: Point2D.Double, gc: GraphicsContext, color: Color) {
         if (isInView(position)) {
 
             val oldFill = gc.fill
-            gc.fill = HighlightColor
-            gc.fillRect(0.0, position.y - gridSize / 2, canvasPane.width, gridSize.toDouble())
+            gc.fill = color
+            gc.fillRect(0.0, position.y, canvasPane.width, gridSize.toDouble())
             gc.fill = oldFill
 
         }
