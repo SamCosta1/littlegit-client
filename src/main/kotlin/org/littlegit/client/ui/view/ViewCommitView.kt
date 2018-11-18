@@ -28,6 +28,10 @@ class ViewCommitView: BaseView() {
     private lateinit var youModifiedLabel: Label
 
     var commit: RawCommit? = null; set(value) {
+        if (commit == value) {
+            return
+        }
+
         field = value
 
         if (!isDocked || value == null) {
@@ -35,7 +39,6 @@ class ViewCommitView: BaseView() {
         }
 
         updateCommit(value)
-
     }
 
     private fun updateCommit(value: RawCommit) {

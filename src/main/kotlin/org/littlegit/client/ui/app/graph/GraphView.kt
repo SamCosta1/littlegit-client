@@ -65,8 +65,13 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         canvasPane.onMouseClicked = EventHandler { event ->
             graph?.let { graph ->
-                val showCommitEvent = ShowCommitEvent(graph.commitLocations[rowIndexFromEvent(event)].commit)
-                fire(showCommitEvent)
+
+                val index = rowIndexFromEvent(event) - 1
+
+                if (index >= 0 && index < graph.commitLocations.size) {
+                    val showCommitEvent = ShowCommitEvent(graph.commitLocations[index].commit)
+                    fire(showCommitEvent)
+                }
             }
         }
 
