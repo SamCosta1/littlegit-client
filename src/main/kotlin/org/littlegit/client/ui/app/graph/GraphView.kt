@@ -31,7 +31,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         for (i in 0 until 100) {
             initial.add(Color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), 1.0))
         }
-
         initial
     }
 
@@ -83,9 +82,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         runAsync {
             GitGraph(repoController.currentLog)
         } ui {
-            graph = it
-            lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
-            drawGraph(canvasPane.canvas.graphicsContext2D)
+            if (!it.isEmpty) {
+                graph = it
+                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
+                drawGraph(canvasPane.canvas.graphicsContext2D)
+            }
         }
     }
 
@@ -124,6 +125,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     private fun mouseMoved(event: MouseEvent) {
         val index = rowIndexFromEvent(event)
+
+        if (index == hoveredRowIndex) {
+            return
+        }
 
         hoveredRowIndex = if (index > 0) {
             index
