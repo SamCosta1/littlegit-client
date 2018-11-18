@@ -2,17 +2,21 @@ package org.littlegit.client.ui.app.graph
 
 import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
+import javafx.geometry.VPos
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import javafx.scene.text.Font
+import javafx.scene.text.TextAlignment
 import org.littlegit.client.ShowCommitEvent
 import org.littlegit.client.ui.util.strokeLine
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 import java.awt.Point
+import java.awt.Toolkit
 import java.awt.geom.Point2D
 import java.util.*
 import kotlin.math.abs
@@ -24,7 +28,9 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     companion object {
         private val ScrollYKey = "${GraphView::class.simpleName}_scroll_y"
         private val HighlightColor = c(216, 216, 216, 0.41)
+        private val CommitSubjectColor = c(255, 255, 255, 0.22)
     }
+
     private val branchColours = with(this) {
         val rand = Random()
         val initial = mutableListOf(Color.RED, Color.GREEN, Color.BROWN, Color.TEAL, Color.CRIMSON)
@@ -37,6 +43,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private val gridSize = 60
     private val commitWidth = 40.0
     private val leftBarWidth = 10.0
+    private val textXPos = 5 * gridSize
+
     private var scrollY = 0.0; set(value) {
         field = value
         stateStore.add(ScrollYKey, value)
@@ -148,6 +156,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private fun drawGraph(gc: GraphicsContext, canvas: Canvas = gc.canvas) {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
+        gc.textBaseline = VPos.CENTER
 
         gc.lineWidth = 2.5
 
@@ -277,11 +286,33 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private fun drawCommitBlob(gc: GraphicsContext, color: Color, location: Point2D.Double, commitLocation: CommitLocation) {
 
         val oldStroke = gc.stroke
-        gc.fillOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+        val x = location.x - commitWidth / 2
+        val y = location.y - commitWidth / 2
+
+        gc.fillOval(x, y, commitWidth, commitWidth)
 
         gc.stroke = color
-        gc.strokeOval(location.x - commitWidth / 2, location.y - commitWidth / 2, commitWidth, commitWidth)
+        gc.strokeOval(x, y, commitWidth, commitWidth)
         gc.stroke = oldStroke
+
+        val textX: Double = if (textXPos < location.x) {
+            location.x + gridSize
+        } else {
+            textXPos.toDouble()
+        }
+
+        val oldFill = gc.fill
+        val oldFont = gc.font
+        if (hoveredRowIndex == commitLocation.location.y) {
+            gc.fill = Color.WHITE
+            gc.font = Font.font(20.0)
+        } else {
+            gc.fill = CommitSubjectColor
+        }
+        
+        gc.fillText(commitLocation.commit.commitSubject, textX, location.y)
+        gc.font = oldFont
+        gc.fill = oldFill
     }
 
     private fun gridCenterPoint(point: Point): Point2D.Double {
