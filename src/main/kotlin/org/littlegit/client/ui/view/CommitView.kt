@@ -24,8 +24,7 @@ class CommitView: BaseView() {
                 backgroundColor += Color.TRANSPARENT
             }
         }
-        prefWidth = 400.0
-        addClass(Styles.primaryBackground)
+
 
         spacing = 10.0
         button(localizer.observable(I18nKey.CommitAll)) {

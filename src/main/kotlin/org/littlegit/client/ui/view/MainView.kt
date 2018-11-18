@@ -9,6 +9,7 @@ import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.stage.StageStyle
+import javafx.util.Duration
 import org.littlegit.client.CreateCommitEvent
 import org.littlegit.client.UnauthorizedEvent
 import org.littlegit.client.UpdateAvailable
@@ -32,6 +33,7 @@ class MainView : BaseView(fullScreen = true) {
     private val isLoading = model.bind { SimpleBooleanProperty(false) }
 
     private val commitView: CommitView by inject()
+    private val viewCommitView: ViewCommitView by inject()
     override val root = vbox {
 
         style {
@@ -85,6 +87,10 @@ class MainView : BaseView(fullScreen = true) {
                     borderColor += box(ThemeColors.DarkPrimary1)
                 }
 
+                prefWidth = 400.0
+                addClass(Styles.primaryBackground)
+
+                // Is swapped out for view commit view
                 add(commitView.root)
             }
 
@@ -95,6 +101,7 @@ class MainView : BaseView(fullScreen = true) {
                 style {
                     backgroundColor += ThemeColors.DarkPrimary3
                 }
+
                 add(graphView.root)
             }
 

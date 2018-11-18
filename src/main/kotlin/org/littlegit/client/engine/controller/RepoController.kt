@@ -67,7 +67,7 @@ class RepoController: Controller(), InitableController {
     init {
         littleGitCoreController.addListener(this::onCommandFinished)
         timer.schedule(300, 2000) {
-            updateRepoIfNeeded()
+            //updateRepoIfNeeded()
         }
     }
 
