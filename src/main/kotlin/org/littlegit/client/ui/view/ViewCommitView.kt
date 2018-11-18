@@ -41,11 +41,8 @@ class ViewCommitView: BaseView() {
     private fun updateCommit(value: RawCommit) {
         isLoading.value = true
 
-        println("Updating")
-        val time = System.currentTimeMillis()
         littleGitCoreController.doNext {
             val result = it.repoReader.getFullCommit(value)
-            println("Done ${System.currentTimeMillis() - time}")
             runLater {
                 isLoading.value = false
 
@@ -89,9 +86,9 @@ class ViewCommitView: BaseView() {
         youDeletedContentLabel.text = youDeleted
         youModifiedContentLabel.text = youModified
 
-        youAddedContentLabel.isVisible = youAdded.isEmpty()
-        youDeletedContentLabel.isVisible = youDeleted.isEmpty()
-        youModifiedContentLabel.isVisible = youModified.isEmpty()
+        youAddedContentLabel.isVisible = youAdded.isNotBlank()
+        youDeletedContentLabel.isVisible = youDeleted.isNotBlank()
+        youModifiedContentLabel.isVisible = youModified.isNotBlank()g
     }
 
     override val root = vbox {

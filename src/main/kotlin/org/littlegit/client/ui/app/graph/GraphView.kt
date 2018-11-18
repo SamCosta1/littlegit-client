@@ -8,6 +8,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import org.littlegit.client.ShowCommitEvent
 import org.littlegit.client.ui.util.strokeLine
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
@@ -62,6 +63,14 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         canvasPane.onScroll = this@GraphView
         canvasPane.onMouseMoved = EventHandler { mouseMoved(it) }
+
+        canvasPane.onMouseClicked = EventHandler { event ->
+            graph?.let { graph ->
+                val showCommitEvent = ShowCommitEvent(graph.commitLocations[rowIndexFromEvent(event)].commit)
+                fire(showCommitEvent)
+            }
+        }
+
         canvasPane.onMouseExited = EventHandler {
             hoveredRowIndex = null
             drawGraph(canvasPane.canvas.graphicsContext2D)
@@ -102,7 +111,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val newScrollY = scrollY + event.deltaY
         // Prevent users scrolling higher up and out of sight of the graph or down below the graph
 
-        val lowerBoundary = canvasPane.height - lastYPos - 2* gridSize
+        val lowerBoundary = canvasPane.height - lastYPos - 2 * gridSize
 
         scrollY = when {
             newScrollY > 0 || lastYPos < canvasPane.height -> 0.0
@@ -114,7 +123,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private fun mouseMoved(event: MouseEvent) {
-        val index = (event.y - scrollY).toInt() / gridSize
+        val index = rowIndexFromEvent(event)
 
         hoveredRowIndex = if (index > 0) {
             index
@@ -124,6 +133,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         drawGraph(canvasPane.canvas.graphicsContext2D)
     }
 
+    private fun rowIndexFromEvent(event: MouseEvent) = (event.y - scrollY).toInt() / gridSize
+
     private fun drawGraph(gc: GraphicsContext, canvas: Canvas = gc.canvas) {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
@@ -131,7 +142,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.lineWidth = 2.5
 
         val headLocation = highlightHeadCommitRow(graph, gc)
-        
+
         if (headLocation?.y != hoveredRowIndex) {
             highlightHoveredRow(graph, gc)
         }

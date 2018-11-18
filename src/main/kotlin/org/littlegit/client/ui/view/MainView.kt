@@ -10,9 +10,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.stage.StageStyle
 import javafx.util.Duration
-import org.littlegit.client.CreateCommitEvent
-import org.littlegit.client.UnauthorizedEvent
-import org.littlegit.client.UpdateAvailable
+import org.littlegit.client.*
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.model.I18nKey
@@ -148,6 +146,15 @@ class MainView : BaseView(fullScreen = true) {
                 commitView.notifyCommitFinished()
 
             }
+        }
+
+        subscribe<ShowCommitEvent> { event ->
+
+            if (!viewCommitView.isDocked) {
+                commitView.replaceWith(viewCommitView, ViewTransition.Slide(Duration.millis(200.0)))
+            }
+
+            viewCommitView.commit = event.commit
         }
     }
 }
