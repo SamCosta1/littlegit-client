@@ -130,7 +130,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             return
         }
 
-        hoveredRowIndex = if (index > 0) {
+        hoveredRowIndex = if (index > 0 && event.y - scrollY < lastYPos) {
             index
         } else {
             null
@@ -161,6 +161,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private fun highlightHoveredRow(graph: GitGraph, gc: GraphicsContext) {
+
         hoveredRowIndex?.let { index ->
             val color = branchColours[graph.commitLocations[index - 1].location.x % branchColours.size]
 
