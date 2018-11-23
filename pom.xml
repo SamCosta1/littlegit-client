@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.littlegit.core</groupId>
             <artifactId>littlegit-core</artifactId>
-            <version>0.5.0</version>
+            <version>0.6.0</version>
             <type>jar</type>
         </dependency>
         <dependency>

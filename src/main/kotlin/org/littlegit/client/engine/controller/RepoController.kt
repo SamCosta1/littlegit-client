@@ -67,7 +67,7 @@ class RepoController: Controller(), InitableController {
     init {
         littleGitCoreController.addListener(this::onCommandFinished)
         timer.schedule(300, 2000) {
-            updateRepoIfNeeded()
+            //updateRepoIfNeeded()
         }
     }
 
@@ -102,7 +102,7 @@ class RepoController: Controller(), InitableController {
             return
         }
 
-        littleGitCoreController.doNext {
+        littleGitCoreController.doNext(false) {
             it.repoModifier.fetch(true)
 
             val currentBranch = getCurrentBranch(it)
@@ -245,15 +245,15 @@ class RepoController: Controller(), InitableController {
             val unstagedChanges = stageAllChanges(it)
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
-                commitAndPush(it)
+                commitAndPush(it, message)
             }
 
             runLater{ callback() }
         }
     }
 
-    fun commitAndPush(it: LittleGitCore) {
-        val result = it.repoModifier.commit("Commit message")
+    fun commitAndPush(it: LittleGitCore, message: String) {
+        val result = it.repoModifier.commit(message)
         if (!result.isError) {
             push()
         }

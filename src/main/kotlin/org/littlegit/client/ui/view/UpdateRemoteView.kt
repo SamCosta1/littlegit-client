@@ -20,7 +20,7 @@ class UpdateRemoteView: BaseView() {
           littleGitCoreController.doNext {
 
               try {
-                  repoController.commitAndPush(it)
+                  repoController.commitAndPush(it, localizer[I18nKey.AutoCommitMessage])
                   runLater {
                       repoController.currentlyUpdating = false
                       close()

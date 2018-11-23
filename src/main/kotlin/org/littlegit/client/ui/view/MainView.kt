@@ -1,19 +1,24 @@
 package org.littlegit.client.ui.view
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.event.EventHandler
 import javafx.geometry.Pos
+import javafx.scene.Cursor
 import javafx.scene.control.TextArea
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import javafx.stage.StageStyle
-import org.littlegit.client.UnauthorizedEvent
-import org.littlegit.client.UpdateAvailable
+import javafx.util.Duration
+import org.littlegit.client.*
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.app.ThemeColors
 import org.littlegit.client.ui.app.graph.GraphView
+import org.littlegit.client.ui.util.Image
+import org.littlegit.client.ui.util.imageView
 import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
 import tornadofx.*
 
@@ -22,79 +27,84 @@ class MainView : BaseView(fullScreen = true) {
     private val sshController: SShController by inject()
 
     private val graphView: GraphView by inject()
-    private val updateFromRemoteView: UpdateRemoteView by inject()
     private val model = ViewModel()
     private val isLoading = model.bind { SimpleBooleanProperty(false) }
 
-    private lateinit var textArea: TextArea
-    override val root = hbox {
-            vbox {
-                hgrow = Priority.ALWAYS
-                hbox {
-                    prefHeight = 50.0
-                    spacing = 10.0
+    private val commitView: CommitView by inject()
+    private val viewCommitView: ViewCommitView by inject()
+    override val root = vbox {
 
-                    style {
-                        borderStyle += BorderStrokeStyle.SOLID
-                        borderWidth += box(0.px, 0.px, 2.px, 0.px)
-                        borderColor += box(ThemeColors.DarkPrimary1)
-                    }
-                    addClass(Styles.primaryBackground)
-                    stackpane {
-                        label(repoController.currentRepoNameObservable).addClass(Styles.heading)
-                    }
-
-                    button(localizer.observable(I18nKey.ChangeProject)).action {
-                        disableWhen(isLoading)
-                        replaceWith(ChooseRepoView::class)
-                    }
-                }
-
-                // Graph
-                vbox {
-                    vgrow = Priority.ALWAYS
-                    style {
-                        backgroundColor += ThemeColors.Primary
-                    }
-                    add(graphView.root)
-                }
+        style {
+            backgroundColor += ThemeColors.Error
+        }
+        hbox {
+            prefHeight = 50.0
+            style {
+                borderStyle += BorderStrokeStyle.SOLID
+                borderWidth += box(0.px, 0.px, 2.px, 0.px)
+                borderColor += box(ThemeColors.DarkPrimary1)
+                backgroundColor += ThemeColors.LightPrimary
+                cursor = Cursor.HAND
             }
+
+            disableWhen(isLoading)
+            addClass(Styles.primaryPadding)
+
+            spacing = 10.0
+            alignment = Pos.CENTER_LEFT
+            label(repoController.currentRepoNameObservable).addClass(Styles.heading)
+            imageView(Image.IcOpenRepo) {
+                fitHeight = 15.0
+                isPreserveRatio = true
+            }
+
+            onMouseClicked = EventHandler {
+                replaceWith(ChooseRepoView::class)
+            }
+
+            spacer {
+                hgrow = Priority.ALWAYS
+            }
+            imageView(Image.IcLogout) {
+                fitHeight = 25.0
+                isPreserveRatio = true
+            }
+
+
+        }
+
+        hbox {
+
+            vgrow = Priority.ALWAYS
+
             vbox {
-                prefWidth = 300.0
-                addClass(Styles.primaryBackground)
 
                 style {
                     borderStyle += BorderStrokeStyle.SOLID
-                    borderWidth += box(0.px, 0.px, 0.px, 2.px)
+                    borderWidth += box(0.px, 2.px, 0.px, 0.px)
                     borderColor += box(ThemeColors.DarkPrimary1)
                 }
 
-                stackpane {
-                    alignment = Pos.CENTER_RIGHT
-                    button(localizer.observable(I18nKey.Logout)).action {
-                        logout()
-                    }
-                }
+                prefWidth = 400.0
+                addClass(Styles.primaryBackground)
 
-                button(localizer.observable(I18nKey.CommitAll)).action {
-                    disableWhen(isLoading)
-                    isLoading.value = true
-                    repoController.stageAllAndCommit("Message") {
-                        isLoading.value = false
-                    }
-                }
-
-            textArea = textarea()
-
-            button(localizer.observable(I18nKey.CommitAll)).action {
-                disableWhen(isLoading)
-                isLoading.value = true
-
-                repoController.stageAllAndCommit(textArea.text) {
-                    textArea.text = ""
-                    isLoading.value = false
-                }
+                // Is swapped out for view commit view
+                add(commitView.root)
             }
+
+
+            // Graph
+            vbox {
+                hgrow = Priority.ALWAYS
+                style {
+                    backgroundColor += ThemeColors.DarkPrimary3
+                }
+
+                add(graphView.root)
+            }
+
+
+
         }
     }
 
@@ -106,6 +116,7 @@ class MainView : BaseView(fullScreen = true) {
     override fun onDock() {
         super.onDock()
 
+        root.requestFocus()
         sshController.checkSshKeysExist { exist ->
             if (!exist) {
                 sshController.generateAndAddSshKey {
@@ -124,7 +135,26 @@ class MainView : BaseView(fullScreen = true) {
         }
 
         subscribe<UpdateAvailable> {
+            repoController.loadLog()
             find(UpdateRemoteView::class).openWindow(StageStyle.UTILITY)
+        }
+
+        subscribe<CreateCommitEvent> { event ->
+            isLoading.value = true
+            repoController.stageAllAndCommit(event.message) {
+                isLoading.value = false
+                commitView.notifyCommitFinished()
+
+            }
+        }
+
+        subscribe<ShowCommitEvent> { event ->
+
+            if (!viewCommitView.isDocked) {
+                commitView.replaceWith(viewCommitView, ViewTransition.Slide(Duration.millis(200.0)))
+            }
+
+            viewCommitView.commit = event.commit
         }
     }
 }

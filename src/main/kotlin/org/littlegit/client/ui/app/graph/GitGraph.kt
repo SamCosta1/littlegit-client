@@ -13,6 +13,7 @@ class GitGraph(commits: List<RawCommit>) {
     val connections: List<Connection>
     val commitLocations: List<CommitLocation>
 
+    val isEmpty: Boolean; get() = connections.isEmpty() && commitLocations.isEmpty()
     private data class ColumnAssignment(val assignerColumn: Int, val assignedColumn: Int)
 
     init {
