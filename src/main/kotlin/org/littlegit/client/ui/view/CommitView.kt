@@ -20,6 +20,7 @@ class CommitView: BaseView() {
         vgrow = Priority.ALWAYS
         textArea = textarea {
             promptText = localizer[I18nKey.CommitPromptText]
+            isWrapText = true
             style {
                 backgroundColor += Color.TRANSPARENT
             }
