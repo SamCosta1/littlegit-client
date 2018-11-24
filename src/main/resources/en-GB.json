@@ -334,5 +334,77 @@
         "term_plural": "",
         "reference": "",
         "comment": ""
+    },
+    {
+        "term": "whats_this",
+        "definition": "What's this?",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "backup_changes",
+        "definition": "We'll store those changes on the cloud!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "see_in_history",
+        "definition": "See the snapshot appear in your history",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "write_message",
+        "definition": "Write a message about the last thing you did",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_changed_files",
+        "definition": "You changed some files!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_added",
+        "definition": "You added:",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_deleted",
+        "definition": "You deleted:",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_changed",
+        "definition": "You changed:",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_are_here",
+        "definition": "You are here!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
     }
 ]

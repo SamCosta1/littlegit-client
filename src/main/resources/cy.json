@@ -334,5 +334,77 @@
         "term_plural": "",
         "reference": "",
         "comment": ""
+    },
+    {
+        "term": "whats_this",
+        "definition": "Beth yw hwn?",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "backup_changes",
+        "definition": "Byddwn yn storio'r versiwn ar y we!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "see_in_history",
+        "definition": "Gallwch weld eich ciplun yn hanes eith project",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "write_message",
+        "definition": "Ysgrifennwch neges am y newidiadau rydych wedi ei wneud",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_changed_files",
+        "definition": "Rydych wedi newid ffeiliau!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_added",
+        "definition": "Wedi creu:",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_deleted",
+        "definition": "Wedi cael gwared o:",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_changed",
+        "definition": "Wedi newid:",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "you_are_here",
+        "definition": "Rydych fan hyn!",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
     }
 ]

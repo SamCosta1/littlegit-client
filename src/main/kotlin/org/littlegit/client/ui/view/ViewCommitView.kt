@@ -107,7 +107,7 @@ class ViewCommitView: BaseView() {
 
         youAddedContentLabel.isVisible = youAdded.isNotBlank()
         youAddedContentLabel.isManaged = youAdded.isNotBlank()
-        
+
         youDeletedContentLabel.isVisible = youDeleted.isNotBlank()
         youDeletedContentLabel.isManaged = youDeleted.isNotBlank()
 
@@ -142,15 +142,16 @@ class ViewCommitView: BaseView() {
         }
 
         commitSubject = label {
+            isWrapText = true
             style {
-                fontSize = 20.px
+                fontSize = 18.px
             }
         }
 
         commitBody = label {
             isWrapText = true
             style {
-                fontSize = 18.px
+                fontSize = 16.px
             }
         }
 
