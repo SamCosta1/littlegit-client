@@ -74,7 +74,7 @@ class ViewCommitView: BaseView() {
             } else {
                 acc
             }
-        }
+        }.removePrefix("\n")
 
         val youDeleted: String = commit.diff.fileDiffs.fold("") { acc, fileDiff ->
             if (fileDiff is FileDiff.DeletedFile) {
@@ -82,7 +82,7 @@ class ViewCommitView: BaseView() {
             } else {
                 acc
             }
-        }
+        }.removePrefix("\n")
 
         val youModified: String = commit.diff.fileDiffs.fold("") { acc, fileDiff ->
             when (fileDiff) {
@@ -90,7 +90,7 @@ class ViewCommitView: BaseView() {
                 is FileDiff.ChangedFile -> "$acc\n${fileDiff.filePath.fileName}"
                 else -> acc
             }
-        }
+        }.removePrefix("\n")
 
         youAddedContentLabel.text = youAdded
         youDeletedContentLabel.text = youDeleted
@@ -118,7 +118,7 @@ class ViewCommitView: BaseView() {
     override val root = vbox {
         vgrow = Priority.ALWAYS
 
-        spacing = 10.0
+        spacing = 20.0
         hbox {
             dateLabel = label {
                 alignment = Pos.CENTER_LEFT
@@ -151,29 +151,37 @@ class ViewCommitView: BaseView() {
         commitBody = label {
             isWrapText = true
             style {
-                fontSize = 16.px
+                fontSize = 14.px
             }
         }
 
-        label(localizer.observable(I18nKey.YouChangedFiles)).addClass(Styles.transparentTitle)
-        youAddedLabel = label(localizer.observable(I18nKey.YouAdded)).addClass(Styles.transparentTitle)
-        youAddedContentLabel = label {
-            style {
-                textFill = c(141, 219, 55)
+        vbox {
+            spacing =  5.0
+            youAddedLabel = label(localizer.observable(I18nKey.YouAdded)).addClass(Styles.transparentTitle)
+            youAddedContentLabel = label {
+                style {
+                    textFill = c(141, 219, 55)
+                }
             }
         }
 
-        youDeletedLabel = label(localizer.observable(I18nKey.YouDeleted)).addClass(Styles.transparentTitle)
-        youDeletedContentLabel = label {
-            style {
-                textFill = c(219, 55, 55)
+        vbox {
+            spacing =  5.0
+            youDeletedLabel = label(localizer.observable(I18nKey.YouDeleted)).addClass(Styles.transparentTitle)
+            youDeletedContentLabel = label {
+                style {
+                    textFill = c(219, 55, 55)
+                }
             }
         }
 
-        youModifiedLabel = label(localizer.observable(I18nKey.YouModified)).addClass(Styles.transparentTitle)
-        youModifiedContentLabel = label {
-            style {
-                textFill = c(74, 144, 226)
+        vbox {
+            spacing =  5.0
+            youModifiedLabel = label(localizer.observable(I18nKey.YouModified)).addClass(Styles.transparentTitle)
+            youModifiedContentLabel = label {
+                style {
+                    textFill = c(74, 144, 226)
+                }
             }
         }
     }

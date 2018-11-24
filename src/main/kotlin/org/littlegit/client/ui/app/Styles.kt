@@ -154,5 +154,5 @@ object ThemeColors {
     val SecondaryText = c("#757575")
     val TertiaryText = c(1.0,1.0,1.0,0.46)
     val Error = c("#771422")
-    val TransparentText = c(255, 255, 255, 0.3)
+    val TransparentText = c(255, 255, 255, 0.26)
 }
