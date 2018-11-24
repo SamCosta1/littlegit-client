@@ -12,7 +12,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
 import org.littlegit.client.ShowCommitEvent
-import org.littlegit.client.ui.util.strokeLine
+import org.littlegit.client.ui.util.*
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 import java.awt.Point
@@ -40,8 +40,9 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private val gridSize = 60
-    private val commitWidth = 40.0
+    private val commitWidth = 35.0
     private val leftBarWidth = 10.0
+    private val arrowSize = 5
 
     private val textStartXPos = gridSize / 3.0
     private val textEndXPos = 6.0 * gridSize
@@ -159,7 +160,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
         gc.textBaseline = VPos.CENTER
-
+        gc.setArrowSize(arrowSize)
         gc.lineWidth = 2.5
 
         val headLocation = highlightHeadCommitRow(graph, gc)
@@ -245,6 +246,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val start = gridCenterPoint(connection.point1)
         val end = gridCenterPoint(connection.point2)
 
+        val offset = commitWidth / 2 + gc.lineWidth
         start.x += textEndXPos
         end.x += textEndXPos
 
@@ -252,10 +254,13 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         when {
             // Same column => Simple vertical line
             start.x == end.x -> {
+                start.y += offset
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
+                gc.strokeUpArrowHead(start)
                 gc.strokeLine(start, end)
             }
             start.x < end.x -> {
+                start.x += offset
                 gc.stroke = branchColours[connection.point2.x % branchColours.size]
 
                 val line1EndX = end.x - gridSize / 2
@@ -264,17 +269,24 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
                 gc.strokeLine(start.x, start.y, line1EndX, start.y)
                 gc.curve(line1EndX, start.y, end.x, start.y, end.x, line2StartY)
                 gc.strokeLine(end.x, line2StartY, end.x, end.y)
+                gc.strokeLeftArrowHead(start)
 
             }
             else -> {
+                start.x -= offset
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
 
-                val line1EndY = end.y - gridSize / 2
-                val line2StartX = start.x - gridSize / 2
+                val line2EndY = end.y - gridSize / 2
+                val line3StartX = start.x - gridSize / 2 - offset
 
-                gc.strokeLine(start.x, start.y, start.x, line1EndY)
-                gc.curve(start.x, line1EndY, start.x, end.y, line2StartX, end.y)
-                gc.strokeLine(line2StartX, end.y, end.x, end.y)
+                val line1EndX = start.x - 2 * arrowSize
+                val line1EndY = start.y + 2 * arrowSize
+
+                gc.curve(start.x, start.y, line1EndX, start.y, line1EndX, line1EndY)
+                gc.strokeLine(line1EndX, line1EndY, line1EndX, line2EndY)
+                gc.curve(line1EndX, line2EndY, line1EndX, end.y, line3StartX, end.y)
+                gc.strokeLine(line3StartX, end.y, end.x, end.y)
+                gc.strokeRightArrowHead(start)
 
             }
         }
@@ -324,10 +336,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         }
 
-
         val text = Text(commitSubject)
         text.font = gc.font
         val bounds = text.layoutBounds.width
+
+        // Currently assumes all characters are equal length so results aren't great
         val widthPerChar = bounds / commitSubject.length
         val maxEndIndex = (textEndXPos - textStartXPos) / widthPerChar
         val endIndex = Math.min(commitSubject.length, maxEndIndex.toInt())
@@ -370,5 +383,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     fun restoreState() {
         scrollY = stateStore.get(ScrollYKey) ?: 0.0
+    }
+
+    override fun onDock() {
+        super.onDock()
+        hoveredRowIndex = null
     }
 }

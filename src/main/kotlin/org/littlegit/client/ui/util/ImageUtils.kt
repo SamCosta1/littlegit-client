@@ -21,3 +21,24 @@ fun EventTarget.imageView(image: Image, lazyload: Boolean = true, op: ImageView.
 fun GraphicsContext.strokeLine(p1: Point2D.Double, p2: Point2D.Double) {
     strokeLine(p1.x, p1.y, p2.x, p2.y)
 }
+
+private var arrowSize = 5
+fun GraphicsContext.setArrowSize(size: Int) {
+    arrowSize = size
+}
+
+fun GraphicsContext.strokeUpArrowHead(point: Point2D.Double) {
+    strokeLine(point.x, point.y, point.x - arrowSize, point.y + arrowSize)
+    strokeLine(point.x, point.y, point.x + arrowSize, point.y + arrowSize)
+}
+
+fun GraphicsContext.strokeLeftArrowHead(point: Point2D.Double) {
+    strokeLine(point.x, point.y, point.x + arrowSize, point.y - arrowSize)
+    strokeLine(point.x, point.y, point.x + arrowSize, point.y + arrowSize)
+}
+
+fun GraphicsContext.strokeRightArrowHead(point: Point2D.Double) {
+    strokeLine(point.x, point.y, point.x - arrowSize, point.y + arrowSize)
+    strokeLine(point.x, point.y, point.x - arrowSize, point.y - arrowSize)
+}
+
