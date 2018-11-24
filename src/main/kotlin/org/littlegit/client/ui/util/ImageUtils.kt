@@ -11,7 +11,9 @@ enum class Image(private val raw: String) {
     EnglishFlag("lang_en-gb.png"),
     Logo("logo.png"),
     IcLogout("ic_logout.png"),
+    IcClose("ic_close.png"),
     IcOpenRepo("ic_open_repo.png");
+
 
     val path; get() = "images/$raw"
 }

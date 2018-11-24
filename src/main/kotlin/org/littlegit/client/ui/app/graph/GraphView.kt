@@ -30,7 +30,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     companion object {
         private val ScrollYKey = "${GraphView::class.simpleName}_scroll_y"
         private val HighlightColor = c(216, 216, 216, 0.41)
-        private val CommitSubjectColor = c(255, 255, 255, 0.3)
+        private val CommitSubjectColor = ThemeColors.TransparentText
     }
 
     private val branchColours = with(this) {

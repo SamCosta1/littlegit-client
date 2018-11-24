@@ -1,5 +1,6 @@
 package org.littlegit.client.ui.app
 
+import javafx.scene.Cursor
 import javafx.scene.layout.Border
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
@@ -17,6 +18,8 @@ class Styles : Stylesheet() {
         val error by cssclass()
         val primaryPadding by cssclass()
         val bulletText by cssclass()
+        val transparentTitle by cssclass()
+        val hover by cssclass()
     }
 
     init {
@@ -27,6 +30,10 @@ class Styles : Stylesheet() {
 
         primaryPadding {
             padding = box(15.px)
+        }
+
+        hover {
+            cursor = Cursor.HAND
         }
 
         label {
@@ -105,6 +112,11 @@ class Styles : Stylesheet() {
 
         }
 
+        transparentTitle {
+            fontSize = 20.px
+            textFill = ThemeColors.TransparentText
+        }
+
         cardView {
             padding = box(10.px)
             borderStyle += BorderStrokeStyle.SOLID
@@ -142,4 +154,5 @@ object ThemeColors {
     val SecondaryText = c("#757575")
     val TertiaryText = c(1.0,1.0,1.0,0.46)
     val Error = c("#771422")
+    val TransparentText = c(255, 255, 255, 0.3)
 }

@@ -1,10 +1,17 @@
 package org.littlegit.client.ui.view
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.event.EventHandler
+import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.layout.Priority
+import org.littlegit.client.HideCommitView
 import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.ui.app.Styles
+import org.littlegit.client.ui.app.ThemeColors
+import org.littlegit.client.ui.util.Image
 import org.littlegit.client.ui.util.format
+import org.littlegit.client.ui.util.imageView
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.FullCommit
 import org.littlegit.core.model.RawCommit
@@ -89,27 +96,71 @@ class ViewCommitView: BaseView() {
         youDeletedContentLabel.text = youDeleted
         youModifiedContentLabel.text = youModified
 
-        youAddedContentLabel.isVisible = youAdded.isNotBlank()
-        youDeletedContentLabel.isVisible = youDeleted.isNotBlank()
-        youModifiedContentLabel.isVisible = youModified.isNotBlank()
+        youAddedLabel.isVisible = youAdded.isNotBlank()
+        youDeletedLabel.isVisible = youDeleted.isNotBlank()
+        youModifiedLabel.isVisible = youModified.isNotBlank()
     }
 
     override val root = vbox {
         vgrow = Priority.ALWAYS
 
-        dateLabel = label()
-        commitSubject = label()
-        commitBody = label()
+        spacing = 10.0
+        hbox {
+            dateLabel = label {
+                alignment = Pos.CENTER_LEFT
+                style {
+                    fontSize = 16.px
+                    textFill = ThemeColors.TransparentText
+                }
+            }
 
-        label(localizer.observable(I18nKey.YouChangedFiles))
-        youAddedLabel = label(localizer.observable(I18nKey.YouAdded))
-        youAddedContentLabel = label()
+            spacer {
+                hgrow = Priority.ALWAYS
+            }
 
-        youDeletedLabel = label(localizer.observable(I18nKey.YouDeleted))
-        youDeletedContentLabel = label()
+            imageView(Image.IcClose) {
+                alignment = Pos.CENTER_RIGHT
+                addClass(Styles.hover)
+                onMouseClicked = EventHandler {
+                    fire(HideCommitView)
+                }
+            }
+        }
 
-        youModifiedLabel = label(localizer.observable(I18nKey.YouModified))
-        youModifiedContentLabel = label()
+        commitSubject = label {
+            style {
+                fontSize = 20.px
+            }
+        }
+
+        commitBody = label {
+            isWrapText = true
+            style {
+                fontSize = 18.px
+            }
+        }
+
+        label(localizer.observable(I18nKey.YouChangedFiles)).addClass(Styles.transparentTitle)
+        youAddedLabel = label(localizer.observable(I18nKey.YouAdded)).addClass(Styles.transparentTitle)
+        youAddedContentLabel = label {
+            style {
+                textFill = c(141, 219, 55)
+            }
+        }
+
+        youDeletedLabel = label(localizer.observable(I18nKey.YouDeleted)).addClass(Styles.transparentTitle)
+        youDeletedContentLabel = label {
+            style {
+                textFill = c(219, 55, 55)
+            }
+        }
+
+        youModifiedLabel = label(localizer.observable(I18nKey.YouModified)).addClass(Styles.transparentTitle)
+        youModifiedContentLabel = label {
+            style {
+                textFill = c(74, 144, 226)
+            }
+        }
     }
 
     override fun onDock() {
