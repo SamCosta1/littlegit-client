@@ -273,21 +273,16 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
             }
             else -> {
-                start.x -= offset
+                start.y += offset
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
 
-                val line2EndY = end.y - gridSize / 2
-                val line3StartX = start.x - gridSize / 2 - offset
+                val line1EndY = end.y - gridSize / 2
+                val line2StartX = start.x - gridSize / 2
 
-                val line1EndX = start.x - 2 * arrowSize
-                val line1EndY = start.y + 2 * arrowSize
-
-                gc.curve(start.x, start.y, line1EndX, start.y, line1EndX, line1EndY)
-                gc.strokeLine(line1EndX, line1EndY, line1EndX, line2EndY)
-                gc.curve(line1EndX, line2EndY, line1EndX, end.y, line3StartX, end.y)
-                gc.strokeLine(line3StartX, end.y, end.x, end.y)
-                gc.strokeRightArrowHead(start)
-
+                gc.strokeLine(start.x, start.y, start.x, line1EndY)
+                gc.curve(start.x, line1EndY, start.x, end.y, line2StartX, end.y)
+                gc.strokeLine(line2StartX, end.y, end.x, end.y)
+                gc.strokeUpArrowHead(start)
             }
         }
 
