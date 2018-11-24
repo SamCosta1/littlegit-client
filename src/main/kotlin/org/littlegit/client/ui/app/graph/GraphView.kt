@@ -11,7 +11,10 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
+import javafx.scene.text.TextAlignment
 import org.littlegit.client.ShowCommitEvent
+import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.ui.app.ThemeColors
 import org.littlegit.client.ui.util.*
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
@@ -191,6 +194,14 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val position = gridTopPoint(headCommit.location)
         highlightRow(position, gc, HighlightColor)
 
+        val oldAlign = gc.textAlign
+        val oldFill = gc.fill
+        gc.textAlign = TextAlignment.RIGHT
+        gc.fill = ThemeColors.DarkAccent
+        gc.font = Font(20.0)
+        gc.fillText(localizer[I18nKey.YouAreHere], canvasPane.width - gridSize / 2, gridCenterPoint(headCommit.location).y)
+        gc.textAlign = oldAlign
+        gc.fill = oldFill
         return headCommit.location
     }
 

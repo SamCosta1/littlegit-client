@@ -68,6 +68,7 @@ enum class I18nKey(val key: String) {
     YouAdded("you_added"),
     YouDeleted("you_deleted"),
     YouModified("you_changed"),
+    YouAreHere("you_are_here"),
     Unknown("-");
 
 
