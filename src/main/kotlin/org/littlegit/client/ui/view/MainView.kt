@@ -23,6 +23,8 @@ import org.littlegit.client.ui.view.startup.loginflow.ChooseLanguageView
 import tornadofx.*
 
 class MainView : BaseView(fullScreen = true) {
+    private val animationDuration = Duration.millis(200.0)
+
     private val authController: AuthController by inject()
     private val sshController: SShController by inject()
 
@@ -148,10 +150,16 @@ class MainView : BaseView(fullScreen = true) {
             }
         }
 
+        subscribe<HideCommitView> {
+            if (viewCommitView.isDocked) {
+                viewCommitView.replaceWith(commitView, ViewTransition.Slide(animationDuration))
+            }
+        }
+
         subscribe<ShowCommitEvent> { event ->
 
             if (!viewCommitView.isDocked) {
-                commitView.replaceWith(viewCommitView, ViewTransition.Slide(Duration.millis(200.0)))
+                commitView.replaceWith(viewCommitView, ViewTransition.Slide(animationDuration))
             }
 
             viewCommitView.commit = event.commit

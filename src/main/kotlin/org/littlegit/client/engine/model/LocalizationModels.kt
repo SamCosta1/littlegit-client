@@ -67,7 +67,8 @@ enum class I18nKey(val key: String) {
     YouChangedFiles("you_changed_files"),
     YouAdded("you_added"),
     YouDeleted("you_deleted"),
-    YouModified("you_modified"),
+    YouModified("you_changed"),
+    YouAreHere("you_are_here"),
     Unknown("-");
 
 

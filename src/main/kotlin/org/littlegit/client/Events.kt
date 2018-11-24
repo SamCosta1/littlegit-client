@@ -9,6 +9,8 @@ object UpdateAvailable: FXEvent()
 
 object ConflictsResolvedEvent: FXEvent()
 
+object HideCommitView: FXEvent()
+
 class ShowCommitEvent(val commit: RawCommit): FXEvent()
 
 class CreateCommitEvent(val message: String): FXEvent()

@@ -1,10 +1,17 @@
 package org.littlegit.client.ui.view
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.event.EventHandler
+import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.layout.Priority
+import org.littlegit.client.HideCommitView
 import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.ui.app.Styles
+import org.littlegit.client.ui.app.ThemeColors
+import org.littlegit.client.ui.util.Image
 import org.littlegit.client.ui.util.format
+import org.littlegit.client.ui.util.imageView
 import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.FullCommit
 import org.littlegit.core.model.RawCommit
@@ -67,7 +74,7 @@ class ViewCommitView: BaseView() {
             } else {
                 acc
             }
-        }
+        }.removePrefix("\n")
 
         val youDeleted: String = commit.diff.fileDiffs.fold("") { acc, fileDiff ->
             if (fileDiff is FileDiff.DeletedFile) {
@@ -75,7 +82,7 @@ class ViewCommitView: BaseView() {
             } else {
                 acc
             }
-        }
+        }.removePrefix("\n")
 
         val youModified: String = commit.diff.fileDiffs.fold("") { acc, fileDiff ->
             when (fileDiff) {
@@ -83,33 +90,100 @@ class ViewCommitView: BaseView() {
                 is FileDiff.ChangedFile -> "$acc\n${fileDiff.filePath.fileName}"
                 else -> acc
             }
-        }
+        }.removePrefix("\n")
 
         youAddedContentLabel.text = youAdded
         youDeletedContentLabel.text = youDeleted
         youModifiedContentLabel.text = youModified
 
+        youAddedLabel.isVisible = youAdded.isNotBlank()
+        youAddedLabel.isManaged = youAdded.isNotBlank()
+
+        youDeletedLabel.isVisible = youDeleted.isNotBlank()
+        youDeletedLabel.isManaged = youDeleted.isNotBlank()
+
+        youModifiedLabel.isVisible = youModified.isNotBlank()
+        youModifiedLabel.isManaged = youModified.isNotBlank()
+
         youAddedContentLabel.isVisible = youAdded.isNotBlank()
+        youAddedContentLabel.isManaged = youAdded.isNotBlank()
+
         youDeletedContentLabel.isVisible = youDeleted.isNotBlank()
+        youDeletedContentLabel.isManaged = youDeleted.isNotBlank()
+
         youModifiedContentLabel.isVisible = youModified.isNotBlank()
+        youModifiedContentLabel.isManaged = youModified.isNotBlank()
     }
 
     override val root = vbox {
         vgrow = Priority.ALWAYS
 
-        dateLabel = label()
-        commitSubject = label()
-        commitBody = label()
+        spacing = 20.0
+        hbox {
+            dateLabel = label {
+                alignment = Pos.CENTER_LEFT
+                style {
+                    fontSize = 16.px
+                    textFill = ThemeColors.TransparentText
+                }
+            }
 
-        label(localizer.observable(I18nKey.YouChangedFiles))
-        youAddedLabel = label(localizer.observable(I18nKey.YouAdded))
-        youAddedContentLabel = label()
+            spacer {
+                hgrow = Priority.ALWAYS
+            }
 
-        youDeletedLabel = label(localizer.observable(I18nKey.YouDeleted))
-        youDeletedContentLabel = label()
+            imageView(Image.IcClose) {
+                alignment = Pos.CENTER_RIGHT
+                addClass(Styles.hover)
+                onMouseClicked = EventHandler {
+                    fire(HideCommitView)
+                }
+            }
+        }
 
-        youModifiedLabel = label(localizer.observable(I18nKey.YouModified))
-        youModifiedContentLabel = label()
+        commitSubject = label {
+            isWrapText = true
+            style {
+                fontSize = 18.px
+            }
+        }
+
+        commitBody = label {
+            isWrapText = true
+            style {
+                fontSize = 14.px
+            }
+        }
+
+        vbox {
+            spacing =  5.0
+            youAddedLabel = label(localizer.observable(I18nKey.YouAdded)).addClass(Styles.transparentTitle)
+            youAddedContentLabel = label {
+                style {
+                    textFill = c(141, 219, 55)
+                }
+            }
+        }
+
+        vbox {
+            spacing =  5.0
+            youDeletedLabel = label(localizer.observable(I18nKey.YouDeleted)).addClass(Styles.transparentTitle)
+            youDeletedContentLabel = label {
+                style {
+                    textFill = c(219, 55, 55)
+                }
+            }
+        }
+
+        vbox {
+            spacing =  5.0
+            youModifiedLabel = label(localizer.observable(I18nKey.YouModified)).addClass(Styles.transparentTitle)
+            youModifiedContentLabel = label {
+                style {
+                    textFill = c(74, 144, 226)
+                }
+            }
+        }
     }
 
     override fun onDock() {

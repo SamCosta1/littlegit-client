@@ -10,13 +10,15 @@ import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
 import org.littlegit.client.ShowCommitEvent
-import org.littlegit.client.ui.util.strokeLine
+import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.ui.app.ThemeColors
+import org.littlegit.client.ui.util.*
 import org.littlegit.client.ui.view.BaseView
 import tornadofx.*
 import java.awt.Point
-import java.awt.Toolkit
 import java.awt.geom.Point2D
 import java.util.*
 import kotlin.math.abs
@@ -28,7 +30,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     companion object {
         private val ScrollYKey = "${GraphView::class.simpleName}_scroll_y"
         private val HighlightColor = c(216, 216, 216, 0.41)
-        private val CommitSubjectColor = c(255, 255, 255, 0.22)
+        private val CommitSubjectColor = ThemeColors.TransparentText
     }
 
     private val branchColours = with(this) {
@@ -41,9 +43,12 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private val gridSize = 60
-    private val commitWidth = 40.0
+    private val commitWidth = 35.0
     private val leftBarWidth = 10.0
-    private val textXPos = 5 * gridSize
+    private val arrowSize = 5
+
+    private val textStartXPos = gridSize / 3.0
+    private val textEndXPos = 6.0 * gridSize
 
     private var scrollY = 0.0; set(value) {
         field = value
@@ -154,10 +159,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private fun rowIndexFromEvent(event: MouseEvent) = (event.y - scrollY).toInt() / gridSize
 
     private fun drawGraph(gc: GraphicsContext, canvas: Canvas = gc.canvas) {
+
         val graph = this.graph ?: return
         gc.clearRect(0.0, 0.0, canvas.width, canvas.width)
         gc.textBaseline = VPos.CENTER
-
+        gc.setArrowSize(arrowSize)
         gc.lineWidth = 2.5
 
         val headLocation = highlightHeadCommitRow(graph, gc)
@@ -188,6 +194,14 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val position = gridTopPoint(headCommit.location)
         highlightRow(position, gc, HighlightColor)
 
+        val oldAlign = gc.textAlign
+        val oldFill = gc.fill
+        gc.textAlign = TextAlignment.RIGHT
+        gc.fill = ThemeColors.DarkAccent
+        gc.font = Font(20.0)
+        gc.fillText(localizer[I18nKey.YouAreHere], canvasPane.width - gridSize / 2, gridCenterPoint(headCommit.location).y)
+        gc.textAlign = oldAlign
+        gc.fill = oldFill
         return headCommit.location
     }
 
@@ -211,6 +225,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             }
 
             val location = gridCenterPoint(commitLocation)
+            location.x += textEndXPos // Shift the commits to the right out of the way of text
+
             val color = branchColours[commitLocation.location.x % branchColours.size]
 
             if (isInView(location)) {
@@ -241,14 +257,21 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val start = gridCenterPoint(connection.point1)
         val end = gridCenterPoint(connection.point2)
 
+        val offset = commitWidth / 2 + gc.lineWidth
+        start.x += textEndXPos
+        end.x += textEndXPos
+
         val oldFill = gc.stroke
         when {
             // Same column => Simple vertical line
             start.x == end.x -> {
+                start.y += offset
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
+                gc.strokeUpArrowHead(start)
                 gc.strokeLine(start, end)
             }
             start.x < end.x -> {
+                start.x += offset
                 gc.stroke = branchColours[connection.point2.x % branchColours.size]
 
                 val line1EndX = end.x - gridSize / 2
@@ -257,9 +280,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
                 gc.strokeLine(start.x, start.y, line1EndX, start.y)
                 gc.curve(line1EndX, start.y, end.x, start.y, end.x, line2StartY)
                 gc.strokeLine(end.x, line2StartY, end.x, end.y)
+                gc.strokeLeftArrowHead(start)
 
             }
             else -> {
+                start.y += offset
                 gc.stroke = branchColours[connection.point1.x % branchColours.size]
 
                 val line1EndY = end.y - gridSize / 2
@@ -268,7 +293,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
                 gc.strokeLine(start.x, start.y, start.x, line1EndY)
                 gc.curve(start.x, line1EndY, start.x, end.y, line2StartX, end.y)
                 gc.strokeLine(line2StartX, end.y, end.x, end.y)
-
+                gc.strokeUpArrowHead(start)
             }
         }
 
@@ -295,10 +320,15 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.strokeOval(x, y, commitWidth, commitWidth)
         gc.stroke = oldStroke
 
-        val textX: Double = if (textXPos < location.x) {
-            location.x + gridSize
-        } else {
-            textXPos.toDouble()
+
+        drawText(gc, commitLocation, location)
+    }
+
+    private fun drawText(gc: GraphicsContext, commitLocation: CommitLocation, location: Point2D.Double) {
+        val commitSubject = commitLocation.commit.commitSubject
+
+        if (commitSubject.isBlank()) {
+            return
         }
 
         val oldFill = gc.fill
@@ -308,9 +338,27 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             gc.font = Font.font(20.0)
         } else {
             gc.fill = CommitSubjectColor
+            gc.font = Font.font(16.0)
+
         }
-        
-        gc.fillText(commitLocation.commit.commitSubject, textX, location.y)
+
+        val text = Text(commitSubject)
+        text.font = gc.font
+        val bounds = text.layoutBounds.width
+
+        // Currently assumes all characters are equal length so results aren't great
+        val widthPerChar = bounds / commitSubject.length
+        val maxEndIndex = (textEndXPos - textStartXPos) / widthPerChar
+        val endIndex = Math.min(commitSubject.length, maxEndIndex.toInt())
+
+        val trimmed = if (endIndex < commitSubject.length) {
+            "${commitSubject.substring(0, endIndex)}..."
+        } else {
+            commitSubject
+        }
+
+        gc.fillText(trimmed, textStartXPos, location.y)
+
         gc.font = oldFont
         gc.fill = oldFill
     }
@@ -341,5 +389,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
     fun restoreState() {
         scrollY = stateStore.get(ScrollYKey) ?: 0.0
+    }
+
+    override fun onDock() {
+        super.onDock()
+        hoveredRowIndex = null
     }
 }
