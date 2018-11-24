@@ -97,8 +97,22 @@ class ViewCommitView: BaseView() {
         youModifiedContentLabel.text = youModified
 
         youAddedLabel.isVisible = youAdded.isNotBlank()
+        youAddedLabel.isManaged = youAdded.isNotBlank()
+
         youDeletedLabel.isVisible = youDeleted.isNotBlank()
+        youDeletedLabel.isManaged = youDeleted.isNotBlank()
+
         youModifiedLabel.isVisible = youModified.isNotBlank()
+        youModifiedLabel.isManaged = youModified.isNotBlank()
+
+        youAddedContentLabel.isVisible = youAdded.isNotBlank()
+        youAddedContentLabel.isManaged = youAdded.isNotBlank()
+        
+        youDeletedContentLabel.isVisible = youDeleted.isNotBlank()
+        youDeletedContentLabel.isManaged = youDeleted.isNotBlank()
+
+        youModifiedContentLabel.isVisible = youModified.isNotBlank()
+        youModifiedContentLabel.isManaged = youModified.isNotBlank()
     }
 
     override val root = vbox {
