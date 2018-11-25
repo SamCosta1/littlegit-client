@@ -148,9 +148,19 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    fun getUnifiedReposList(completion: (List<Repo>?) -> Unit) {
-        repoDb.getAllRepos {
-            completion(it)
+    fun getUnifiedReposList(completion: (List<RepoDescriptor>?) -> Unit) {
+        repoDb.getAllRepos { localList ->
+
+            repoApi.getAllRepos().enqueue {
+                if (it.isSuccess) {
+                    val allRepos = mutableListOf<RepoDescriptor>()
+                    localList?.let { allRepos.addAll(localList) }
+                    it.body?.let   { allRepos.addAll(it)   }
+                    completion(allRepos)
+                } else {
+                    completion(localList)
+                }
+            }
         }
     }
 
@@ -222,6 +232,7 @@ class RepoController: Controller(), InitableController {
                 clone(repo) { isSuccess, localRepo ->
                     repoDb.saveRepo(localRepo) {
                         repoDb.setCurrentRepoId(localRepo.localId)
+                        completion(true, localRepo)
                     }
                 }
             }
@@ -236,17 +247,22 @@ class RepoController: Controller(), InitableController {
 
         littleGitCoreController.doNext { core ->
 
-            sshController.getPrivateKeyPath {
-                it?.let { core.configModifier.setSshKeyPath(it) }
-            }
 
             if (core.repoReader.isInitialized().data == true) {
+                setPrivateKeyPath(core)
                 runLater { completion(true, repo) }
                 loadLog()
             } else {
                 val result = core.repoModifier.initializeRepo(bare = false)
+                setPrivateKeyPath(core)
                 runLater { completion(!result.isError, repo) }
             }
+        }
+    }
+
+    private fun setPrivateKeyPath(core: LittleGitCore) {
+        sshController.getPrivateKeyPath {
+            it?.let { core.configModifier.setSshKeyPath(it) }
         }
     }
 
@@ -278,17 +294,19 @@ class RepoController: Controller(), InitableController {
         littleGitCoreController.currentRepoPath = path
         val repo = Repo(remoteRepoSummary.id.toString(), path, remoteRepo = remoteRepoSummary)
 
-        littleGitCoreController.doNext(false) {
-            it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
-            it.repoModifier.fetch()
-            val branches = it.repoReader.getBranches().data
-            val branch = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
+        initialiseRepoIfNeeded(repo) { _,_ ->
+            littleGitCoreController.doNext(false) {
+                it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
+                it.repoModifier.fetch()
+                val branches = it.repoReader.getBranches().data
+                val branch = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
 
-            if (branch == null) {
-                runLater { callback(false, repo) }
-            } else {
-                val result = it.repoModifier.merge(branch)
-                runLater { callback(!result.isError, repo) }
+                if (branch == null) {
+                    runLater { callback(false, repo) }
+                } else {
+                    val result = it.repoModifier.merge(branch)
+                    runLater { callback(!result.isError, repo) }
+                }
             }
         }
     }
