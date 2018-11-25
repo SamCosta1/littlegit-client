@@ -25,7 +25,6 @@ class Styles : Stylesheet() {
     init {
         primaryBackground {
             backgroundColor += ThemeColors.DarkPrimary2
-            padding = box(15.px)
         }
 
         primaryPadding {
@@ -85,6 +84,7 @@ class Styles : Stylesheet() {
             fontSize = 17.px
             fontWeight = FontWeight.BOLD
             padding = box(10.px)
+            cursor = Cursor.HAND
         }
 
         button and pressed {

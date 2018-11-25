@@ -22,6 +22,7 @@ import tornadofx.*
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.concurrent.schedule
@@ -147,6 +148,12 @@ class RepoController: Controller(), InitableController {
         }
     }
 
+    fun getUnifiedReposList(completion: (List<Repo>?) -> Unit) {
+        repoDb.getAllRepos {
+            completion(it)
+        }
+    }
+
     fun getRepos(completion: (List<Repo>?) -> Unit) {
         repoDb.getAllRepos(completion)
     }
@@ -205,9 +212,21 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    fun setCurrentRepo(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
-        repoDb.setCurrentRepoId(repo.localId)
-        initialiseRepoIfNeeded(repo, completion)
+    fun setCurrentRepo(repo: RepoDescriptor, completion: (success: Boolean, repo: Repo) -> Unit) {
+        when (repo) {
+            is Repo -> {
+                repoDb.setCurrentRepoId(repo.localId)
+                initialiseRepoIfNeeded(repo, completion)
+            }
+            is RemoteRepoSummary -> {
+                clone(repo) { isSuccess, localRepo ->
+                    repoDb.saveRepo(localRepo) {
+                        repoDb.setCurrentRepoId(localRepo.localId)
+                    }
+                }
+            }
+            else -> throw Exception("This shouldn't ever happen!")
+        }
     }
 
     private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
@@ -235,7 +254,6 @@ class RepoController: Controller(), InitableController {
         littleGitCoreController.doNext {
             it.repoReader.getBranches().data?.find { it.isHead }?.let { currentBranch ->
                 val result = it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
-                println(result)
             }
         }
     }
@@ -249,6 +267,29 @@ class RepoController: Controller(), InitableController {
             }
 
             runLater{ callback() }
+        }
+    }
+
+    // TODO: Move this into the core library which is where it probably should be
+    private fun clone(remoteRepoSummary: RemoteRepoSummary, callback: (success: Boolean, repo: Repo) -> Unit) {
+        val path = Paths.get(System.getProperty("user.home"), remoteRepoSummary.repoName)
+        Files.createDirectories(path)
+
+        littleGitCoreController.currentRepoPath = path
+        val repo = Repo(remoteRepoSummary.id.toString(), path, remoteRepo = remoteRepoSummary)
+
+        littleGitCoreController.doNext(false) {
+            it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
+            it.repoModifier.fetch()
+            val branches = it.repoReader.getBranches().data
+            val branch = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
+
+            if (branch == null) {
+                runLater { callback(false, repo) }
+            } else {
+                val result = it.repoModifier.merge(branch)
+                runLater { callback(!result.isError, repo) }
+            }
         }
     }
 

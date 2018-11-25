@@ -21,6 +21,7 @@ class SplashView : BaseView() {
 
     override val root = borderpane {
         addClass(Styles.primaryBackground)
+        addClass(Styles.primaryPadding)
 
         center {
             vbox {

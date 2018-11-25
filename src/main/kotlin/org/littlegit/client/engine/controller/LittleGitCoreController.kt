@@ -1,5 +1,7 @@
 package org.littlegit.client.engine.controller
 
+import org.littlegit.client.engine.model.RemoteRepoSummary
+import org.littlegit.client.engine.util.SimpleCallback
 import org.littlegit.core.LittleGitCore
 import tornadofx.*
 import java.nio.file.Path
@@ -26,6 +28,7 @@ class LittleGitCoreController: Controller() {
     fun addListener(listener: () -> Unit) {
         listeners.add(listener)
     }
+
     // Should only be called on the main ui thread
     fun doNext(notifyListeners: Boolean = true, action: (LittleGitCore) -> Unit) {
         if (littleGitCore == null) {
