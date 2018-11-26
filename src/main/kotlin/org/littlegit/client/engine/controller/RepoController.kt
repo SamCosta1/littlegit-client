@@ -260,9 +260,12 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    private fun setPrivateKeyPath(core: LittleGitCore) {
-        sshController.getPrivateKeyPath {
-            it?.let { core.configModifier.setSshKeyPath(it) }
+    private fun setPrivateKeyPath(core: LittleGitCore, completion: LittleGitCommandCallback<Void?>? = null) {
+        sshController.getPrivateKeyPath { path ->
+            if (path != null) {
+                val result = core.configModifier.setSshKeyPath(path)
+                completion?.invoke(result)
+            }
         }
     }
 
@@ -295,9 +298,9 @@ class RepoController: Controller(), InitableController {
         val repo = Repo(remoteRepoSummary.id.toString(), path, remoteRepo = remoteRepoSummary)
 
         initialiseRepoIfNeeded(repo) { _,_ ->
-            littleGitCoreController.doNext(false) {
+            littleGitCoreController.doNext(true) {
                 it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
-                it.repoModifier.fetch()
+                it.repoModifier.fetch(all = true)
                 val branches = it.repoReader.getBranches().data
                 val branch = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
 
@@ -305,7 +308,7 @@ class RepoController: Controller(), InitableController {
                     runLater { callback(false, repo) }
                 } else {
                     val result = it.repoModifier.merge(branch)
-                    runLater { callback(!result.isError, repo) }
+                     runLater { callback(!result.isError, repo) }
                 }
             }
         }
