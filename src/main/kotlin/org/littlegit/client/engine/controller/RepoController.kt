@@ -14,6 +14,7 @@ import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
 import org.littlegit.client.engine.util.LittleGitCommandCallback
 import org.littlegit.client.engine.util.SimpleCallback
+import org.littlegit.client.engine.util.addAllIf
 import org.littlegit.core.LittleGitCommandResult
 import org.littlegit.core.LittleGitCore
 import org.littlegit.core.commandrunner.GitResult
@@ -153,15 +154,27 @@ class RepoController: Controller(), InitableController {
 
             repoApi.getAllRepos().enqueue {
                 if (it.isSuccess) {
-                    val allRepos = mutableListOf<RepoDescriptor>()
-                    localList?.let { allRepos.addAll(localList) }
-                    it.body?.let   { allRepos.addAll(it)   }
-                    completion(allRepos)
+                    completion(unifyReposList(localList, it.body))
                 } else {
                     completion(localList)
                 }
             }
         }
+    }
+
+    private fun unifyReposList(localList: List<Repo>?, remoteList: List<RemoteRepoSummary>?): List<RepoDescriptor> {
+        val localRepos = localList ?: emptyList()
+
+        val allRepos: MutableList<RepoDescriptor> = localRepos.toMutableList()
+        val remoteRepos = remoteList ?: emptyList()
+
+        remoteRepos.forEach { remoteRepo ->
+            if (localRepos.find { remoteRepo.id == it.remoteRepo?.id } == null) {
+                allRepos.add(remoteRepo)
+            }
+        }
+
+        return allRepos
     }
 
     fun getRepos(completion: (List<Repo>?) -> Unit) {
