@@ -14,7 +14,6 @@ import org.littlegit.core.model.FileDiff
 import org.littlegit.core.model.RawCommit
 import org.littlegit.client.engine.util.LittleGitCommandCallback
 import org.littlegit.client.engine.util.SimpleCallback
-import org.littlegit.client.engine.util.addAllIf
 import org.littlegit.core.LittleGitCommandResult
 import org.littlegit.core.LittleGitCore
 import org.littlegit.core.commandrunner.GitResult
