@@ -49,13 +49,7 @@ open class AuthController : Controller(), InitableController, AuthTokensProvider
                 userController.updateUserCache(loginResponse.body.user)
             }
 
-            sshController.generateAndAddSshKey {
-                completion(loginResponse)
-
-                if (!it.isSuccess) {
-                    // TODO: Warn the user something went wrong
-                }
-            }
+            completion(loginResponse)
         }
     }
 

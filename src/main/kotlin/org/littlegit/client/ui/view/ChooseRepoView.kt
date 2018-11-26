@@ -118,6 +118,7 @@ class ChooseRepoView : BaseView(fullScreen = false) {
 
     override fun onDock() {
         super.onDock()
+        repos.clear()
         repoController.getUnifiedReposList {
             repos.setAll(it ?: emptyList())
             recentReposHeading.isVisible = repos.isNotEmpty()

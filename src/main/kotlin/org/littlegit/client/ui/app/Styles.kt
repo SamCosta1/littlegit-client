@@ -127,7 +127,7 @@ class Styles : Stylesheet() {
 
         selectableCardView and hover {
             cursor = Cursor.HAND
-            borderColor += box(ThemeColors.DarkPrimary1)
+            borderColor += box(ThemeColors.Accent)
         }
 
         error {
