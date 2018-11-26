@@ -121,4 +121,23 @@ class RepoControllerTests: BaseControllerTest() {
             }
         }
     }
+
+    @Test
+    fun testSetCurrentRepo_WithLocalRepo_IsSuccessful() = runTest { completion ->
+        littleGitCore.repoModifier.initializeRepo()
+
+        val repo = RepoHelper.createRepo(path = repoFolder.root.toPath())
+
+        repoController.setCurrentRepo(repo) { success, foundRepo ->
+            assertTrue(success)
+            assertEquals(repo, foundRepo)
+            assertEquals(repoFolder.root.toPath(), foundRepo.path)
+            assertEquals(privateKeyPath, littleGitCore.configModifier.getSshKeyPath().data)
+
+            repoController.getCurrentRepo { currentRepo ->
+                assertEquals(foundRepo, currentRepo)
+                completion()
+            }
+        }
+    }
 }
