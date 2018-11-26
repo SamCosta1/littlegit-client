@@ -11,7 +11,6 @@ class LittleGitCoreController: Controller() {
 
     private val listeners: MutableList<() -> Unit> = mutableListOf()
 
-
     private val executor = Executors.newSingleThreadExecutor()
     private var littleGitCore: LittleGitCore? = null
     var currentRepoPath: Path? = null; set(newValue) {

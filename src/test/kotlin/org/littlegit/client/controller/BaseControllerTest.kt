@@ -7,6 +7,8 @@ import okhttp3.ResponseBody
 import org.littlegit.client.engine.api.ErrorResponse
 import org.littlegit.client.engine.serialization.MoshiProvider
 import org.littlegit.client.testUtils.BaseAsyncTest
+import org.littlegit.core.LittleGitCore
+import java.io.File
 
 open class BaseControllerTest: BaseAsyncTest() {
 
@@ -21,4 +23,5 @@ open class BaseControllerTest: BaseAsyncTest() {
     fun serializeErrorResponse(error: ErrorResponse): ResponseBody =
             ResponseBody.create(MediaType.parse("application/json"), moshi.adapter(ErrorResponse::class.java).toJson(error))
 
+    fun buildCore(file: File) = LittleGitCore.Builder().setRepoDirectoryPath(file.toPath()).build()
 }

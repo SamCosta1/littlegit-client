@@ -252,7 +252,7 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    private fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
+    fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
         currentLog = emptyList()
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo
@@ -273,11 +273,11 @@ class RepoController: Controller(), InitableController {
     }
 
     private fun setPrivateKeyPath(core: LittleGitCore, completion: LittleGitCommandCallback<Void?>? = null) {
-        sshController.getPrivateKeyPath { path ->
-            if (path != null) {
-                val result = core.configModifier.setSshKeyPath(path)
-                completion?.invoke(result)
-            }
+        val path = sshController.getPrivateKeyPath()
+
+        if (path != null) {
+            val result = core.configModifier.setSshKeyPath(path)
+            completion?.invoke(result)
         }
     }
 
