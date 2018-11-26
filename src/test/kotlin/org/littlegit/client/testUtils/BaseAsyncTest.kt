@@ -1,10 +1,10 @@
 package org.littlegit.client.testUtils
 
-import com.squareup.moshi.Moshi
 import org.awaitility.kotlin.await
 import org.junit.Before
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import org.littlegit.client.engine.db.LocalDbAccessor
-import org.littlegit.client.engine.serialization.MoshiProvider
 import tornadofx.*
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
@@ -14,9 +14,13 @@ abstract class BaseAsyncTest {
 
     lateinit var scope: Scope
 
+    @Rule
+    @JvmField var dbFolder = TemporaryFolder()
+
     @Before
     open fun setup() {
         scope = Scope()
+        addToScope(LocalDbAccessor(Paths.get(dbFolder.root.canonicalPath, "temp.txt")), LocalDbAccessor::class)
         com.sun.javafx.application.PlatformImpl.startup { }
     }
 

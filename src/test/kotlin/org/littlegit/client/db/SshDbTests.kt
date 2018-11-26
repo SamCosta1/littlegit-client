@@ -8,7 +8,7 @@ class SshDbTests: BaseDbTests<SShDb>(SShDb::class) {
 
     @Test
     fun testGetSetSshKeyPath_IsSuccessful() = runTest { completion ->
-        val sshKeyPath = testFolder.root.toPath()
+        val sshKeyPath = dbFolder.root.toPath()
 
         db.setSshKeyPath(sshKeyPath) {
             db.getSshKeyPath {
@@ -21,7 +21,7 @@ class SshDbTests: BaseDbTests<SShDb>(SShDb::class) {
 
     @Test
     fun testGetSetSshKeyPath_WithoutCache_IsSuccessful() = runTest { completion ->
-        val sshKeyPath = testFolder.root.toPath()
+        val sshKeyPath = dbFolder.root.toPath()
 
         db.setSshKeyPath(sshKeyPath) {
             db.clearCache()

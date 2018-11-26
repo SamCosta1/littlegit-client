@@ -6,6 +6,7 @@ import org.junit.rules.TemporaryFolder
 import org.littlegit.client.engine.controller.LittleGitCoreController
 import org.littlegit.client.engine.controller.RepoController
 import org.littlegit.client.engine.controller.SShController
+import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.testUtils.RepoHelper
 import org.littlegit.client.testUtils.upon
 import org.littlegit.core.LittleGitCore
@@ -25,6 +26,7 @@ class RepoControllerTests: BaseControllerTest() {
     @Rule @JvmField var sshFolder = TemporaryFolder()
     @Rule @JvmField var repoFolder = TemporaryFolder()
     private lateinit var privateKeyPath: Path
+    private lateinit var repoDb: RepoDb
 
     override fun setup() {
         super.setup()
@@ -36,7 +38,9 @@ class RepoControllerTests: BaseControllerTest() {
 
         addToScope(sshController, SShController::class)
         addToScope(littleGitCoreController, LittleGitCoreController::class)
+
         repoController = findInTestScope(RepoController::class)
+        repoDb = findInTestScope(RepoDb::class)
     }
 
     @Test
@@ -65,6 +69,56 @@ class RepoControllerTests: BaseControllerTest() {
             assertEquals(privateKeyPath, littleGitCore.configModifier.getSshKeyPath().data)
             assertTrue(littleGitCore.repoReader.isInitialized().data!!)
             completion()
+        }
+    }
+
+    @Test
+    fun testSetCurrentRepo_WithDirectory_NotAlreadyARepo_IsSuccessful() = runTest { completion ->
+
+        repoController.setCurrentRepo(repoFolder.root) { success, repo ->
+            assertTrue(success)
+            assertEquals(repoFolder.root.toPath(), repo.path)
+            assertTrue(littleGitCore.repoReader.isInitialized().data!!)
+
+            repoController.getRepos { allRepos ->
+
+                assertTrue(allRepos?.contains(repo)!!)
+                assertEquals(1, allRepos.size)
+
+                repoController.getCurrentRepo {  currentRepo ->
+                    assertEquals(repo, currentRepo)
+                    completion()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testSetCurrentRepo_WithDirectory_AlreadyARepo_IsSuccessful() = runTest { completion ->
+
+        // Setup: Make the repo already exist
+        littleGitCore.repoModifier.initializeRepo()
+
+        val repo = RepoHelper.createRepo(path = repoFolder.root.toPath())
+        repoDb.updateRepos(listOf(repo)) {
+
+            repoController.setCurrentRepo(repoFolder.root) { success, foundRepo ->
+                assertTrue(success)
+                assertEquals(repo, foundRepo)
+                assertEquals(repoFolder.root.toPath(), foundRepo.path)
+                assertTrue(littleGitCore.repoReader.isInitialized().data!!)
+
+                repoController.getRepos { allRepos ->
+
+                    assertTrue(allRepos?.contains(foundRepo)!!)
+                    assertEquals(1, allRepos.size)
+
+                    repoController.getCurrentRepo { currentRepo ->
+                        assertEquals(foundRepo, currentRepo)
+                        completion()
+                    }
+                }
+            }
         }
     }
 }
