@@ -25,6 +25,7 @@ class SignupView: BaseView() {
     private var passwordError: I18nKey? = null
 
     override val root = borderpane {
+        addClass(Styles.primaryPadding)
         addClass(Styles.primaryBackground)
         top {
             borderpane {

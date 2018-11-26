@@ -134,7 +134,7 @@ class ViewCommitView: BaseView() {
 
             imageView(Image.IcClose) {
                 alignment = Pos.CENTER_RIGHT
-                addClass(Styles.hover)
+                addClass(Styles.handOnHover)
                 onMouseClicked = EventHandler {
                     fire(HideCommitView)
                 }

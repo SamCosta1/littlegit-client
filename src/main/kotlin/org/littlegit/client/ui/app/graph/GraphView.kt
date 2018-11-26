@@ -183,9 +183,11 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private fun highlightHoveredRow(graph: GitGraph, gc: GraphicsContext) {
 
         hoveredRowIndex?.let { index ->
-            val color = branchColours[graph.commitLocations[index - 1].location.x % branchColours.size]
+            try {
+                val color = branchColours[graph.commitLocations[index - 1].location.x % branchColours.size]
 
-            highlightRow(gridTopPoint(Point(0, index)), gc, Color(color.red, color.green, color.blue, 0.2))
+                highlightRow(gridTopPoint(Point(0, index)), gc, Color(color.red, color.green, color.blue, 0.2))
+            } catch (ignored: Exception) {}
         }
     }
 

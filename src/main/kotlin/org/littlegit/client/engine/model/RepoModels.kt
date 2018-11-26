@@ -5,7 +5,11 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.util.*
 
-data class Repo(val localId: String = UUID.randomUUID().toString(), val path: Path, var lastAccessedDate: OffsetDateTime = OffsetDateTime.now(), var remoteRepo: RemoteRepoSummary? = null) {
+interface RepoDescriptor {
+
+}
+
+data class Repo(val localId: String = UUID.randomUUID().toString(), val path: Path, var lastAccessedDate: OffsetDateTime = OffsetDateTime.now(), var remoteRepo: RemoteRepoSummary? = null): RepoDescriptor {
     override fun equals(other: Any?): Boolean {
         return other is Repo &&
                 other.lastAccessedDate.withNano(0) == lastAccessedDate.withNano(0)
@@ -15,7 +19,7 @@ data class Repo(val localId: String = UUID.randomUUID().toString(), val path: Pa
     }
 }
 
-data class RemoteRepoSummary(val id: Int, val repoName: String, val createdDate: OffsetDateTime, val description: String, val cloneUrlPath: String) {
+data class RemoteRepoSummary(val id: Int, val repoName: String, val createdDate: OffsetDateTime, val description: String, val cloneUrlPath: String): RepoDescriptor {
     override fun equals(other: Any?): Boolean {
         return other is RemoteRepoSummary
         && other.id == id

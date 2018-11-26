@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Orientation
 import org.littlegit.client.engine.api.CallFailure
 import org.littlegit.client.engine.controller.AuthController
+import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.util.*
@@ -14,6 +15,7 @@ import tornadofx.*
 class LoginView : BaseView() {
 
     private val authController: AuthController by inject()
+    private val sshController: SShController by inject()
 
     private val model = ViewModel()
     private val email = model.bind { SimpleStringProperty() }
@@ -25,6 +27,7 @@ class LoginView : BaseView() {
 
     override val root = borderpane {
         addClass(Styles.primaryBackground)
+        addClass(Styles.primaryPadding)
         top {
             borderpane {
                 left {
@@ -94,7 +97,15 @@ class LoginView : BaseView() {
                         action {
                             authController.login(email.value, password.value) {
                                 when {
-                                    it.isSuccess -> NavigationUtils.navigateFromLoginFlow(this@LoginView, repoController)
+                                    it.isSuccess -> {
+                                        sshController.generateAndAddSshKey {
+                                            NavigationUtils.navigateFromLoginFlow(this@LoginView, repoController)
+
+                                            if (!it.isSuccess) {
+                                                // TODO: Warn the user something went wrong
+                                            }
+                                        }
+                                    }
                                     it.errorBody is CallFailure.ApiError -> {
                                         if (it.errorBody.errorCode == 401) {
                                             message.value = localizer[I18nKey.IncorrectLoginDetails]

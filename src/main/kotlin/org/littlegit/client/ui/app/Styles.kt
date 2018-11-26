@@ -19,20 +19,19 @@ class Styles : Stylesheet() {
         val primaryPadding by cssclass()
         val bulletText by cssclass()
         val transparentTitle by cssclass()
-        val hover by cssclass()
+        val handOnHover by cssclass()
     }
 
     init {
         primaryBackground {
             backgroundColor += ThemeColors.DarkPrimary2
-            padding = box(15.px)
         }
 
         primaryPadding {
             padding = box(15.px)
         }
 
-        hover {
+        handOnHover {
             cursor = Cursor.HAND
         }
 
@@ -85,6 +84,7 @@ class Styles : Stylesheet() {
             fontSize = 17.px
             fontWeight = FontWeight.BOLD
             padding = box(10.px)
+            cursor = Cursor.HAND
         }
 
         button and pressed {
@@ -125,9 +125,9 @@ class Styles : Stylesheet() {
             borderRadius += box(15.px)
         }
 
-        cardView and selectableCardView and hover {
-            borderWidth += box(2.px)
-            borderColor += box(ThemeColors.DarkPrimary1)
+        selectableCardView and hover {
+            cursor = Cursor.HAND
+            borderColor += box(ThemeColors.Accent)
         }
 
         error {

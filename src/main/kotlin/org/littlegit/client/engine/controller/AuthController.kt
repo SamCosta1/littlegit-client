@@ -11,6 +11,7 @@ open class AuthController : Controller(), InitableController, AuthTokensProvider
     var isLoggedIn: Boolean = false; get() = authTokens != null
 
     private val apiController: ApiController by inject()
+    private val sshController: SShController by inject()
     private val authApi: AuthApi; get() = apiController.authApi
     private val userController: UserController by inject()
     private val localizer: Localizer by inject()
@@ -42,13 +43,13 @@ open class AuthController : Controller(), InitableController, AuthTokensProvider
     }
 
     fun login(email: String, password: String, completion: ApiCallCompletion<LoginResponse>) {
-        authApi.login(LoginRequest(email, password)).enqueue {
-            if (it.isSuccess && it.body != null) {
-                updateAuthTokens(it.body.accessToken, it.body.refreshToken)
-                userController.updateUserCache(it.body.user)
+        authApi.login(LoginRequest(email, password)).enqueue { loginResponse ->
+            if (loginResponse.isSuccess && loginResponse.body != null) {
+                updateAuthTokens(loginResponse.body.accessToken, loginResponse.body.refreshToken)
+                userController.updateUserCache(loginResponse.body.user)
             }
 
-            completion(it)
+            completion(loginResponse)
         }
     }
 

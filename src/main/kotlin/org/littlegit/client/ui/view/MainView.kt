@@ -89,6 +89,7 @@ class MainView : BaseView(fullScreen = true) {
 
                 prefWidth = 400.0
                 addClass(Styles.primaryBackground)
+                addClass(Styles.primaryPadding)
 
                 // Is swapped out for view commit view
                 add(commitView.root)
