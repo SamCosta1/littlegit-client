@@ -11,8 +11,10 @@ import org.littlegit.client.testUtils.RepoHelper
 import org.littlegit.client.testUtils.upon
 import org.littlegit.core.LittleGitCore
 import org.mockito.Mockito.mock
+import java.io.FileNotFoundException
 import java.nio.file.Path
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -61,7 +63,7 @@ class RepoControllerTests: BaseControllerTest() {
     fun testInitializeRepo_RepoAlreadyInitialised_IsSuccessful() = runTest { completion ->
         val repo = RepoHelper.createRepo(path = repoFolder.root.toPath())
         littleGitCore.repoModifier.initializeRepo()
-        
+
         repoController.initialiseRepoIfNeeded(repo) { success, _ ->
             assertTrue(success)
             assertNotNull(littleGitCoreController.currentRepoPath)
@@ -131,12 +133,32 @@ class RepoControllerTests: BaseControllerTest() {
         repoController.setCurrentRepo(repo) { success, foundRepo ->
             assertTrue(success)
             assertEquals(repo, foundRepo)
-            assertEquals(repoFolder.root.toPath(), foundRepo.path)
+            assertEquals(repoFolder.root.toPath(), foundRepo!!.path)
             assertEquals(privateKeyPath, littleGitCore.configModifier.getSshKeyPath().data)
 
             repoController.getCurrentRepo { currentRepo ->
                 assertEquals(foundRepo, currentRepo)
                 completion()
+            }
+        }
+    }
+
+    @Test
+    fun testSetCurrentRepo_NoLongerExists_FailsGracefully() = runTest { completion ->
+        val repoFolder = repoFolder.root.toPath().resolve("NonExistentDirectory")
+
+        val repo = RepoHelper.createRepo(path = repoFolder)
+        repoDb.saveRepo(repo) {
+
+
+            repoController.setCurrentRepo(repo) { success, _ ->
+                assertFalse(success)
+
+                // Check it's been removed from the list
+                repoDb.getAllRepos { repos ->
+                    assertFalse(repos?.contains(repo)!!)
+                    completion()
+                }
             }
         }
     }

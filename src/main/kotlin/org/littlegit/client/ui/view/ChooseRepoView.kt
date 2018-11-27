@@ -97,8 +97,8 @@ class ChooseRepoView : BaseView(fullScreen = false) {
         }
     }
 
-    private fun onRepoChosen(success: Boolean, repo: Repo) {
-        if (success && repo.remoteRepo == null) {
+    private fun onRepoChosen(success: Boolean, repo: Repo?) {
+        if (success && repo  != null && repo.remoteRepo == null) {
             repoController.createRemoteRepo(repo) {
                 moveToMainIfNeeded(it.isSuccess)
             }

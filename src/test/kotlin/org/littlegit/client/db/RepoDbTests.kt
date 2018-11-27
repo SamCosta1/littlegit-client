@@ -5,6 +5,7 @@ import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.testUtils.RepoHelper
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
@@ -126,6 +127,20 @@ class RepoDbTests: BaseDbTests<RepoDb>(RepoDb::class) {
 
                         completion()
                     }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testDeleteRepo_IsSuccessful() = runTest { completion ->
+        val repo = RepoHelper.createRepo("repoName", 10)
+
+        db.saveRepo(repo) {
+            db.deleteRepo(repo) {
+                db.getAllRepos { repos ->
+                    assertFalse(repos!!.contains(repo))
+                    completion()
                 }
             }
         }

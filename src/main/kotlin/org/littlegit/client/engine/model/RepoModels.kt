@@ -10,6 +10,8 @@ interface RepoDescriptor {
 }
 
 data class Repo(val localId: String = UUID.randomUUID().toString(), val path: Path, var lastAccessedDate: OffsetDateTime = OffsetDateTime.now(), var remoteRepo: RemoteRepoSummary? = null): RepoDescriptor {
+    val existsLocally: Boolean; get() = path.toFile().exists()
+
     override fun equals(other: Any?): Boolean {
         return other is Repo &&
                 other.lastAccessedDate.withNano(0) == lastAccessedDate.withNano(0)

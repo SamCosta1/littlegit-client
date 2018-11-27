@@ -20,6 +20,7 @@ import org.littlegit.core.commandrunner.GitResult
 import org.littlegit.core.model.*
 import tornadofx.*
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -183,18 +184,25 @@ class RepoController: Controller(), InitableController {
     fun setCurrentRepo(dir: File, completion: (success: Boolean, repo: Repo) -> Unit) {
         repoDb.getAllRepos { repos ->
 
-            repos?.find { it.path == dir.toPath() }?.let {
-                it.lastAccessedDate = OffsetDateTime.now()
-                currentRepo = it
-                repoDb.updateRepos()
-            } ?: run {
+            val existingRepo = repos?.find { it.path == dir.toPath() }
+
+            if (existingRepo != null) {
+                existingRepo.lastAccessedDate = OffsetDateTime.now()
+                currentRepo = existingRepo
+                repoDb.updateRepo(existingRepo) {
+                    repoDb.setCurrentRepoId(currentRepoId!!)
+                    initialiseRepoIfNeeded(currentRepo!!, completion)
+
+                }
+            } else {
                 val repo = Repo(path = dir.toPath())
-                repoDb.saveRepo(repo)
-                currentRepo = repo
+                repoDb.saveRepo(repo) {
+                    currentRepo = repo
+                    repoDb.setCurrentRepoId(currentRepoId!!)
+                    initialiseRepoIfNeeded(currentRepo!!, completion)
+                }
             }
 
-            repoDb.setCurrentRepoId(currentRepoId!!)
-            initialiseRepoIfNeeded(currentRepo!!, completion)
         }
     }
 
@@ -234,25 +242,44 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    fun setCurrentRepo(repo: RepoDescriptor, completion: (success: Boolean, repo: Repo) -> Unit) {
-        when (repo) {
-            is Repo -> {
-                repoDb.setCurrentRepoId(repo.localId)
-                initialiseRepoIfNeeded(repo, completion)
-            }
-            is RemoteRepoSummary -> {
-                clone(repo) { isSuccess, localRepo ->
-                    repoDb.saveRepo(localRepo) {
-                        repoDb.setCurrentRepoId(localRepo.localId)
-                        completion(true, localRepo)
+    fun setCurrentRepo(repo: RepoDescriptor, completion: (success: Boolean, repo: Repo?) -> Unit) {
+            when (repo) {
+                is Repo -> {
+
+                    try {
+
+                        initialiseRepoIfNeeded(repo) { success, repoRes ->
+                            repoDb.setCurrentRepoId(repo.localId) {
+                                completion(success, repoRes)
+                            }
+                        }
+
+                    } catch (fileNotFoundException: FileNotFoundException) {
+                        // Repo has been moved / deleted so remove it from the list
+
+                        repoDb.deleteRepo(repo) {
+                            completion(false, null)
+                        }
                     }
                 }
+                is RemoteRepoSummary -> {
+                    clone(repo) { isSuccess, localRepo ->
+                        repoDb.saveRepo(localRepo) {
+                            repoDb.setCurrentRepoId(localRepo.localId) { _ ->
+                                completion(true, localRepo)
+                            }
+                        }
+                    }
+                }
+                else -> throw Exception("This shouldn't ever happen!")
             }
-            else -> throw Exception("This shouldn't ever happen!")
-        }
     }
 
     fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
+        if (!repo.existsLocally) {
+            throw FileNotFoundException()
+        }
+
         currentLog = emptyList()
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo

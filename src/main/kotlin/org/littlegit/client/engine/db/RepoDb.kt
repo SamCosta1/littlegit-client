@@ -61,6 +61,17 @@ class RepoDb: LocalDb() {
         }
     }
 
+    fun deleteRepo(repo: Repo, completion: SimpleCallback<Unit>? = null) {
+
+        getAllRepos { repos ->
+            val mutableList = repos?.toMutableList()
+
+            mutableList?.removeAll { it.localId == repo.localId }
+            updateRepos(mutableList, completion)
+
+        }
+    }
+
     // Mainly for testing
     fun clearCache() {
         repos = null
