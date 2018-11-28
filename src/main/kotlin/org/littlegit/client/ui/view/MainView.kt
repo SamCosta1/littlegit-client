@@ -165,6 +165,10 @@ class MainView : BaseView(fullScreen = true) {
 
             viewCommitView.commit = event.commit
         }
+
+        subscribe<RepoNoLongerExistsEvent> {
+            replaceWith<ChooseRepoView>()
+        }
     }
 }
 

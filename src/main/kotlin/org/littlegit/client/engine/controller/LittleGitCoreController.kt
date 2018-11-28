@@ -1,5 +1,6 @@
 package org.littlegit.client.engine.controller
 
+import org.littlegit.client.RepoNoLongerExistsEvent
 import org.littlegit.core.LittleGitCore
 import tornadofx.*
 import java.nio.file.Path
@@ -42,6 +43,7 @@ class LittleGitCoreController: Controller() {
             val repoExists = currentRepoPath!!.toFile().exists()
             if (!repoExists) {
                 listeners.forEach { it.onRepoDirectoryMissing(currentRepoPath) }
+                runLater { fire(RepoNoLongerExistsEvent(currentRepoPath!!)) }
             }
 
             action(if (repoExists) littleGitCore!! else null)
