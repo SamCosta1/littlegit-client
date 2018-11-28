@@ -1,7 +1,5 @@
 package org.littlegit.client.engine.controller
 
-import org.littlegit.client.engine.model.RemoteRepoSummary
-import org.littlegit.client.engine.util.SimpleCallback
 import org.littlegit.core.LittleGitCore
 import tornadofx.*
 import java.nio.file.Path
@@ -9,7 +7,12 @@ import java.util.concurrent.Executors
 
 class LittleGitCoreController: Controller() {
 
-    private val listeners: MutableList<() -> Unit> = mutableListOf()
+    interface LittleGitCoreControllerListener {
+        fun onCommandCompleted(){}
+        fun onRepoDirectoryMissing(currentRepoPath: Path?) {}
+    }
+
+    private val listeners: MutableList<LittleGitCoreControllerListener> = mutableListOf()
 
     private val executor = Executors.newSingleThreadExecutor()
     private var littleGitCore: LittleGitCore? = null
@@ -24,21 +27,27 @@ class LittleGitCoreController: Controller() {
         }
     }
 
-    fun addListener(listener: () -> Unit) {
+    fun addListener(listener: LittleGitCoreControllerListener) {
         listeners.add(listener)
     }
 
     // Should only be called on the main ui thread
-    fun doNext(notifyListeners: Boolean = true, action: (LittleGitCore) -> Unit) {
+    fun doNext(notifyListeners: Boolean = true, action: (LittleGitCore?) -> Unit) {
         if (littleGitCore == null) {
             throw Exception("Littlegit core not initialized")
         }
 
         executor.execute {
-            action(littleGitCore!!)
+
+            val repoExists = currentRepoPath!!.toFile().exists()
+            if (!repoExists) {
+                listeners.forEach { it.onRepoDirectoryMissing(currentRepoPath) }
+            }
+
+            action(if (repoExists) littleGitCore!! else null)
 
             if (notifyListeners) {
-                listeners.forEach { it.invoke() }
+                listeners.forEach { it.onCommandCompleted() }
             }
         }
     }

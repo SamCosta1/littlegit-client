@@ -16,18 +16,22 @@ class UpdateRemoteView: BaseView() {
     private val conflictsView: ResolveConflictView by inject()
 
     init {
-      subscribe<ConflictsResolvedEvent> {
-          littleGitCoreController.doNext {
+        subscribe<ConflictsResolvedEvent> {
+            littleGitCoreController.doNext {
+                if (it == null) {
+                    return@doNext
+                }
 
-              try {
-                  repoController.commitAndPush(it, localizer[I18nKey.AutoCommitMessage])
-                  runLater {
-                      repoController.currentlyUpdating = false
-                      close()
-                  }
-              } catch (e: Exception) {}
-          }
-      }
+                try {
+                    repoController.commitAndPush(it, localizer[I18nKey.AutoCommitMessage])
+                    runLater {
+                        repoController.currentlyUpdating = false
+                        close()
+                    }
+                } catch (e: Exception) {
+                }
+            }
+        }
     }
 
     override val root = vbox {

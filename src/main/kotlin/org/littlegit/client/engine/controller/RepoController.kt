@@ -23,12 +23,13 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.concurrent.schedule
 
-class RepoController: Controller(), InitableController {
+class RepoController: Controller(), InitableController, LittleGitCoreController.LittleGitCoreControllerListener {
 
     companion object {
         private const val REMOTE_NAME = "littlegit-origin"
@@ -67,16 +68,25 @@ class RepoController: Controller(), InitableController {
     val logObservable: ObservableList<RawCommit> = mutableListOf<RawCommit>().observable()
 
     init {
-        littleGitCoreController.addListener(this::onCommandFinished)
+        littleGitCoreController.addListener(this)
         timer.schedule(300, 2000) {
             //updateRepoIfNeeded()
         }
     }
 
-    private fun onCommandFinished() {
+    override fun onCommandCompleted() {
+        super.onCommandCompleted()
         loadLog()
     }
 
+    // THIS IS SYNCHRONOUS SHOULDN'T BE CALLED ON MAIN THREAD
+    override fun onRepoDirectoryMissing(currentRepoPath: Path?) {
+
+        currentRepo?. let {
+            repoDb.deleteRepoSync(it)
+            currentRepo = null
+        }
+    }
 
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
@@ -105,6 +115,10 @@ class RepoController: Controller(), InitableController {
         }
 
         littleGitCoreController.doNext(false) {
+            if (it == null) {
+                return@doNext
+            }
+
             it.repoModifier.fetch(true)
 
             val currentBranch = getCurrentBranch(it)
@@ -124,6 +138,10 @@ class RepoController: Controller(), InitableController {
 
     fun updateToLatestFetched(callback: SimpleCallback<LittleGitCommandResult<MergeResult>>) {
         littleGitCoreController.doNext {
+            if (it == null) {
+                callback.invoke(LittleGitCommandResult.buildError(GitError.NotARepo(emptyList())))
+                return@doNext
+            }
             // First commit any unstaged changes since otherwise we'll be in a world of trouble
 
             val unstagedChanges = stageAllChanges(it)
@@ -160,6 +178,10 @@ class RepoController: Controller(), InitableController {
                 }
             }
         }
+    }
+
+    private fun deleteCurrentRepo() {
+
     }
 
     private fun unifyReposList(localList: List<Repo>?, remoteList: List<RemoteRepoSummary>?): List<RepoDescriptor> {
@@ -238,7 +260,7 @@ class RepoController: Controller(), InitableController {
 
     private fun setOrigin(remoteRepo: RemoteRepoSummary) {
         littleGitCoreController.doNext {
-            it.repoModifier.addRemote(REMOTE_NAME, remoteRepo.cloneUrlPath)
+            it?.repoModifier?.addRemote(REMOTE_NAME, remoteRepo.cloneUrlPath)
         }
     }
 
@@ -246,21 +268,11 @@ class RepoController: Controller(), InitableController {
             when (repo) {
                 is Repo -> {
 
-                    try {
-
                         initialiseRepoIfNeeded(repo) { success, repoRes ->
                             repoDb.setCurrentRepoId(repo.localId) {
                                 completion(success, repoRes)
                             }
                         }
-
-                    } catch (fileNotFoundException: FileNotFoundException) {
-                        // Repo has been moved / deleted so remove it from the list
-
-                        repoDb.deleteRepo(repo) {
-                            completion(false, null)
-                        }
-                    }
                 }
                 is RemoteRepoSummary -> {
                     clone(repo) { isSuccess, localRepo ->
@@ -276,16 +288,15 @@ class RepoController: Controller(), InitableController {
     }
 
     fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
-        if (!repo.existsLocally) {
-            throw FileNotFoundException()
-        }
-
         currentLog = emptyList()
         littleGitCoreController.currentRepoPath = repo.path
         currentRepo = repo
 
         littleGitCoreController.doNext { core ->
-
+            if (core == null) {
+                completion(false, repo)
+                return@doNext
+            }
 
             if (core.repoReader.isInitialized().data == true) {
                 setPrivateKeyPath(core)
@@ -310,6 +321,10 @@ class RepoController: Controller(), InitableController {
 
     fun push() {
         littleGitCoreController.doNext {
+            if (it == null) {
+                return@doNext
+            }
+
             it.repoReader.getBranches().data?.find { it.isHead }?.let { currentBranch ->
                 val result = it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
             }
@@ -318,6 +333,10 @@ class RepoController: Controller(), InitableController {
 
     fun stageAllAndCommit(message: String, callback: () -> Unit) {
         littleGitCoreController.doNext {
+            if (it == null) {
+                callback()
+                return@doNext
+            }
             val unstagedChanges = stageAllChanges(it)
 
             if (unstagedChanges?.hasTrackedChanges == true || unstagedChanges?.unTrackedFiles?.isNotEmpty() == true) {
@@ -338,6 +357,11 @@ class RepoController: Controller(), InitableController {
 
         initialiseRepoIfNeeded(repo) { _,_ ->
             littleGitCoreController.doNext(true) {
+                if (it == null) {
+                    callback(false, repo)
+                    return@doNext
+                }
+
                 it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
                 it.repoModifier.fetch(all = true)
                 val branches = it.repoReader.getBranches().data
@@ -382,6 +406,10 @@ class RepoController: Controller(), InitableController {
 
     fun loadLog() {
         littleGitCoreController.doNext(notifyListeners = false) {
+            if (it == null) {
+                return@doNext
+            }
+
             val commits = it.repoReader.getCommitList().data ?: emptyList()
             runLater {
                 currentLog = commits
@@ -396,6 +424,11 @@ class RepoController: Controller(), InitableController {
         }
 
         littleGitCoreController.doNext {
+            if (it == null) {
+                completion.invoke(LittleGitCommandResult.buildError(GitError.NotARepo(emptyList())))
+                return@doNext
+            }
+
             Files.write(file.file.toPath(), file.content, Charset.forName("UTF-8"))
 
             val stageResult = it.repoModifier.stageFile(file.file)

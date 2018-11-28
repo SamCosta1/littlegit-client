@@ -76,6 +76,15 @@ class RepoDb: LocalDb() {
     fun clearCache() {
         repos = null
     }
+
+    fun deleteRepoSync(repo: Repo) {
+        val allRepos = repos ?: readList(REPOS_KEY, Repo::class.java) ?: emptyList()
+        val mutable = allRepos.toMutableList()
+
+        mutable.removeAll { it.localId == repo.localId }
+        writeList(REPOS_KEY, mutable, Repo::class.java)
+        repos = mutable
+    }
 }
 
 fun String.inject(vararg params: Any) = MessageFormat.format(this, *params)!!

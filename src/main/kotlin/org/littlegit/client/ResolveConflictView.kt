@@ -28,11 +28,11 @@ class ResolveConflictView: BaseView() {
     private fun updateConflictFiles() {
         val conflictFile = conflicts?.conflictFiles?.get(currentFileIndex) ?: return
         littleGitCoreController.doNext {
-            val file = it.repoReader.getFile("master", conflictFile.filePath.toFile())
+            val file = it?.repoReader?.getFile("master", conflictFile.filePath.toFile())
 
             runLater {
-                file1View.file = file.data
-                file2View.file = file.data
+                file1View.file = file?.data
+                file2View.file = file?.data
             }
         }
     }
