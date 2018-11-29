@@ -46,6 +46,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private val commitWidth = 35.0
     private val leftBarWidth = 10.0
     private val arrowSize = 5
+    private val checkoutButtonWidth = gridSize.toDouble() * 3
 
     private val textStartXPos = gridSize / 3.0
     private val textEndXPos = 6.0 * gridSize
@@ -68,10 +69,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         restoreState()
         repoController.logObservable.addListener(ListChangeListener {
-            scrollY = 0.0
             reGenerateGraph()
         })
-
 
         canvasPane.onScroll = this@GraphView
         canvasPane.onMouseMoved = EventHandler { mouseMoved(it) }
@@ -81,7 +80,13 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
                 val index = rowIndexFromEvent(event) - 1
 
-                if (index >= 0 && index < graph.commitLocations.size) {
+                if (index < 0 || index >= graph.commitLocations.size) {
+                    return@let
+                }
+
+                if (isClickOnCheckoutButton(index, event)) {
+                    repoController.checkoutCommit(graph.commitLocations[index].commit) {}
+                } else {
                     val showCommitEvent = ShowCommitEvent(graph.commitLocations[index].commit)
                     fire(showCommitEvent)
                 }
@@ -96,13 +101,18 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         reGenerateGraph()
     }
 
+    private fun isClickOnCheckoutButton(index: Int, event: MouseEvent): Boolean {
+        return event.x > canvasPane.width - checkoutButtonWidth && index >= 0 && index < graph?.commitLocations?.size ?: 0
+    }
+
     private fun reGenerateGraph() {
         runAsync {
             GitGraph(repoController.currentLog)
         } ui {
             if (!it.isEmpty) {
                 graph = it
-                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
+                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y - scrollY
+                println(lastYPos.toString() + "   size:" + graph?.commitLocations?.size + " scrolly:" + scrollY + "   " + graph?.commitLocations?.lastOrNull())
                 drawGraph(canvasPane.canvas.graphicsContext2D)
             }
         }
@@ -170,6 +180,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         if (headLocation?.y != hoveredRowIndex) {
             highlightHoveredRow(graph, gc)
+            drawCheckoutButton(gc)
         }
 
         graph.connections.forEach {
@@ -196,6 +207,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val position = gridTopPoint(headCommit.location)
         highlightRow(position, gc, HighlightColor)
 
+
         val oldAlign = gc.textAlign
         val oldFill = gc.fill
         gc.textAlign = TextAlignment.RIGHT
@@ -205,6 +217,20 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.textAlign = oldAlign
         gc.fill = oldFill
         return headCommit.location
+    }
+
+    private fun drawCheckoutButton(gc: GraphicsContext) {
+        hoveredRowIndex?.let { index ->
+            val oldStroke = gc.stroke
+            val oldAlignment = gc.textAlign
+            gc.stroke = ThemeColors.Accent
+            gc.textAlign = TextAlignment.CENTER
+            gc.font = Font.font(16.0)
+            gc.strokeRoundRect(canvasPane.width - checkoutButtonWidth, gridTopPoint(Point(0, index)).y, checkoutButtonWidth, gridSize.toDouble(), 15.0, 15.0)
+            gc.strokeText(localizer[I18nKey.GoToThisVersion], canvasPane.width - checkoutButtonWidth / 2, gridCenterPoint(Point(0, index)).y)
+            gc.stroke = oldStroke
+            gc.textAlign = oldAlignment
+        }
     }
 
     private fun highlightRow(position: Point2D.Double, gc: GraphicsContext, color: Color) {
