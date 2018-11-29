@@ -168,6 +168,8 @@ class RepoControllerTests: BaseControllerTest() {
         repoController.setCurrentRepo(repoFolder.root) { _, _ ->
             val testFile = "the_shire.txt"
 
+            commandHelper.initConfig()
+            
             // Create some commits
             val commitMessage1 = "Add-the-shire"
             commandHelper.writeToFile(testFile, "Th")
