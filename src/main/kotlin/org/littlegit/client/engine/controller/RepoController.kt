@@ -354,10 +354,10 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             }
 
             val branches = it.repoReader.getBranches().data
-            var branch = branches?.find { it.commitHash == commit.hash }
+            var branch = branches?.find { it is LocalBranch && it.commitHash == commit.hash }
 
             if (branch == null) {
-                val createResult = it.repoModifier.createBranch(commit.hash, commit)
+                val createResult = it.repoModifier.createBranch("Branch-${commit.hash}", commit)
 
                 if (createResult.isError) {
                     callback(createResult)

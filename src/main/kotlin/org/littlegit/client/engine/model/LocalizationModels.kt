@@ -69,6 +69,7 @@ enum class I18nKey(val key: String) {
     YouDeleted("you_deleted"),
     YouModified("you_changed"),
     YouAreHere("you_are_here"),
+    GoToThisVersion("go_to_this_version"),
     Unknown("-");
 
 

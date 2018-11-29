@@ -46,6 +46,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private val commitWidth = 35.0
     private val leftBarWidth = 10.0
     private val arrowSize = 5
+    private val checkoutButtonWidth = gridSize.toDouble() * 3
 
     private val textStartXPos = gridSize / 3.0
     private val textEndXPos = 6.0 * gridSize
@@ -71,7 +72,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
             scrollY = 0.0
             reGenerateGraph()
         })
-
 
         canvasPane.onScroll = this@GraphView
         canvasPane.onMouseMoved = EventHandler { mouseMoved(it) }
@@ -103,7 +103,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     }
 
     private fun isClickOnCheckoutButton(index: Int, event: MouseEvent): Boolean {
-        return true
+        return event.x > canvasPane.width - checkoutButtonWidth && index >= 0 && index < graph?.commitLocations?.size ?: 0
     }
 
     private fun reGenerateGraph() {
@@ -180,6 +180,7 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         if (headLocation?.y != hoveredRowIndex) {
             highlightHoveredRow(graph, gc)
+            drawCheckoutButton(gc)
         }
 
         graph.connections.forEach {
@@ -206,7 +207,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val position = gridTopPoint(headCommit.location)
         highlightRow(position, gc, HighlightColor)
 
-        drawCheckoutButton(position, gc)
 
         val oldAlign = gc.textAlign
         val oldFill = gc.fill
@@ -219,8 +219,16 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         return headCommit.location
     }
 
-    private fun drawCheckoutButton(position: Point2D.Double, gc: GraphicsContext) {
-        gc.fillRect(0.0, 0.0, gridSize.toDouble(), gridSize.toDouble())
+    private fun drawCheckoutButton(gc: GraphicsContext) {
+        hoveredRowIndex?.let { index ->
+            val oldStroke = gc.stroke
+            gc.stroke = ThemeColors.Accent
+
+            gc.font = Font.font(16.0)
+            gc.strokeRoundRect(canvasPane.width - checkoutButtonWidth, gridTopPoint(Point(0, index)).y, checkoutButtonWidth, gridSize.toDouble(), 15.0, 15.0)
+            gc.strokeText(localizer[I18nKey.GoToThisVersion], canvasPane.width - checkoutButtonWidth, gridCenterPoint(Point(0, index)).y)
+            gc.stroke = oldStroke
+        }
     }
 
     private fun highlightRow(position: Point2D.Double, gc: GraphicsContext, color: Color) {
