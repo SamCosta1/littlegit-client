@@ -97,8 +97,8 @@ class ChooseRepoView : BaseView(fullScreen = false) {
         }
     }
 
-    private fun onRepoChosen(success: Boolean, repo: Repo) {
-        if (success && repo.remoteRepo == null) {
+    private fun onRepoChosen(success: Boolean, repo: Repo?) {
+        if (success && repo  != null && repo.remoteRepo == null) {
             repoController.createRemoteRepo(repo) {
                 moveToMainIfNeeded(it.isSuccess)
             }
@@ -112,6 +112,7 @@ class ChooseRepoView : BaseView(fullScreen = false) {
         if (move) {
             replaceWith(MainView::class)
         } else {
+            reloadReposList()
             isLoading.value = false
         }
     }
@@ -119,11 +120,14 @@ class ChooseRepoView : BaseView(fullScreen = false) {
     override fun onDock() {
         super.onDock()
         repos.clear()
+        reloadReposList()
+    }
+
+    private fun reloadReposList() {
         repoController.getUnifiedReposList {
             repos.setAll(it ?: emptyList())
             recentReposHeading.isVisible = repos.isNotEmpty()
         }
-
     }
 
     private fun logout() {

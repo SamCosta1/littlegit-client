@@ -15,6 +15,14 @@ open class SShDb: LocalDb() {
         writeAsync(DB_KEY, path, Path::class.java, completion)
     }
 
+    open fun getSshKeyPath(): Path? {
+        if (sshKeyPath != null) {
+            return sshKeyPath
+        }
+
+        return read(DB_KEY, Path::class.java)
+    }
+
     open fun getSshKeyPath(completion: SimpleCallback<Path?>) {
         if (sshKeyPath != null) {
             completion(sshKeyPath)

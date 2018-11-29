@@ -13,14 +13,11 @@ open class BaseDbTests<T : LocalDb>(private val clazz: KClass<T>): BaseAsyncTest
 
     lateinit var db: T; private set
 
-    @Rule
-    @JvmField var testFolder = TemporaryFolder()
 
     @Before
     override fun setup() {
         super.setup()
 
-        addToScope(LocalDbAccessor(Paths.get(testFolder.root.canonicalPath, "temp.txt")), LocalDbAccessor::class)
         db = findInTestScope(clazz)
 
     }

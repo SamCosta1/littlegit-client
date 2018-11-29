@@ -52,6 +52,10 @@ class ViewCommitView: BaseView() {
         isLoading.value = true
 
         littleGitCoreController.doNext(false) {
+            if (it == null) {
+                return@doNext
+            }
+
             val result = it.repoReader.getFullCommit(value)
             runLater {
                 isLoading.value = false

@@ -19,7 +19,7 @@ import java.nio.file.attribute.PosixFilePermissions
 import java.util.*
 
 
-class SShController: Controller() {
+open class SShController: Controller() {
 
     private val sshDb: SShDb by inject()
     private val userApi = find(ApiController::class.java).userApi
@@ -29,10 +29,6 @@ class SShController: Controller() {
         sshDb.getSshKeyPath {  keyPath ->
             completion(keyPath?.toFile()?.exists() == true)
         }
-    }
-
-    fun getSshKeyPath(completion: SimpleCallback<Path?>) {
-        sshDb.getSshKeyPath(completion)
     }
 
     fun generateAndAddSshKey(path: Path? = null, completion: ApiCallCompletion<Void>) {
@@ -76,14 +72,9 @@ class SShController: Controller() {
     fun getPublicKeyPath(sshPath: Path) = sshPath.resolve("id_rsa.pub").normalize()
     fun getPrivateKeyPath(sshPath: Path) = sshPath.resolve("id_rsa").normalize()
 
-    fun getPrivateKeyPath(completion: SimpleCallback<Path?>) {
-        getSshKeyPath { it ->
-            if (it != null) {
-                completion(getPrivateKeyPath(it))
-            } else {
-                completion(null)
-            }
-        }
+    open fun getPrivateKeyPath(): Path? {
+        val sshKeyPath = sshDb.getSshKeyPath() ?: return null
+        return getPrivateKeyPath(sshKeyPath)
     }
 
     // Check if the user already uses the default ssh keys because if they do, we'll leave them alone and put ours elsewhere
