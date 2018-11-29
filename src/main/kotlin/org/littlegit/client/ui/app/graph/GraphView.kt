@@ -222,12 +222,14 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
     private fun drawCheckoutButton(gc: GraphicsContext) {
         hoveredRowIndex?.let { index ->
             val oldStroke = gc.stroke
+            val oldAlignment = gc.textAlign
             gc.stroke = ThemeColors.Accent
-
+            gc.textAlign = TextAlignment.CENTER
             gc.font = Font.font(16.0)
             gc.strokeRoundRect(canvasPane.width - checkoutButtonWidth, gridTopPoint(Point(0, index)).y, checkoutButtonWidth, gridSize.toDouble(), 15.0, 15.0)
-            gc.strokeText(localizer[I18nKey.GoToThisVersion], canvasPane.width - checkoutButtonWidth, gridCenterPoint(Point(0, index)).y)
+            gc.strokeText(localizer[I18nKey.GoToThisVersion], canvasPane.width - checkoutButtonWidth / 2, gridCenterPoint(Point(0, index)).y)
             gc.stroke = oldStroke
+            gc.textAlign = oldAlignment
         }
     }
 
