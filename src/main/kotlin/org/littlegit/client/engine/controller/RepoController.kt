@@ -347,6 +347,37 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
         }
     }
 
+    fun checkoutCommit(commit: RawCommit, callback: LittleGitCommandCallback<Branch?>) {
+        littleGitCoreController.doNext {
+            if (it == null) {
+                return@doNext
+            }
+
+            val branches = it.repoReader.getBranches().data
+            var branch = branches?.find { it.commitHash == commit.hash }
+
+            if (branch == null) {
+                val createResult = it.repoModifier.createBranch(commit.hash, commit)
+
+                if (createResult.isError) {
+                    callback(createResult)
+                    return@doNext
+                } else {
+                    branch = createResult.data
+                }
+            }
+            
+            val result = it.repoModifier.checkoutBranch(branch!!, true)
+
+            if (result.isError) {
+                result.result
+                callback(LittleGitCommandResult(null, result.result))
+            } else {
+                callback(LittleGitCommandResult(branch, result.result))
+            }
+        }
+    }
+
     // TODO: Move this into the core library which is where it probably should be
     private fun clone(remoteRepoSummary: RemoteRepoSummary, callback: (success: Boolean, repo: Repo) -> Unit) {
         val path = Paths.get(System.getProperty("user.home"), remoteRepoSummary.repoName)

@@ -8,21 +8,19 @@ import org.littlegit.client.engine.controller.RepoController
 import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.testUtils.RepoHelper
+import org.littlegit.client.testUtils.TestCommandHelper
 import org.littlegit.client.testUtils.upon
 import org.littlegit.core.LittleGitCore
 import org.mockito.Mockito.mock
-import java.io.FileNotFoundException
 import java.nio.file.Path
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class RepoControllerTests: BaseControllerTest() {
 
     private val littleGitCoreController = LittleGitCoreController()
     private lateinit var repoController: RepoController
     private lateinit var littleGitCore: LittleGitCore
+    private lateinit var commandHelper: TestCommandHelper
 
     private lateinit var sshController: SShController
     @Rule @JvmField var sshFolder = TemporaryFolder()
@@ -33,6 +31,7 @@ class RepoControllerTests: BaseControllerTest() {
     override fun setup() {
         super.setup()
 
+        commandHelper = TestCommandHelper(repoFolder.root)
         sshController = mock(SShController::class.java)
         littleGitCore = buildCore(repoFolder.root)
         privateKeyPath = sshFolder.root.toPath().resolve("id_rsa")
@@ -159,6 +158,49 @@ class RepoControllerTests: BaseControllerTest() {
                     assertFalse(repos?.contains(repo)!!)
                     completion()
                 }
+            }
+        }
+    }
+
+    @Test
+    fun testCheckoutPreviousCommit_IsSuccessful() = runTest { completion ->
+
+        repoController.setCurrentRepo(repoFolder.root) { _, _ ->
+            val testFile = "the_shire.txt"
+
+            // Create some commits
+            val commitMessage1 = "Add-the-shire"
+            commandHelper.writeToFile(testFile, "Th")
+                    .addAll()
+                    .commit(commitMessage1)
+
+            val commitMessage2 = "Add-mordor"
+            commandHelper.writeToFile(testFile, "This")
+                    .addAll()
+                    .commit(commitMessage2)
+
+            val commitMessage3 = "Add-gondor"
+            commandHelper.writeToFile(testFile, "Thist")
+                    .addAll()
+                    .commit(commitMessage3)
+
+            val commits = littleGitCore.repoReader.getCommitList()
+            assertEquals(3, commits.data?.size)
+
+            val headCommit = commits.data?.find { it.isHead }
+            assertEquals(commitMessage3, headCommit?.commitSubject)
+
+            // Now checkout back to the first commit
+            val targetCommit = commits.data?.find { it.commitSubject == commitMessage1 }
+            assertNotNull(targetCommit); targetCommit!!
+
+            repoController.checkoutCommit(targetCommit) {
+                val updatedCommits = littleGitCore.repoReader.getCommitList()
+                val newHead = updatedCommits.data?.find { it.isHead }
+
+                assertEquals(newHead?.hash, targetCommit.hash)
+                assertNotEquals(headCommit?.hash, newHead?.hash)
+                completion()
             }
         }
     }
