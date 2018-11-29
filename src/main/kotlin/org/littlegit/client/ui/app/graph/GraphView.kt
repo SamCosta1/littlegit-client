@@ -69,7 +69,6 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
         restoreState()
         repoController.logObservable.addListener(ListChangeListener {
-            scrollY = 0.0
             reGenerateGraph()
         })
 
@@ -112,7 +111,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         } ui {
             if (!it.isEmpty) {
                 graph = it
-                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y
+                lastYPos = gridCenterPoint(graph?.commitLocations?.lastOrNull()?.location ?: Point()).y - scrollY
+                println(lastYPos.toString() + "   size:" + graph?.commitLocations?.size + " scrolly:" + scrollY + "   " + graph?.commitLocations?.lastOrNull())
                 drawGraph(canvasPane.canvas.graphicsContext2D)
             }
         }
