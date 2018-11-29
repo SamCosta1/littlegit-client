@@ -180,10 +180,6 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
         }
     }
 
-    private fun deleteCurrentRepo() {
-
-    }
-
     private fun unifyReposList(localList: List<Repo>?, remoteList: List<RemoteRepoSummary>?): List<RepoDescriptor> {
         val localRepos = localList ?: emptyList()
 
