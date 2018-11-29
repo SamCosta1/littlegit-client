@@ -81,7 +81,13 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
 
                 val index = rowIndexFromEvent(event) - 1
 
-                if (index >= 0 && index < graph.commitLocations.size) {
+                if (index < 0 || index >= graph.commitLocations.size) {
+                    return@let
+                }
+
+                if (isClickOnCheckoutButton(index, event)) {
+                    repoController.checkoutCommit(graph.commitLocations[index].commit) {}
+                } else {
                     val showCommitEvent = ShowCommitEvent(graph.commitLocations[index].commit)
                     fire(showCommitEvent)
                 }
@@ -94,6 +100,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         }
 
         reGenerateGraph()
+    }
+
+    private fun isClickOnCheckoutButton(index: Int, event: MouseEvent): Boolean {
+        return true
     }
 
     private fun reGenerateGraph() {
@@ -196,6 +206,8 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         val position = gridTopPoint(headCommit.location)
         highlightRow(position, gc, HighlightColor)
 
+        drawCheckoutButton(position, gc)
+
         val oldAlign = gc.textAlign
         val oldFill = gc.fill
         gc.textAlign = TextAlignment.RIGHT
@@ -205,6 +217,10 @@ class GraphView: BaseView(), EventHandler<ScrollEvent> {
         gc.textAlign = oldAlign
         gc.fill = oldFill
         return headCommit.location
+    }
+
+    private fun drawCheckoutButton(position: Point2D.Double, gc: GraphicsContext) {
+        gc.fillRect(0.0, 0.0, gridSize.toDouble(), gridSize.toDouble())
     }
 
     private fun highlightRow(position: Point2D.Double, gc: GraphicsContext, color: Color) {
