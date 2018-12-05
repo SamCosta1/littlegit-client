@@ -122,9 +122,9 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             it.repoModifier.fetch(true)
 
             littleGitCoreController.doNext { _ ->
-                val currentBranch = getCurrentBranch(it)
+                val currentBranch: LocalBranch? = getCurrentBranch(it)
 
-                if (currentBranch?.upstream != null) {
+                if (currentBranch?.upstream != null && currentBranch.commitHash != currentBranch.upstream?.commitHash) {
                     val changesToRemote = it.repoReader.getLogBetween(currentBranch, currentBranch.upstream!!)
                     if (changesToRemote.data?.isEmpty() == false) {
                         runLater { fire(UpdateAvailable) }

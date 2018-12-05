@@ -4,6 +4,7 @@ import org.littlegit.client.RepoNoLongerExistsEvent
 import org.littlegit.core.LittleGitCore
 import tornadofx.*
 import java.nio.file.Path
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class LittleGitCoreController: Controller() {
