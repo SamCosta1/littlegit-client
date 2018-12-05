@@ -16,6 +16,8 @@ class LittleGitCoreController: Controller() {
     private val listeners: MutableList<LittleGitCoreControllerListener> = mutableListOf()
 
     private val executor = Executors.newSingleThreadExecutor()
+    private val longRunningExecutor = Executors.newSingleThreadExecutor()
+
     private var littleGitCore: LittleGitCore? = null
     var currentRepoPath: Path? = null; set(newValue) {
         field = newValue
@@ -32,12 +34,24 @@ class LittleGitCoreController: Controller() {
         listeners.add(listener)
     }
 
+    /**
+     * Some tasks like fetch can be very long running. These are to be done on this executor so not to slow down the main one
+     * Only operations which do not have an effect on anything else should be run on this thread e.g. fetching
+     */
+    fun doNextLongRunning(notifyListeners: Boolean = true, action: (LittleGitCore?) -> Unit) {
+
+        execute(longRunningExecutor, action, notifyListeners)
+    }
+
     // Should only be called on the main ui thread
     fun doNext(notifyListeners: Boolean = true, action: (LittleGitCore?) -> Unit) {
+        execute(executor, action, notifyListeners)
+    }
+
+    private fun execute(executor: Executor, action: (LittleGitCore?) -> Unit, notifyListeners: Boolean) {
         if (littleGitCore == null) {
             throw Exception("Littlegit core not initialized")
         }
-
         executor.execute {
 
             val repoExists = currentRepoPath!!.toFile().exists()

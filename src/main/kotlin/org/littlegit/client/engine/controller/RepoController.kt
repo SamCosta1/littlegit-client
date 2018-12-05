@@ -69,8 +69,8 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
 
     init {
         littleGitCoreController.addListener(this)
-        timer.schedule(300, 2000) {
-            //updateRepoIfNeeded()
+        timer.schedule(300, 4000) {
+            updateRepoIfNeeded()
         }
     }
 
@@ -114,19 +114,21 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             return
         }
 
-        littleGitCoreController.doNext(false) {
+        littleGitCoreController.doNextLongRunning (false) {
             if (it == null) {
-                return@doNext
+                return@doNextLongRunning
             }
 
             it.repoModifier.fetch(true)
 
-            val currentBranch = getCurrentBranch(it)
+            littleGitCoreController.doNext { _ ->
+                val currentBranch = getCurrentBranch(it)
 
-            if (currentBranch?.upstream != null) {
-                val changesToRemote = it.repoReader.getLogBetween(currentBranch, currentBranch.upstream!!)
-                if (changesToRemote.data?.isEmpty() == false) {
-                    fire(UpdateAvailable)
+                if (currentBranch?.upstream != null) {
+                    val changesToRemote = it.repoReader.getLogBetween(currentBranch, currentBranch.upstream!!)
+                    if (changesToRemote.data?.isEmpty() == false) {
+                        runLater { fire(UpdateAvailable) }
+                    }
                 }
             }
         }
@@ -263,12 +265,11 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     fun setCurrentRepo(repo: RepoDescriptor, completion: (success: Boolean, repo: Repo?) -> Unit) {
             when (repo) {
                 is Repo -> {
-
-                        initialiseRepoIfNeeded(repo) { success, repoRes ->
-                            repoDb.setCurrentRepoId(repo.localId) {
-                                completion(success, repoRes)
-                            }
+                    initialiseRepoIfNeeded(repo) { success, repoRes ->
+                        repoDb.setCurrentRepoId(repo.localId) {
+                            completion(success, repoRes)
                         }
+                    }
                 }
                 is RemoteRepoSummary -> {
                     clone(repo) { isSuccess, localRepo ->

@@ -2,6 +2,7 @@ package org.littlegit.client
 
 import org.littlegit.client.ui.view.BaseView
 import org.littlegit.client.ui.view.FileView
+import org.littlegit.core.model.ConflictFileType
 import org.littlegit.core.model.MergeResult
 import tornadofx.*
 
@@ -28,11 +29,11 @@ class ResolveConflictView: BaseView() {
     private fun updateConflictFiles() {
         val conflictFile = conflicts?.conflictFiles?.get(currentFileIndex) ?: return
         littleGitCoreController.doNext {
-            val file = it?.repoReader?.getFile("master", conflictFile.filePath.toFile())
-
+            val file1 = it?.repoReader?.getConflictFileContent(conflictFile, ConflictFileType.Ours)
+            val file2 = it?.repoReader?.getConflictFileContent(conflictFile, ConflictFileType.Theirs)
             runLater {
-                file1View.file = file?.data
-                file2View.file = file?.data
+                file1View.file = file1?.data
+                file2View.file = file2?.data
             }
         }
     }
