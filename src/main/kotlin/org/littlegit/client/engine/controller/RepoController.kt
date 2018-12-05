@@ -351,7 +351,7 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             }
 
             val branches = it.repoReader.getBranches().data
-            var branch = branches?.find { it is LocalBranch && it.commitHash == commit.hash }
+            var branch = branches?.find { it.commitHash == commit.hash }
 
             if (branch == null) {
                 val createResult = it.repoModifier.createBranch("Branch-${commit.hash}", commit)
@@ -393,12 +393,15 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
                 it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
                 it.repoModifier.fetch(all = true)
                 val branches = it.repoReader.getBranches().data
-                val branch = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
-
-                if (branch == null) {
+                val remoteMaster = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
+                if (remoteMaster == null || remoteMaster !is RemoteBranch) {
                     runLater { callback(false, repo) }
                 } else {
-                    val result = it.repoModifier.merge(branch)
+                    val result = it.repoModifier.merge(remoteMaster)
+
+                    // There's now only one local branch, the newly created one
+                    val currentBranch = it.repoReader.getBranches().data?.find { it is LocalBranch } as LocalBranch
+                    it.repoModifier.setRemoteTracking(currentBranch, remoteMaster)
                      runLater { callback(!result.isError, repo) }
                 }
             }
