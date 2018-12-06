@@ -147,7 +147,6 @@ class MainView : BaseView(fullScreen = true) {
             repoController.stageAllAndCommit(event.message) {
                 isLoading.value = false
                 commitView.notifyCommitFinished()
-
             }
         }
 

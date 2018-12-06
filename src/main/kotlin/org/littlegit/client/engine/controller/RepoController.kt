@@ -243,25 +243,25 @@ class RepoController: Controller(), InitableController {
     }
 
     fun setCurrentRepo(repo: RepoDescriptor, completion: (success: Boolean, repo: Repo?) -> Unit) {
-            when (repo) {
-                is Repo -> {
-                    initialiseRepoIfNeeded(repo) { success, repoRes ->
-                        repoDb.setCurrentRepoId(repo.localId) {
-                            completion(success, repoRes)
-                        }
+        when (repo) {
+            is Repo -> {
+                initialiseRepoIfNeeded(repo) { success, repoRes ->
+                    repoDb.setCurrentRepoId(repo.localId) {
+                        completion(success, repoRes)
                     }
                 }
-                is RemoteRepoSummary -> {
-                    clone(repo) { isSuccess, localRepo ->
-                        repoDb.saveRepo(localRepo) {
-                            repoDb.setCurrentRepoId(localRepo.localId) { _ ->
-                                completion(true, localRepo)
-                            }
-                        }
-                    }
-                }
-                else -> throw Exception("This shouldn't ever happen!")
             }
+            is RemoteRepoSummary -> {
+                clone(repo) { isSuccess, localRepo ->
+                    repoDb.saveRepo(localRepo) {
+                        repoDb.setCurrentRepoId(localRepo.localId) { _ ->
+                            completion(true, localRepo)
+                        }
+                    }
+                }
+            }
+            else -> throw Exception("This shouldn't ever happen!")
+        }
     }
 
     fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
@@ -356,9 +356,8 @@ class RepoController: Controller(), InitableController {
         }
     }
 
-    // TODO: Move this into the core library which is where it probably should be
-    private fun clone(remoteRepoSummary: RemoteRepoSummary, callback: (success: Boolean, repo: Repo) -> Unit) {
-        val path = Paths.get(System.getProperty("user.home"), remoteRepoSummary.repoName)
+    fun clone(remoteRepoSummary: RemoteRepoSummary, localPath: Path? = null, callback: (success: Boolean, repo: Repo) -> Unit) {
+        val path = localPath ?: Paths.get(System.getProperty("user.home"), remoteRepoSummary.repoName)
         Files.createDirectories(path)
 
         littleGitCoreController.currentRepoPath = path
@@ -372,7 +371,13 @@ class RepoController: Controller(), InitableController {
                 }
 
                 it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
-                it.repoModifier.fetch(all = true)
+                val fetchResult = it.repoModifier.fetch(all = true, quiet = true)
+
+                if (fetchResult.isError) {
+                    callback(false, repo)
+                    return@doNext
+                }
+
                 val branches = it.repoReader.getBranches().data
                 val remoteMaster = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
                 if (remoteMaster == null || remoteMaster !is RemoteBranch) {
