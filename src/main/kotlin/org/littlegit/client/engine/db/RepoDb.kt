@@ -33,10 +33,14 @@ class RepoDb: LocalDb() {
     }
 
     fun updateRepos(allRepos: List<Repo>? = repos, completion: SimpleCallback<Unit>? = null) {
-        allRepos?.let {
-            repos = allRepos
+        repos = allRepos
+
+        if (allRepos == null) {
+            completion?.invoke(Unit)
+        } else {
             writeListAsync(REPOS_KEY, allRepos, Repo::class.java, completion)
         }
+
     }
 
     fun getCurrentRepoId(completion: (String?) -> Unit) {

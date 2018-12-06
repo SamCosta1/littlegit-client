@@ -69,9 +69,9 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
 
     init {
         littleGitCoreController.addListener(this)
-        timer.schedule(300, 4000) {
-            updateRepoIfNeeded()
-        }
+//        timer.schedule(300, 4000) {
+//            updateRepoIfNeeded()
+//        }
     }
 
     override fun onCommandCompleted() {
@@ -83,8 +83,8 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     override fun onRepoDirectoryMissing(currentRepoPath: Path?) {
 
         currentRepo?. let {
-            repoDb.deleteRepoSync(it)
             currentRepo = null
+            repoDb.deleteRepoSync(it)
         }
     }
 
@@ -210,16 +210,18 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
                 existingRepo.lastAccessedDate = OffsetDateTime.now()
                 currentRepo = existingRepo
                 repoDb.updateRepo(existingRepo) {
-                    repoDb.setCurrentRepoId(currentRepoId!!)
-                    initialiseRepoIfNeeded(currentRepo!!, completion)
+                    repoDb.setCurrentRepoId(currentRepoId!!) {
+                        initialiseRepoIfNeeded(currentRepo!!, completion)
+                    }
 
                 }
             } else {
                 val repo = Repo(path = dir.toPath())
                 repoDb.saveRepo(repo) {
                     currentRepo = repo
-                    repoDb.setCurrentRepoId(currentRepoId!!)
-                    initialiseRepoIfNeeded(currentRepo!!, completion)
+                    repoDb.setCurrentRepoId(currentRepoId!!) {
+                        initialiseRepoIfNeeded(currentRepo!!, completion)
+                    }
                 }
             }
 
@@ -296,13 +298,14 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             }
 
             if (core.repoReader.isInitialized().data == true) {
-                setPrivateKeyPath(core)
-                runLater { completion(true, repo) }
-                loadLog()
+                setPrivateKeyPath(core) {
+                    runLater { completion(true, repo) }
+                }
             } else {
                 val result = core.repoModifier.initializeRepo(bare = false)
-                setPrivateKeyPath(core)
-                runLater { completion(!result.isError, repo) }
+                setPrivateKeyPath(core) {
+                    runLater { completion(!result.isError, repo) }
+                }
             }
         }
     }
