@@ -33,10 +33,9 @@ class RepoDb: LocalDb() {
     }
 
     fun updateRepos(allRepos: List<Repo>? = repos, completion: SimpleCallback<Unit>? = null) {
-        allRepos?.let {
-            repos = allRepos
-            writeListAsync(REPOS_KEY, allRepos, Repo::class.java, completion)
-        }
+        repos = allRepos
+
+        writeListAsync(REPOS_KEY, allRepos ?: emptyList(), Repo::class.java, completion)
     }
 
     fun getCurrentRepoId(completion: (String?) -> Unit) {
@@ -87,4 +86,3 @@ class RepoDb: LocalDb() {
     }
 }
 
-fun String.inject(vararg params: Any) = MessageFormat.format(this, *params)!!

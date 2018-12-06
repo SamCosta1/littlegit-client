@@ -19,6 +19,7 @@ class StartupController: Controller() {
 
         // Find it so it starts watching the network
         find(NetworkController::class)
+        find(GitController::class)
 
         controllers.forEach {
 

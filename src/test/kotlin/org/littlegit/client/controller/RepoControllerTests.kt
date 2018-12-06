@@ -11,6 +11,7 @@ import org.littlegit.client.testUtils.RepoHelper
 import org.littlegit.client.testUtils.TestCommandHelper
 import org.littlegit.client.testUtils.upon
 import org.littlegit.core.LittleGitCore
+import org.littlegit.core.model.LocalBranch
 import org.mockito.Mockito.mock
 import java.nio.file.Path
 import kotlin.test.*
@@ -25,6 +26,7 @@ class RepoControllerTests: BaseControllerTest() {
     private lateinit var sshController: SShController
     @Rule @JvmField var sshFolder = TemporaryFolder()
     @Rule @JvmField var repoFolder = TemporaryFolder()
+    @Rule @JvmField var remoteFolder = TemporaryFolder()
     private lateinit var privateKeyPath: Path
     private lateinit var repoDb: RepoDb
 
@@ -124,6 +126,44 @@ class RepoControllerTests: BaseControllerTest() {
     }
 
     @Test
+    fun testClone_BlankRepo_IsSuccessful() = runTest { completion ->
+        val remoteRepoSummary = RepoHelper.createRemoteRepo(cloneUrl = remoteFolder.root.normalize().toPath().toString())
+        TestCommandHelper(remoteFolder.root)
+                .init()
+                .initConfig()
+
+        repoController.clone(remoteRepoSummary, repoFolder.root.toPath()) { isSuccess, repo ->
+            assertTrue(isSuccess)
+
+            completion()
+        }
+    }
+
+    @Test
+    fun testClone_IsSuccessful() = runTest { completion ->
+
+        val remoteRepoSummary = RepoHelper.createRemoteRepo(cloneUrl = remoteFolder.root.normalize().toPath().toString())
+        val commitHash = TestCommandHelper(remoteFolder.root)
+                            .init()
+                            .initConfig()
+                            .writeToFile("file.txt", "Content")
+                            .addAll()
+                            .commit()
+                            .getLastCommitHash()
+
+        repoController.clone(remoteRepoSummary, repoFolder.root.toPath()) { isSuccess, repo ->
+            assertTrue(isSuccess)
+
+            val localBranch = littleGitCore.repoReader.getBranches().data?.find { it is LocalBranch && it.isHead } as LocalBranch
+            assertEquals(commitHash, localBranch.commitHash)
+            assertNotNull(localBranch)
+            assertNotNull(localBranch.upstream)
+
+            completion()
+        }
+    }
+
+    @Test
     fun testSetCurrentRepo_WithLocalRepo_IsSuccessful() = runTest { completion ->
         littleGitCore.repoModifier.initializeRepo()
 
@@ -147,18 +187,29 @@ class RepoControllerTests: BaseControllerTest() {
         val repoFolder = repoFolder.root.toPath().resolve("NonExistentDirectory")
 
         val repo = RepoHelper.createRepo(path = repoFolder)
-        repoDb.saveRepo(repo) {
+
+        repoController.setCurrentRepo(repo) { success, _ ->
+            assertFalse(success)
+
+            completion()
+        }
+    }
+
+    @Test
+    fun testWhenNotifiedRepo_WhenNoLongerExists_IsSuccessful() = runTest { completion ->
+
+        val repo = RepoHelper.createRepo(path = repoFolder.root.toPath())
 
 
-            repoController.setCurrentRepo(repo) { success, _ ->
-                assertFalse(success)
+        repoController.setCurrentRepo(repo) { _, _ ->
 
-                // Check it's been removed from the list
-                repoDb.getAllRepos { repos ->
-                    assertFalse(repos?.contains(repo)!!)
-                    completion()
-                }
+            repoController.notifyRepoDirectoryMissingSync(repo.path)
+
+            repoDb.getAllRepos { repos ->
+                assertEquals(0, repos?.size)
+                completion()
             }
+
         }
     }
 

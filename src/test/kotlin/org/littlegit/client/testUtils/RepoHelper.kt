@@ -7,5 +7,6 @@ import java.nio.file.Paths
 import java.time.OffsetDateTime
 
 object RepoHelper {
-    fun createRepo(name: String = "winterfeld-plans", id: Int = 10, path: Path = Paths.get("/path/to/repo")) = Repo(localId = id.toString(), path = path, remoteRepo = RemoteRepoSummary(id, name, OffsetDateTime.now(), "description", "cloneUrl"))
+    fun createRepo(name: String = "winterfeld-plans", id: Int = 10, path: Path = Paths.get("/path/to/repo")) = Repo(localId = id.toString(), path = path, remoteRepo = createRemoteRepo(id, name) )
+    fun createRemoteRepo(id: Int = 10, name: String = "winterfeld-plans", cloneUrl: String = "cloneUrl") = RemoteRepoSummary(id, name, OffsetDateTime.now(), "description", cloneUrl)
 }

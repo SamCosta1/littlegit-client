@@ -29,7 +29,7 @@ import java.time.OffsetDateTime
 import java.util.*
 import kotlin.concurrent.schedule
 
-class RepoController: Controller(), InitableController, LittleGitCoreController.LittleGitCoreControllerListener {
+class RepoController: Controller(), InitableController {
 
     companion object {
         private const val REMOTE_NAME = "littlegit-origin"
@@ -39,10 +39,9 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     private val sshController: SShController by inject()
     private val apiController: ApiController by inject()
     private val repoApi: RepoApi; get() = apiController.repoApi
-    private val networkController: NetworkController by inject()
     private val localizer: Localizer by inject()
+    private val networkController: NetworkController by inject()
 
-    private val timer = Timer()
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
 
@@ -67,27 +66,6 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     }
     val logObservable: ObservableList<RawCommit> = mutableListOf<RawCommit>().observable()
 
-    init {
-        littleGitCoreController.addListener(this)
-        timer.schedule(300, 2000) {
-            //updateRepoIfNeeded()
-        }
-    }
-
-    override fun onCommandCompleted() {
-        super.onCommandCompleted()
-        loadLog()
-    }
-
-    // THIS IS SYNCHRONOUS SHOULDN'T BE CALLED ON MAIN THREAD
-    override fun onRepoDirectoryMissing(currentRepoPath: Path?) {
-
-        currentRepo?. let {
-            repoDb.deleteRepoSync(it)
-            currentRepo = null
-        }
-    }
-
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
             repoDb.getAllRepos {
@@ -99,34 +77,36 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
                 onReady(this)
             }
         }
-
-        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, hasInternetAccess ->
-           if (hasInternetAccess) {
-               if (currentRepo != null) {
-                   updateRepoIfNeeded()
-               }
-           }
-        })
     }
 
-    private fun updateRepoIfNeeded() {
+    fun notifyRepoDirectoryMissingSync(currentRepoPath: Path?) {
+
+        currentRepo?.let {
+            currentRepo = null
+            repoDb.deleteRepoSync(it)
+        }
+    }
+
+    fun updateRepoIfNeeded() {
         if (!networkController.isInternetAvailable() || currentRepo == null || currentlyUpdating) {
             return
         }
 
-        littleGitCoreController.doNext(false) {
+        littleGitCoreController.doNextLongRunning (false) {
             if (it == null) {
-                return@doNext
+                return@doNextLongRunning
             }
 
             it.repoModifier.fetch(true)
 
-            val currentBranch = getCurrentBranch(it)
+            littleGitCoreController.doNext { _ ->
+                val currentBranch: LocalBranch? = getCurrentBranch(it)
 
-            if (currentBranch?.upstream != null) {
-                val changesToRemote = it.repoReader.getLogBetween(currentBranch, currentBranch.upstream!!)
-                if (changesToRemote.data?.isEmpty() == false) {
-                    fire(UpdateAvailable)
+                if (currentBranch?.upstream != null && currentBranch.commitHash != currentBranch.upstream?.commitHash) {
+                    val changesToRemote = it.repoReader.getLogBetween(currentBranch, currentBranch.upstream!!)
+                    if (changesToRemote.data?.isEmpty() == false) {
+                        runLater { fire(UpdateAvailable) }
+                    }
                 }
             }
         }
@@ -208,16 +188,18 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
                 existingRepo.lastAccessedDate = OffsetDateTime.now()
                 currentRepo = existingRepo
                 repoDb.updateRepo(existingRepo) {
-                    repoDb.setCurrentRepoId(currentRepoId!!)
-                    initialiseRepoIfNeeded(currentRepo!!, completion)
+                    repoDb.setCurrentRepoId(currentRepoId!!) {
+                        initialiseRepoIfNeeded(currentRepo!!, completion)
+                    }
 
                 }
             } else {
                 val repo = Repo(path = dir.toPath())
                 repoDb.saveRepo(repo) {
                     currentRepo = repo
-                    repoDb.setCurrentRepoId(currentRepoId!!)
-                    initialiseRepoIfNeeded(currentRepo!!, completion)
+                    repoDb.setCurrentRepoId(currentRepoId!!) {
+                        initialiseRepoIfNeeded(currentRepo!!, completion)
+                    }
                 }
             }
 
@@ -261,26 +243,25 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     }
 
     fun setCurrentRepo(repo: RepoDescriptor, completion: (success: Boolean, repo: Repo?) -> Unit) {
-            when (repo) {
-                is Repo -> {
-
-                        initialiseRepoIfNeeded(repo) { success, repoRes ->
-                            repoDb.setCurrentRepoId(repo.localId) {
-                                completion(success, repoRes)
-                            }
-                        }
+        when (repo) {
+            is Repo -> {
+                initialiseRepoIfNeeded(repo) { success, repoRes ->
+                    repoDb.setCurrentRepoId(repo.localId) {
+                        completion(success, repoRes)
+                    }
                 }
-                is RemoteRepoSummary -> {
-                    clone(repo) { isSuccess, localRepo ->
-                        repoDb.saveRepo(localRepo) {
-                            repoDb.setCurrentRepoId(localRepo.localId) { _ ->
-                                completion(true, localRepo)
-                            }
+            }
+            is RemoteRepoSummary -> {
+                clone(repo) { isSuccess, localRepo ->
+                    repoDb.saveRepo(localRepo) {
+                        repoDb.setCurrentRepoId(localRepo.localId) { _ ->
+                            completion(true, localRepo)
                         }
                     }
                 }
-                else -> throw Exception("This shouldn't ever happen!")
             }
+            else -> throw Exception("This shouldn't ever happen!")
+        }
     }
 
     fun initialiseRepoIfNeeded(repo: Repo, completion: (success: Boolean, repo: Repo) -> Unit) {
@@ -295,13 +276,14 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             }
 
             if (core.repoReader.isInitialized().data == true) {
-                setPrivateKeyPath(core)
-                runLater { completion(true, repo) }
-                loadLog()
+                setPrivateKeyPath(core) {
+                    runLater { completion(true, repo) }
+                }
             } else {
                 val result = core.repoModifier.initializeRepo(bare = false)
-                setPrivateKeyPath(core)
-                runLater { completion(!result.isError, repo) }
+                setPrivateKeyPath(core) {
+                    runLater { completion(!result.isError, repo) }
+                }
             }
         }
     }
@@ -350,7 +332,7 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
             }
 
             val branches = it.repoReader.getBranches().data
-            var branch = branches?.find { it is LocalBranch && it.commitHash == commit.hash }
+            var branch = branches?.find { it.commitHash == commit.hash }
 
             if (branch == null) {
                 val createResult = it.repoModifier.createBranch("Branch-${commit.hash}", commit)
@@ -374,9 +356,8 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
         }
     }
 
-    // TODO: Move this into the core library which is where it probably should be
-    private fun clone(remoteRepoSummary: RemoteRepoSummary, callback: (success: Boolean, repo: Repo) -> Unit) {
-        val path = Paths.get(System.getProperty("user.home"), remoteRepoSummary.repoName)
+    fun clone(remoteRepoSummary: RemoteRepoSummary, localPath: Path? = null, callback: (success: Boolean, repo: Repo) -> Unit) {
+        val path = localPath ?: Paths.get(System.getProperty("user.home"), remoteRepoSummary.repoName)
         Files.createDirectories(path)
 
         littleGitCoreController.currentRepoPath = path
@@ -385,20 +366,35 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
         initialiseRepoIfNeeded(repo) { _,_ ->
             littleGitCoreController.doNext(true) {
                 if (it == null) {
-                    callback(false, repo)
+                    runLater { callback(false, repo) }
                     return@doNext
                 }
 
                 it.repoModifier.addRemote(REMOTE_NAME, remoteRepoSummary.cloneUrlPath)
-                it.repoModifier.fetch(all = true)
-                val branches = it.repoReader.getBranches().data
-                val branch = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
+                val fetchResult = it.repoModifier.fetch(all = true, quiet = true)
 
-                if (branch == null) {
+                if (fetchResult.isError) {
+                    runLater { callback(false, repo) }
+                    return@doNext
+                }
+
+                // If there are no commits i.e. the remote is empty, then don't try to merge anything because there's nothing to merge
+                if (it.repoReader.getCommitList().data?.isEmpty() == true) {
+                    callback(true, repo)
+                    return@doNext
+                }
+
+                val branches = it.repoReader.getBranches().data
+                val remoteMaster = branches?.find { it.branchName == "master" } ?: branches?.firstOrNull()
+                if (remoteMaster == null || remoteMaster !is RemoteBranch) {
                     runLater { callback(false, repo) }
                 } else {
-                    val result = it.repoModifier.merge(branch)
-                     runLater { callback(!result.isError, repo) }
+                    val result = it.repoModifier.merge(remoteMaster)
+
+                    // There's now only one local branch, the newly created one
+                    val currentBranch = it.repoReader.getBranches().data?.find { it is LocalBranch } as LocalBranch
+                    it.repoModifier.setRemoteTracking(currentBranch, remoteMaster)
+                    runLater { callback(!result.isError, repo) }
                 }
             }
         }
