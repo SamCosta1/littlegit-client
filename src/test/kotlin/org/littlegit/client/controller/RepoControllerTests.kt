@@ -147,18 +147,29 @@ class RepoControllerTests: BaseControllerTest() {
         val repoFolder = repoFolder.root.toPath().resolve("NonExistentDirectory")
 
         val repo = RepoHelper.createRepo(path = repoFolder)
-        repoDb.saveRepo(repo) {
+
+        repoController.setCurrentRepo(repo) { success, _ ->
+            assertFalse(success)
+
+            completion()
+        }
+    }
+
+    @Test
+    fun testWhenNotifiedRepo_WhenNoLongerExists_IsSuccessful() = runTest { completion ->
+
+        val repo = RepoHelper.createRepo(path = repoFolder.root.toPath())
 
 
-            repoController.setCurrentRepo(repo) { success, _ ->
-                assertFalse(success)
+        repoController.setCurrentRepo(repo) { _, _ ->
 
-                // Check it's been removed from the list
-                repoDb.getAllRepos { repos ->
-                    assertFalse(repos?.contains(repo)!!)
-                    completion()
-                }
+            repoController.notifyRepoDirectoryMissingSync(repo.path)
+
+            repoDb.getAllRepos { repos ->
+                assertEquals(0, repos?.size)
+                completion()
             }
+
         }
     }
 

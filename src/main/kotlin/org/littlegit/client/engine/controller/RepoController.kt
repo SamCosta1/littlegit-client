@@ -29,7 +29,7 @@ import java.time.OffsetDateTime
 import java.util.*
 import kotlin.concurrent.schedule
 
-class RepoController: Controller(), InitableController, LittleGitCoreController.LittleGitCoreControllerListener {
+class RepoController: Controller(), InitableController {
 
     companion object {
         private const val REMOTE_NAME = "littlegit-origin"
@@ -39,10 +39,9 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     private val sshController: SShController by inject()
     private val apiController: ApiController by inject()
     private val repoApi: RepoApi; get() = apiController.repoApi
-    private val networkController: NetworkController by inject()
     private val localizer: Localizer by inject()
+    private val networkController: NetworkController by inject()
 
-    private val timer = Timer()
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
 
@@ -67,27 +66,6 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
     }
     val logObservable: ObservableList<RawCommit> = mutableListOf<RawCommit>().observable()
 
-    init {
-        littleGitCoreController.addListener(this)
-//        timer.schedule(300, 4000) {
-//            updateRepoIfNeeded()
-//        }
-    }
-
-    override fun onCommandCompleted() {
-        super.onCommandCompleted()
-        loadLog()
-    }
-
-    // THIS IS SYNCHRONOUS SHOULDN'T BE CALLED ON MAIN THREAD
-    override fun onRepoDirectoryMissing(currentRepoPath: Path?) {
-
-        currentRepo?. let {
-            currentRepo = null
-            repoDb.deleteRepoSync(it)
-        }
-    }
-
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
             repoDb.getAllRepos {
@@ -99,17 +77,17 @@ class RepoController: Controller(), InitableController, LittleGitCoreController.
                 onReady(this)
             }
         }
-
-        networkController.networkAvailability.addListener(tornadofx.ChangeListener { _, oldValue, hasInternetAccess ->
-           if (hasInternetAccess) {
-               if (currentRepo != null) {
-                   updateRepoIfNeeded()
-               }
-           }
-        })
     }
 
-    private fun updateRepoIfNeeded() {
+    fun notifyRepoDirectoryMissingSync(currentRepoPath: Path?) {
+
+        currentRepo?.let {
+            currentRepo = null
+            repoDb.deleteRepoSync(it)
+        }
+    }
+
+    fun updateRepoIfNeeded() {
         if (!networkController.isInternetAvailable() || currentRepo == null || currentlyUpdating) {
             return
         }
