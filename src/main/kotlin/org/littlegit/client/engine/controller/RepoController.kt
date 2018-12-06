@@ -366,7 +366,7 @@ class RepoController: Controller(), InitableController {
         initialiseRepoIfNeeded(repo) { _,_ ->
             littleGitCoreController.doNext(true) {
                 if (it == null) {
-                    callback(false, repo)
+                    runLater { callback(false, repo) }
                     return@doNext
                 }
 
@@ -374,7 +374,13 @@ class RepoController: Controller(), InitableController {
                 val fetchResult = it.repoModifier.fetch(all = true, quiet = true)
 
                 if (fetchResult.isError) {
-                    callback(false, repo)
+                    runLater { callback(false, repo) }
+                    return@doNext
+                }
+
+                // If there are no commits i.e. the remote is empty, then don't try to merge anything because there's nothing to merge
+                if (it.repoReader.getCommitList().data?.isEmpty() == true) {
+                    callback(true, repo)
                     return@doNext
                 }
 
@@ -388,7 +394,7 @@ class RepoController: Controller(), InitableController {
                     // There's now only one local branch, the newly created one
                     val currentBranch = it.repoReader.getBranches().data?.find { it is LocalBranch } as LocalBranch
                     it.repoModifier.setRemoteTracking(currentBranch, remoteMaster)
-                     runLater { callback(!result.isError, repo) }
+                    runLater { callback(!result.isError, repo) }
                 }
             }
         }

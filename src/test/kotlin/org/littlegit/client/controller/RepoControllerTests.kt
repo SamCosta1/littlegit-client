@@ -126,6 +126,20 @@ class RepoControllerTests: BaseControllerTest() {
     }
 
     @Test
+    fun testClone_BlankRepo_IsSuccessful() = runTest { completion ->
+        val remoteRepoSummary = RepoHelper.createRemoteRepo(cloneUrl = remoteFolder.root.normalize().toPath().toString())
+        TestCommandHelper(remoteFolder.root)
+                .init()
+                .initConfig()
+
+        repoController.clone(remoteRepoSummary, repoFolder.root.toPath()) { isSuccess, repo ->
+            assertTrue(isSuccess)
+
+            completion()
+        }
+    }
+
+    @Test
     fun testClone_IsSuccessful() = runTest { completion ->
 
         val remoteRepoSummary = RepoHelper.createRemoteRepo(cloneUrl = remoteFolder.root.normalize().toPath().toString())
