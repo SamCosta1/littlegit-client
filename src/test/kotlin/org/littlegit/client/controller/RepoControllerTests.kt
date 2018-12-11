@@ -6,9 +6,11 @@ import org.junit.rules.TemporaryFolder
 import org.littlegit.client.engine.controller.LittleGitCoreController
 import org.littlegit.client.engine.controller.RepoController
 import org.littlegit.client.engine.controller.SShController
+import org.littlegit.client.engine.controller.UserController
 import org.littlegit.client.engine.db.RepoDb
 import org.littlegit.client.testUtils.RepoHelper
 import org.littlegit.client.testUtils.TestCommandHelper
+import org.littlegit.client.testUtils.UserHelper
 import org.littlegit.client.testUtils.upon
 import org.littlegit.core.LittleGitCore
 import org.littlegit.core.model.LocalBranch
@@ -29,6 +31,7 @@ class RepoControllerTests: BaseControllerTest() {
     @Rule @JvmField var remoteFolder = TemporaryFolder()
     private lateinit var privateKeyPath: Path
     private lateinit var repoDb: RepoDb
+    private val user = UserHelper.createUser()
 
     override fun setup() {
         super.setup()
@@ -42,6 +45,7 @@ class RepoControllerTests: BaseControllerTest() {
         addToScope(sshController, SShController::class)
         addToScope(littleGitCoreController, LittleGitCoreController::class)
 
+        findInTestScope(UserController::class).currentUser = user
         repoController = findInTestScope(RepoController::class)
         repoDb = findInTestScope(RepoDb::class)
     }
@@ -52,6 +56,12 @@ class RepoControllerTests: BaseControllerTest() {
 
         repoController.initialiseRepoIfNeeded(repo) { success, _ ->
             assertTrue(success)
+
+            val setEmail = littleGitCore.configModifier.getEmail().data
+            val setName = littleGitCore.configModifier.getName().data
+
+            assertEquals(user.email, setEmail)
+            assertEquals(user.username, setName)
             assertNotNull(littleGitCoreController.currentRepoPath)
 
             assertEquals(privateKeyPath, littleGitCore.configModifier.getSshKeyPath().data)
@@ -66,7 +76,14 @@ class RepoControllerTests: BaseControllerTest() {
         littleGitCore.repoModifier.initializeRepo()
 
         repoController.initialiseRepoIfNeeded(repo) { success, _ ->
+
             assertTrue(success)
+            val setEmail = littleGitCore.configModifier.getEmail().data
+            val setName = littleGitCore.configModifier.getName().data
+
+            assertEquals(user.email, setEmail)
+            assertEquals(user.username, setName)
+
             assertNotNull(littleGitCoreController.currentRepoPath)
 
             assertEquals(privateKeyPath, littleGitCore.configModifier.getSshKeyPath().data)
@@ -107,6 +124,13 @@ class RepoControllerTests: BaseControllerTest() {
 
             repoController.setCurrentRepo(repoFolder.root) { success, foundRepo ->
                 assertTrue(success)
+
+                val setEmail = littleGitCore.configModifier.getEmail().data
+                val setName = littleGitCore.configModifier.getName().data
+
+                assertEquals(user.email, setEmail)
+                assertEquals(user.username, setName)
+
                 assertEquals(repo, foundRepo)
                 assertEquals(repoFolder.root.toPath(), foundRepo.path)
                 assertTrue(littleGitCore.repoReader.isInitialized().data!!)

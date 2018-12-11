@@ -58,11 +58,12 @@ class MainView : BaseView(fullScreen = true) {
             imageView(Image.IcOpenRepo) {
                 fitHeight = 15.0
                 isPreserveRatio = true
+
+                onMouseClicked = EventHandler {
+                    replaceWith(ChooseRepoView::class)
+                }
             }
 
-            onMouseClicked = EventHandler {
-                replaceWith(ChooseRepoView::class)
-            }
 
             spacer {
                 hgrow = Priority.ALWAYS
@@ -70,6 +71,10 @@ class MainView : BaseView(fullScreen = true) {
             imageView(Image.IcLogout) {
                 fitHeight = 25.0
                 isPreserveRatio = true
+
+                onMouseClicked = EventHandler {
+                    logout()
+                }
             }
 
 

@@ -41,6 +41,7 @@ class RepoController: Controller(), InitableController {
     private val repoApi: RepoApi; get() = apiController.repoApi
     private val localizer: Localizer by inject()
     private val networkController: NetworkController by inject()
+    private val userController: UserController by inject()
 
     private val repoDb: RepoDb by inject()
     private var currentRepoId: String? = null
@@ -252,7 +253,7 @@ class RepoController: Controller(), InitableController {
                 }
             }
             is RemoteRepoSummary -> {
-                clone(repo) { isSuccess, localRepo ->
+                clone(repo) { _, localRepo ->
                     repoDb.saveRepo(localRepo) {
                         repoDb.setCurrentRepoId(localRepo.localId) { _ ->
                             completion(true, localRepo)
@@ -275,16 +276,26 @@ class RepoController: Controller(), InitableController {
                 return@doNext
             }
 
-            if (core.repoReader.isInitialized().data == true) {
-                setPrivateKeyPath(core) {
-                    runLater { completion(true, repo) }
-                }
+            val isSuccess = if (core.repoReader.isInitialized().data != true) {
+                !core.repoModifier.initializeRepo(bare = false).isError
             } else {
-                val result = core.repoModifier.initializeRepo(bare = false)
-                setPrivateKeyPath(core) {
-                    runLater { completion(!result.isError, repo) }
-                }
+                true
             }
+
+            userController.currentUser?.email?.let { email ->
+                core.configModifier.setEmail(email)
+            }
+
+            userController.currentUser?.username?.let { username ->
+                core.configModifier.setName(username)
+            }
+
+            setPrivateKeyPath(core) {
+                runLater { completion(isSuccess, repo) }
+            }
+
+
+
         }
     }
 

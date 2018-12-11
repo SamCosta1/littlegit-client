@@ -13,22 +13,23 @@ class AuthDbTests: BaseDbTests<AuthDb>(AuthDb::class) {
 
         val tokens = AuthTokens("accessToken", "refreshToken")
 
-        db.clearTokens()
+        db.clearTokens {
 
-        // Insert the tokens
-        db.updateTokens(tokens) {
+            // Insert the tokens
+            db.updateTokens(tokens) {
 
-            // Retrieve them
-            db.getTokens {  retrievedTokens ->
-                assertEquals(tokens, retrievedTokens)
+                // Retrieve them
+                db.getTokens {  retrievedTokens ->
+                    assertEquals(tokens, retrievedTokens)
 
-                // Clear them
-                db.clearTokens {
+                    // Clear them
+                    db.clearTokens {
 
-                    // Ensure they're cleared
-                    db.getTokens {
-                        assertNull(it)
-                        completion.invoke()
+                        // Ensure they're cleared
+                        db.getTokens {
+                            assertNull(it)
+                            completion.invoke()
+                        }
                     }
                 }
             }
