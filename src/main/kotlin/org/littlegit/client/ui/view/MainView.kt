@@ -46,38 +46,45 @@ class MainView : BaseView(fullScreen = true) {
                 borderWidth += box(0.px, 0.px, 2.px, 0.px)
                 borderColor += box(ThemeColors.DarkPrimary1)
                 backgroundColor += ThemeColors.LightPrimary
-                cursor = Cursor.HAND
             }
 
             disableWhen(isLoading)
             addClass(Styles.primaryPadding)
 
             spacing = 10.0
-            alignment = Pos.CENTER_LEFT
-            label(repoController.currentRepoNameObservable).addClass(Styles.heading)
-            imageView(Image.IcOpenRepo) {
-                fitHeight = 15.0
-                isPreserveRatio = true
+            hbox {
+                alignment = Pos.CENTER_LEFT
+                spacing = 10.0
 
+                label(repoController.currentRepoNameObservable).addClass(Styles.heading)
+                imageView(Image.IcOpenRepo) {
+                    fitHeight = 15.0
+                    isPreserveRatio = true
+
+                }
+
+                addClass(Styles.handOnHover)
                 onMouseClicked = EventHandler {
                     replaceWith(ChooseRepoView::class)
                 }
             }
 
-
             spacer {
                 hgrow = Priority.ALWAYS
             }
-            imageView(Image.IcLogout) {
-                fitHeight = 25.0
-                isPreserveRatio = true
+
+            vbox {
+
+                addClass(Styles.handOnHover)
+                imageView(Image.IcLogout) {
+                    fitHeight = 25.0
+                    isPreserveRatio = true
+                }
 
                 onMouseClicked = EventHandler {
                     logout()
                 }
             }
-
-
         }
 
         hbox {
