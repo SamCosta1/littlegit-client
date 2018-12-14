@@ -2,6 +2,7 @@ package org.littlegit.client.engine.controller
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import org.littlegit.client.LogoutEvent
 import org.littlegit.client.UpdateAvailable
 import org.littlegit.client.engine.api.ApiCallCompletion
 import org.littlegit.client.engine.api.CallFailure
@@ -67,6 +68,11 @@ class RepoController: Controller(), InitableController {
     }
     val logObservable: ObservableList<RawCommit> = mutableListOf<RawCommit>().observable()
 
+    init {
+        subscribe<LogoutEvent> {
+            repoDb.clearAll()
+        }
+    }
     override fun onStart(onReady: (InitableController) -> Unit) {
         repoDb.getCurrentRepoId { repoId ->
             repoDb.getAllRepos {

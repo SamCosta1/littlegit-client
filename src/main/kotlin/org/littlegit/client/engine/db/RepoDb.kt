@@ -84,5 +84,10 @@ class RepoDb: LocalDb() {
         writeList(REPOS_KEY, mutable, Repo::class.java)
         repos = mutable
     }
+
+    fun clearAll() {
+        clear(REPOS_KEY)
+        clear(CURRENT_REPO_ID)
+    }
 }
 

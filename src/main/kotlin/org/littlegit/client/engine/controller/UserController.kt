@@ -1,5 +1,6 @@
 package org.littlegit.client.engine.controller
 
+import org.littlegit.client.LogoutEvent
 import org.littlegit.client.engine.db.UserDb
 import org.littlegit.client.engine.i18n.Localizer
 import org.littlegit.client.engine.model.User
@@ -23,6 +24,12 @@ open class UserController: Controller(), InitableController {
             } else {
                 onReady(this)
             }
+        }
+    }
+
+    init {
+        subscribe<LogoutEvent> {
+            userDb.clearUser()
         }
     }
 

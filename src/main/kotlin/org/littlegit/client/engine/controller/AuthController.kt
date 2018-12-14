@@ -1,5 +1,6 @@
 package org.littlegit.client.engine.controller
 
+import org.littlegit.client.LogoutEvent
 import org.littlegit.client.engine.api.*
 import org.littlegit.client.engine.db.AuthDb
 import org.littlegit.client.engine.i18n.Localizer
@@ -24,6 +25,10 @@ open class AuthController : Controller(), InitableController, AuthTokensProvider
             authTokens = it
             onReady(this)
         }
+    }
+
+    init {
+        subscribe<LogoutEvent> { logout() }
     }
 
     fun signup(email: String, password: String, name: String, completion: ApiCallCompletion<LoginResponse>) {

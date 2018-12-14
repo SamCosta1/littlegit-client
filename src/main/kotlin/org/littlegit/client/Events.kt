@@ -12,6 +12,8 @@ object ConflictsResolvedEvent: FXEvent()
 
 object HideCommitView: FXEvent()
 
+object LogoutEvent: FXEvent()
+
 class RepoNoLongerExistsEvent(val path: Path): FXEvent()
 
 class ShowCommitEvent(val commit: RawCommit): FXEvent()
