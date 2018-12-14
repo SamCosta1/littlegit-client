@@ -14,4 +14,8 @@ class UserDb: LocalDb() {
     }
 
     fun getUser(completion: (User?) -> Unit) = readAsync(DB_KEY, User::class.java, completion)
+
+    fun clearUser(completion: SimpleCallback<Unit>? = null) {
+        clear(DB_KEY, completion)
+    }
 }

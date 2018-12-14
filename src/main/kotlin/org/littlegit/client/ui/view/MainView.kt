@@ -3,17 +3,13 @@ package org.littlegit.client.ui.view
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.Cursor
-import javafx.scene.control.TextArea
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import javafx.stage.StageStyle
 import javafx.util.Duration
 import org.littlegit.client.*
 import org.littlegit.client.engine.controller.AuthController
 import org.littlegit.client.engine.controller.SShController
-import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.app.ThemeColors
 import org.littlegit.client.ui.app.graph.GraphView
@@ -124,7 +120,7 @@ class MainView : BaseView(fullScreen = true) {
     }
 
     private fun logout() {
-        authController.logout()
+        fire(LogoutEvent)
         replaceWith(ChooseLanguageView::class)
     }
 
