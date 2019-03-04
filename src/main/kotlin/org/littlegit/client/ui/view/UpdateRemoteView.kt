@@ -2,15 +2,16 @@ package org.littlegit.client.ui.view
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Label
+import javafx.scene.text.TextAlignment
 import org.littlegit.client.ConflictsResolvedEvent
 import org.littlegit.client.ResolveConflictView
 import org.littlegit.client.engine.model.I18nKey
+import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.app.ThemeColors
 import tornadofx.*
 
 class UpdateRemoteView: BaseView() {
 
-    private lateinit var label: Label
     private val viewModel = ViewModel()
     private val solvingConflicts = viewModel.bind { SimpleBooleanProperty(false) }
     private val conflictsView: ResolveConflictView by inject()
@@ -35,14 +36,21 @@ class UpdateRemoteView: BaseView() {
     }
 
     override val root = vbox {
-        maxWidth = 100.0
+        maxWidth = 600.0
         maxHeight = 100.0
         style {
             backgroundColor += ThemeColors.LightPrimary
         }
 
-        label(localizer.observable(I18nKey.UpdateAvailable))
-        label = label("Status")
+        label(localizer.observable(I18nKey.UpdateAvailable)) {
+            addClass(Styles.heading)
+
+            style {
+                textAlignment = TextAlignment.CENTER
+                padding = box(10.px)
+            }
+        }
+
         button(localizer.observable(I18nKey.UpdateToLatest)).action {
             repoController.updateToLatestFetched {
                 if (!it.isError) {

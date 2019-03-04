@@ -45,9 +45,9 @@ open class SShController: Controller() {
             generateAndWrite(sshPath)
 
             val publicKeyString = getPublicKeyPath(sshPath).toFile().readLines().joinWithSpace()
-            userApi.addSshKey(SshKeyRequest(publicKeyString, userController.currentUser?.id!!)).enqueue {
+            userApi.addSshKey(SshKeyRequest(publicKeyString, userController.currentUser?.id!!)).enqueue { response ->
                 sshDb.setSshKeyPath(sshPath)
-                completion(it)
+                completion(response)
             }
         }
     }
