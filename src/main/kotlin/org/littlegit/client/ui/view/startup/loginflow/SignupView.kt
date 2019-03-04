@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Orientation
 import org.littlegit.client.engine.api.CallFailure
 import org.littlegit.client.engine.controller.AuthController
+import org.littlegit.client.engine.controller.SShController
 import org.littlegit.client.engine.model.I18nKey
 import org.littlegit.client.ui.app.Styles
 import org.littlegit.client.ui.util.*
@@ -14,6 +15,7 @@ import tornadofx.*
 class SignupView: BaseView() {
 
     private val authController: AuthController by inject()
+    private val sshController: SShController by inject()
 
     private val model = ViewModel()
     private val email = model.bind { SimpleStringProperty() }
@@ -111,7 +113,15 @@ class SignupView: BaseView() {
                         action {
                             authController.signup(email.value, password.value, name.value) {
                                 when {
-                                    it.isSuccess -> NavigationUtils.navigateFromLoginFlow(this@SignupView, repoController)
+                                    it.isSuccess -> {
+                                        sshController.generateAndAddSshKey {
+                                            NavigationUtils.navigateFromLoginFlow(this@SignupView, repoController)
+
+                                            if (!it.isSuccess) {
+                                                // TODO: Warn the user something went wrong
+                                            }
+                                        }
+                                    }
                                     it.errorBody is CallFailure.ApiError -> {
                                         emailError = it.errorBody.localisedMessage.findOneOf(I18nKey.EmailInUse, I18nKey.InvalidEmail)
                                         passwordError = it.errorBody.localisedMessage.findOneOf(I18nKey.InvalidPassword)

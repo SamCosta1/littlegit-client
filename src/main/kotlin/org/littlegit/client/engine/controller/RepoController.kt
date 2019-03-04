@@ -299,9 +299,6 @@ class RepoController: Controller(), InitableController {
             setPrivateKeyPath(core) {
                 runLater { completion(isSuccess, repo) }
             }
-
-
-
         }
     }
 
@@ -321,7 +318,7 @@ class RepoController: Controller(), InitableController {
             }
 
             it.repoReader.getBranches().data?.find { it.isHead }?.let { currentBranch ->
-                val result = it.repoModifier.push(REMOTE_NAME, currentBranch.branchName)
+                val result = it.repoModifier.push(REMOTE_NAME, currentBranch.branchName, true)
             }
         }
     }
@@ -419,6 +416,7 @@ class RepoController: Controller(), InitableController {
 
     fun commitAndPush(it: LittleGitCore, message: String) {
         val result = it.repoModifier.commit(message)
+
         if (!result.isError) {
             push()
         }
