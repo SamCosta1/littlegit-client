@@ -51,7 +51,10 @@ class UpdateRemoteView: BaseView() {
             }
         }
 
-        button(localizer.observable(I18nKey.UpdateToLatest)).action {
+        button(localizer.observable(I18nKey.UpdateToLatest)) {
+           hiddenWhen(solvingConflicts)
+
+            action {
             repoController.updateToLatestFetched {
                 if (!it.isError) {
                     if (it.data?.hasConflicts == false) {
@@ -66,6 +69,7 @@ class UpdateRemoteView: BaseView() {
                 }
             }
         }
+        }
 
         vbox {
             add(conflictsView.root)
@@ -77,5 +81,4 @@ class UpdateRemoteView: BaseView() {
         super.onDock()
         repoController.currentlyUpdating = true
     }
-
 }

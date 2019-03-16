@@ -12,6 +12,7 @@ enum class Image(private val raw: String) {
     Logo("logo.png"),
     IcLogout("ic_logout.png"),
     IcClose("ic_close.png"),
+    ICTick("ic_tick.png"),
     IcOpenRepo("ic_open_repo.png");
 
 

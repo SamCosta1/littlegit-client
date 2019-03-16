@@ -20,6 +20,7 @@ class Styles : Stylesheet() {
         val bulletText by cssclass()
         val transparentTitle by cssclass()
         val handOnHover by cssclass()
+        val fileview by cssclass()
     }
 
     init {
@@ -48,6 +49,14 @@ class Styles : Stylesheet() {
         bulletText {
             textFill = ThemeColors.TertiaryText
             fontSize = 15.px
+        }
+
+        fileview {
+            padding = box(10.px)
+            borderColor += box(ThemeColors.Accent)
+            borderStyle += BorderStrokeStyle.SOLID
+            borderWidth += box(2.px)
+            borderRadius += box(3.px)
         }
 
         label and subheading {

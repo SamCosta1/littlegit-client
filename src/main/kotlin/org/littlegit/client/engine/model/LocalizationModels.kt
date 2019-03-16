@@ -70,7 +70,15 @@ enum class I18nKey(val key: String) {
     YouModified("you_changed"),
     YouAreHere("you_are_here"),
     GoToThisVersion("go_to_this_version"),
+    ClashDetected("clash_detected"),
+    Finish("finish"),
+    ConflictMessage("conflict_message"),
+    Version1("v_1"),
+    Version2("v_2"),
+    FinalVersion("v_final"),
     Unknown("-");
+
+
 
 
 
