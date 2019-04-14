@@ -406,5 +406,61 @@
         "term_plural": "",
         "reference": "",
         "comment": ""
+    },
+    {
+        "term": "go_to_this_version",
+        "definition": "Go to this version",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "clash_detected",
+        "definition": "Clash detected",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "finish",
+        "definition": "Finish",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "conflict_message",
+        "definition": "You need to choose which version you want to keep.",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "v_1",
+        "definition": "Version 1",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "v_2",
+        "definition": "Version 2",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
+    },
+    {
+        "term": "v_final",
+        "definition": "Final Version",
+        "context": "",
+        "term_plural": "",
+        "reference": "",
+        "comment": ""
     }
 ]

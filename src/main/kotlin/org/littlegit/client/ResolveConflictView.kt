@@ -25,9 +25,9 @@ class ResolveConflictView: BaseView() {
     private lateinit var outputField: TextArea
     private val tickSize = 25.0
 
-    var valid = ViewModel().bind { SimpleBooleanProperty(false) }
+    private var valid = ViewModel().bind { SimpleBooleanProperty(false) }
 
-    var currentFileIndex = -1; set(value) {
+    private var currentFileIndex = -1; set(value) {
         field = value
 
         if (conflicts == null) {
